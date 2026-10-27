@@ -82,6 +82,7 @@
     let y = p.includes('arriba') ? 0.24 : p.includes('abajo') ? (VERT ? 0.72 : 0.76) : 0.5, x = 0.5;
     if (p.includes('izquierda')) x = VERT ? 0.5 : 0.28; if (p.includes('derecha')) x = VERT ? 0.5 : 0.72;
     if (P.formato === '1x1' && p.includes('arriba')) y = 0.28;
+    if (+P.y > 0 && +P.y < 1) y = +P.y;   // ajuste fino opcional (fracción del alto)
     return { x: W * x, y: H * y };
   }
   const k = (t, a, b) => Math.max(0, Math.min(1, (t - a) / (b - a)));
