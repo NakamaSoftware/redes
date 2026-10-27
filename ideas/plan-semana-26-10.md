@@ -6,7 +6,7 @@ Horarios según los mejores momentos de Metricool para @pvmr.dev: 10:00 es el pi
 | Día | 10:00 | 12:30 · historias | 18:00 |
 |---|---|---|---|
 | Lun 26 | ✅ Carrusel «5 pedidos a ChatGPT» (publicado) | Encuesta + Kumi (sin programar) | — |
-| Mar 27 | — | — | Reel animado: «Pedile a la IA que te haga 3 preguntas» (banco #16) |
+| Mar 27 | — | — | — (el reel animado pasa a ser el reel con cara del jueves) |
 | Mié 28 | Carrusel «3 tareas IA» (Metricool) | Elegí una + Kumi CHARLA | — |
 | Jue 29 | — | Preguntame | Reel con cara: «ChatGPT te puede hacer preguntas a vos» (banco #16, guion en ideas/guiones/reel-3-preguntas.md) |
 | Vie 30 | Carrusel nuevo: «Mito vs. realidad: 5 cosas que creés sobre la IA en tu negocio» (banco #4) | Pregunta trampa + deslizador + Kumi | — |
