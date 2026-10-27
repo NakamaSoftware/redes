@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-mensaje-llega» · Viegas IA · Motion Lab
+     Conversación de mensajería genérica (sin marcas): la cabecera con avatar entra, aparece «escribiendo…» con tres puntos que laten,
+     las burbujas llegan con rebote y desenfoque de movimiento, las tuyas con doble check que se enciende, una reacción con emoji salta
+     sobre la última, la cámara sigue la conversación y entra con «zoom a través» en la burbuja final hasta el cierre con logo.
+     Cambia "contacto", "estado", "inicial" (letra del avatar), "mensajes" ([{de:"ellos"|"yo", texto}], *palabra* = acento),
+     "reaccion" (emoji), "hora", "subtitulo".
+     Colores "fondo", "fondo2", "tinta", "acento"; "titular" (*palabra* = acento), "marca", "logo" (ruta o "" = inicial), "duracion".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). Cualquier parámetro también por URL: ?titular=…&acento=%23ff0 -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.chip{ font:600 30px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:16px 30px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.08); }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.sub{ font:400 60px var(--serif); font-style:italic; color:rgba(var(--tintaRgb),.8); white-space:nowrap; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.chat{ border-radius:56px; overflow:hidden; background:linear-gradient(180deg, rgba(var(--tintaRgb),.07), rgba(var(--tintaRgb),.03));
+  border:1.5px solid rgba(var(--tintaRgb),.12); box-shadow:0 50px 120px rgba(0,0,0,.5), inset 0 1px 0 rgba(var(--tintaRgb),.14); }
+.cab{ position:absolute; left:0; right:0; top:0; height:150px; display:flex; align-items:center; gap:26px; padding:0 44px; z-index:2;
+  border-bottom:1.5px solid rgba(var(--tintaRgb),.08); background:#1d1916; }
+.ava{ width:86px; height:86px; border-radius:50%; display:grid; place-items:center; font:700 42px var(--fuente); color:var(--fondo);
+  background:linear-gradient(140deg, var(--acento), rgba(var(--halo),.55)); flex:none; }
+.nom{ font:600 44px var(--fuente); color:var(--tinta); letter-spacing:-.02em; }
+.est{ font:500 28px var(--fuente); color:var(--acento); margin-top:2px; }
+.hilo{ position:absolute; left:0; right:0; top:150px; bottom:0; overflow:hidden; }
+.msg{ position:absolute; left:0; top:0; max-width:74%; padding:26px 34px; font:500 46px/1.22 var(--fuente); letter-spacing:-.015em; border-radius:40px; }
+.msg.ellos{ background:rgba(var(--tintaRgb),.1); color:var(--tinta); border-bottom-left-radius:12px; }
+.msg.yo{ background:var(--acento); color:var(--fondo); border-bottom-right-radius:12px; }
+.msg.yo em{ color:var(--fondo); font-weight:400; }
+.msg .meta{ display:block; text-align:right; font:500 24px var(--fuente); opacity:.7; margin-top:6px; letter-spacing:0; }
+.chk{ display:inline-block; margin-left:10px; letter-spacing:-.3em; font-weight:700; }
+.escr{ position:absolute; left:0; top:0; padding:30px 36px; border-radius:40px; border-bottom-left-radius:12px; background:rgba(var(--tintaRgb),.1); display:flex; gap:14px; }
+.escr i{ width:18px; height:18px; border-radius:50%; background:rgba(var(--tintaRgb),.7); display:block; }
+.reac{ position:absolute; left:0; top:0; font-size:54px; width:96px; height:96px; display:grid; place-items:center; border-radius:50%;
+  background:#2a2421; border:3px solid var(--fondo); box-shadow:0 12px 30px rgba(0,0,0,.5); }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "contacto": "Laura · Estudio",
+  "estado": "escribiendo…",
+  "inicial": "L",
+  "hora": "18:42",
+  "mensajes": [
+    { "de": "ellos", "texto": "¿Ya está listo el lanzamiento?" },
+    { "de": "yo", "texto": "Mañana a las 10 🚀" },
+    { "de": "ellos", "texto": "Tengo *muchas ganas* de verlo" },
+    { "de": "yo", "texto": "Te mando el *acceso* antes que a nadie" }
+  ],
+  "reaccion": "❤️",
+  "titular": "Hablemos *de tu proyecto*",
+  "subtitulo": "Respuesta en menos de 24 h",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+// cierre común: logo con rebote fuerte, titular palabra a palabra, subtítulo y marca
+function hazCierre(MG) {
+  const logo = MG.el(logoHTML());
+  const anchoTit = VERT ? W - 180 : 1500;
+  const tit = MG.texto(md(P.titular), 'tit'); tit.style.width = anchoTit + 'px'; tit.style.fontSize = (VERT ? 112 : 124) + 'px';
+  const sub = MG.el(`<div class="sub">${esc(P.subtitulo || '')}</div>`);
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+  [logo, tit, sub, marca].forEach((e) => { e.style.opacity = 0; });
+  return (t, tC) => {
+    const { k, curvas: C } = MG;
+    if (t < tC - .05) { [logo, tit, sub, marca].forEach((e) => { e.style.opacity = 0; }); return; }
+    tit.style.opacity = 1;
+    const bloque = 150 + 60 + tit.offsetHeight + 40 + 80 + 30 + 50, y0 = (H - bloque) / 2 - (VERT ? 40 : 0);
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-20 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(tit, (W - anchoTit) / 2, y0 + 210);
+    tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .22 + i * .07, { d: .6, dy: 90, escala0: 1, curva: 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const n = tit.trozos.length * .07;
+    const es = MG.entra(sub, t, tC + .5 + n, { d: .6, dx: -80, dy: 0, curva: 'salidaExpo', base: 6 });
+    MG.pon(sub, (W - sub.offsetWidth) / 2 + es.x, y0 + 210 + tit.offsetHeight + 40);
+    const em = MG.entra(marca, t, tC + .7 + n, { d: .6, dy: 40, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 210 + tit.offsetHeight + 150 + em.y);
+  };
+}
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion;
+  const CW = VERT ? 900 : 1040, CHh = VERT ? 1180 : 900, cx = W / 2, cy = VERT ? 900 : 540;
+  const chat = MG.el(`<div class="chat" style="width:${CW}px;height:${CHh}px"><div class="cab"><div class="ava">${esc(P.inicial || 'A')}</div><div><div class="nom">${esc(P.contacto)}</div><div class="est">en línea</div></div></div><div class="hilo"></div></div>`);
+  const hilo = chat.querySelector('.hilo'), est = chat.querySelector('.est');
+  const msgs = P.mensajes || [];
+  const tC = D - 2.9, paso = (tC - 1.9) / msgs.length;
+  // tiempos: cada mensaje de «ellos» va precedido de «escribiendo…» 0.8 s
+  const T = msgs.map((m, i) => 1.0 + i * paso + (m.de === 'ellos' ? .8 : .25));
+  const burb = msgs.map((m) => { const b = document.createElement('div'); b.className = 'msg ' + (m.de === 'yo' ? 'yo' : 'ellos');
+    b.innerHTML = md(esc(m.texto)) + `<span class="meta">${esc(P.hora || '')}${m.de === 'yo' ? '<span class="chk">✓✓</span>' : ''}</span>`; hilo.appendChild(b); return b; });
+  const escr = document.createElement('div'); escr.className = 'escr'; escr.innerHTML = '<i></i><i></i><i></i>'; hilo.appendChild(escr);
+  const puntos = [...escr.children];
+  const reac = MG.el(`<div class="reac">${P.reaccion || '❤️'}</div>`, hilo);
+  const cierre = hazCierre(MG);
+  const GAP = 26, HH = CHh - 150, U = burb.length - 1, tR = T[U] + .7, M = 40;
+  let alt = null;
+  return (t) => {
+    if (!alt) alt = burb.map((b) => [b.offsetWidth, b.offsetHeight]);
+    let tipo = -1; msgs.forEach((m, i) => { if (m.de !== 'yo' && t > T[i] - .8 && t < T[i]) tipo = i; });
+    est.textContent = tipo >= 0 ? (P.estado || 'escribiendo…') : 'en línea';
+    // apilado desde abajo: cada burbuja empuja a las anteriores con su curva de aparición
+    const ap = burb.map((b, i) => C.salidaQuint(k(t, T[i] - .05, T[i] + .45)));
+    const ti = Math.max(0, tipo), ae = tipo >= 0 ? C.salidaCubica(k(t, T[ti] - .8, T[ti] - .55)) * (1 - C.entradaCubica(k(t, T[ti] - .12, T[ti]))) : 0;
+    let y = HH - 36 - ae * (110 + GAP);
+    escr.style.transformOrigin = '0 100%';
+    MG.pon(escr, M, HH - 36 - 110 + (1 - ae) * 40, lerp(.5, 1, C.rebote(k(t, T[ti] - .8, T[ti] - .4)))); escr.style.opacity = ae;
+    puntos.forEach((p, i) => { p.style.transform = `translateY(${-Math.max(0, Math.sin(t * 9 - i * .9)) * 12}px)`; });
+    const ys = [];
+    for (let i = U; i >= 0; i--) {
+      const b = burb[i], yo = msgs[i].de === 'yo', a = ap[i], [bw, bh] = alt[i];
+      y -= (bh + GAP) * a; ys[i] = y + GAP * a;
+      const e = MG.entra(b, t, T[i], { d: .5, dx: yo ? 140 : -140, dy: 60, escala0: .7, curva: yo ? 'rebote' : 'salidaExpo', base: 6 });
+      b.style.transformOrigin = yo ? '100% 100%' : '0 100%';
+      MG.pon(b, (yo ? CW - M - bw : M) + e.x, ys[i] + e.y, e.s);
+      const ch = b.querySelector('.chk'); if (ch) ch.style.opacity = t > T[i] + .8 ? 1 : .35;
+    }
+    // reacción sobre la última burbuja
+    const er = MG.entra(reac, t, tR, { d: .55, dy: 0, escala0: 0, curva: 'reboteFuerte', base: 4 });
+    const yoU = msgs[U].de === 'yo', [uw, uh] = alt[U];
+    MG.pon(reac, yoU ? CW - M - uw - 40 : M + uw - 56, ys[U] + uh - 52, er.s, `rotate(${(1 - C.salidaQuint(k(t, tR, tR + .6))) * -30}deg)`);
+    // chat: entra desde abajo y frena suave; cámara que deriva y baja hacia la última burbuja; «zoom a través» en el cierre
+    const ec = MG.entra(chat, t, 0, { d: .9, dy: 300, escala0: .84, curva: 'salidaQuint', base: 8 });
+    const sal = C.entradaCubica(k(t, tC - .6, tC));
+    MG.pon(chat, cx - CW / 2, cy - CHh / 2 + ec.y, ec.s, `rotate(${(1 - ec.p) * -4 + Math.sin(t * .6) * .5}deg)`);
+    chat.style.opacity = Math.min(1, ec.p * 1.8) * (1 - C.salidaCubica(k(t, tC - .25, tC + .05)));
+    MG.desenfoca(chat, 0, sal * 22);
+    const fy = cy - CHh / 2 + 150 + ys[U] + uh / 2;
+    const cerr = t >= tC - .05;
+    const zz = cerr ? lerp(1.25, 1, C.salidaQuint(k(t, tC - .05, tC + 1.3))) * lerp(1, 1.04, k(t, tC, D)) : lerp(1, 1.08, t / D) * (1 + 3.5 * sal);
+    const oy = cerr ? H / 2 : lerp(cy, fy, C.afterEffects(k(t, 2, tC)));
+    MG.vista.style.transformOrigin = `${cx}px ${oy}px`;
+    MG.vista.style.transform = `scale(${zz}) translate(${Math.sin(t * .5) * 10}px, ${Math.cos(t * .41) * 8}px) rotate(${Math.sin(t * .33) * .5}deg)`;
+    cierre(t, tC);
+  };
+});
+</script>
+</body></html>

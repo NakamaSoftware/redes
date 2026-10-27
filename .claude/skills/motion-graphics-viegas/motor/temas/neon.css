@@ -1,0 +1,3 @@
+/* Tema «neon»: negro azulado, cian y magenta que brillan */
+:root { --fondo:#07060F; --fondo-rgb:7,6,15; --rejilla:#16123A; --halo:0,240,255; --acento:#00F0FF; --acento2:#FF2BD6; --texto:#F2F0FF; --mute:#8C86B8;
+  --tarjeta:#100E24; --tarjeta2:#0B0A1C; --superficie:#1E1A40; --tinta:#07060F; --claro:180,200,255; --sombra:0,0,0; }

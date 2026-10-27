@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-lower-third» · Viegas IA · Motion Lab
+     Rótulo de nombre elegante para poner encima de la toma: una línea fina se traza de izquierda a derecha, una barra de
+     acento crece, el nombre sube letra a letra desde una máscara, el cargo y el usuario llegan con su propia curva; sale
+     a la inversa (acelerando) y se recoge en un sello de marca pequeño en la esquina. Nunca tapa la cara: en 9:16 va en el
+     tercio inferior dentro de la zona segura (y ≤ 1480) y en 16:9 abajo a la izquierda.
+     Cambia "nombre", "cargo", "usuario", "etiqueta", "acento", "tinta", "placa" (color del cristal), "toma" (imagen o vídeo de
+     muestra; "" = degradado con silueta), "sello" (true/false), "logo" (ruta o "" = inicial), "marca", "tSalida".
+     Para usarlo encima de un vídeo real: render con --transparente y "toma": "transparente".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif',serif;
+  --fondo:#141210; --tinta:#F7F0E8; --acento:#D97757; --halo:217,119,87; --placa:20,18,16; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:var(--fondo); }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.toma{ overflow:hidden; background:radial-gradient(70% 55% at 55% 30%, #5a4436, #2a211b 60%, #141210); }
+.toma img, .toma video{ width:100%; height:100%; object-fit:cover; }
+.silueta{ position:absolute; background:radial-gradient(closest-side, #0e0b09 60%, rgba(14,11,9,.0)); filter:blur(8px); }
+.luz{ position:absolute; border-radius:50%; filter:blur(120px); background:var(--acento); opacity:.18; }
+.lt{ position:absolute; left:0; top:0; }
+.placaLT{ position:absolute; left:0; top:0; border-radius:22px; background:rgba(var(--placa),.55);
+  -webkit-backdrop-filter:blur(22px) saturate(140%); backdrop-filter:blur(22px) saturate(140%); border:1px solid rgba(255,255,255,.08); transform-origin:0 50%; }
+.barraLT{ position:absolute; width:10px; border-radius:6px; background:var(--acento); box-shadow:0 0 30px rgba(var(--halo),.6); transform-origin:50% 100%; }
+.mascara{ position:absolute; overflow:hidden; padding:0 8px 10px 0; }
+.nombre{ font:700 86px/1.05 var(--fuente); letter-spacing:-.035em; color:var(--tinta); white-space:nowrap; }
+.nombre .mg-trozo{ display:inline-block; }
+.cargo{ font:400 50px/1.1 var(--serif); font-style:italic; color:var(--acento); white-space:nowrap; }
+.fila{ display:flex; gap:16px; align-items:center; font:500 32px var(--fuente); color:rgba(247,240,232,.75); white-space:nowrap; }
+.fila b{ padding:8px 18px; border-radius:99px; font:700 24px var(--fuente); letter-spacing:.12em; text-transform:uppercase; background:var(--acento); color:var(--fondo); }
+.fila i{ width:12px; height:12px; border-radius:50%; background:#ff5a4a; box-shadow:0 0 14px #ff5a4a; display:inline-block; }
+svg.trazo{ position:absolute; overflow:visible; left:0; top:0; }
+.sello{ width:96px; height:96px; border-radius:28px; display:grid; place-items:center; background:var(--acento); color:var(--fondo); font:800 54px var(--fuente); overflow:hidden; box-shadow:0 18px 40px rgba(0,0,0,.35); }
+.sello img{ width:100%; height:100%; object-fit:cover; }
+.selloT{ font:600 30px var(--fuente); color:var(--tinta); white-space:nowrap; letter-spacing:-.01em; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "fondo": "#141210",
+  "tinta": "#F7F0E8",
+  "acento": "#D97757",
+  "placa": "#141210",
+  "toma": "",
+  "nombre": "Diego Viegas",
+  "cargo": "Editor de vídeo con IA",
+  "usuario": "@viegasestudio",
+  "etiqueta": "En directo",
+  "tSalida": 5.6,
+  "sello": true,
+  "marca": "Viegas Estudio",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : typeof d === 'boolean' ? v !== 'false' : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+if (P.acento) { raiz.setProperty('--acento', P.acento); raiz.setProperty('--halo', hexRgb(P.acento)); }
+if (P.fondo) raiz.setProperty('--fondo', P.fondo);
+if (P.tinta) raiz.setProperty('--tinta', P.tinta);
+if (P.placa) raiz.setProperty('--placa', hexRgb(P.placa));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const TRANSP = P.toma === 'transparente';
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: TRANSP ? 'transparente' : undefined }, (MG) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion;
+
+  // ---- toma de muestra (o imagen/vídeo real): solo para la previa
+  let toma = null, sil = [], luz = null;
+  if (!TRANSP) {
+    toma = MG.el(`<div class="toma" style="width:${W}px;height:${H}px"></div>`);
+    if (P.toma) toma.innerHTML = /\.(mp4|webm|mov)$/i.test(P.toma) ? '' : `<img src="${P.toma}">`;
+    if (P.toma && /\.(mp4|webm|mov)$/i.test(P.toma)) { const v = MG.tarjeta(P.toma, W, H, 0); toma.appendChild(v); }
+    if (!P.toma) {   // silueta: cabeza y hombros (dónde estaría la cara: nada del rótulo pasa por aquí)
+      const cx = VERT ? W / 2 : W * .6, cy = VERT ? 720 : 400, r = VERT ? 210 : 190;
+      sil = [[cx - r, cy - r * 1.2, r * 2, r * 2.4], [cx - r * 2.4, cy + r * 1.05, r * 4.8, r * 4]].map(([x, y, w, h]) =>
+        { const s = document.createElement('div'); s.className = 'silueta'; s.style.cssText += `left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:50%`; toma.appendChild(s); return s; });
+      luz = document.createElement('div'); luz.className = 'luz'; luz.style.cssText += `width:900px;height:900px`; toma.appendChild(luz);
+    }
+  }
+
+  // ---- rótulo
+  const lt = MG.el(`<div class="lt"></div>`);
+  const placa = MG.el(`<div class="placaLT"></div>`, lt);
+  const barra = MG.el(`<div class="barraLT"></div>`, lt);
+  const mNom = MG.el(`<div class="mascara"></div>`, lt);
+  const nom = MG.texto(esc(P.nombre), 'nombre', 'letras'); mNom.appendChild(nom); nom.style.position = 'relative';
+  const mCar = MG.el(`<div class="mascara"><div class="cargo">${esc(P.cargo)}</div></div>`, lt), car = mCar.firstChild;
+  const fila = MG.el(`<div class="fila">${P.etiqueta ? `<b><i></i> ${esc(P.etiqueta)}</b>` : ''}<span>${esc(P.usuario)}</span></div>`, lt);
+  fila.querySelector('b') && (fila.querySelector('b').style.cssText = 'display:flex;gap:10px;align-items:center');
+  const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg'); svg.setAttribute('class', 'trazo'); lt.appendChild(svg);
+  if (VERT) { nom.style.fontSize = '108px'; car.style.fontSize = '62px'; fila.style.fontSize = '38px'; }
+
+  // ---- sello final (esquina, pequeño)
+  const ini = (P.marca || '·').trim()[0].toUpperCase();
+  const sello = MG.el(`<div class="sello">${P.logo ? `<img src="${P.logo}">` : ini}</div>`);
+  const selloT = MG.el(`<div class="selloT">${esc(P.marca)}</div>`);
+  if (!P.sello) { sello.style.display = 'none'; selloT.style.display = 'none'; }
+
+  const tS = P.tSalida, tSe = tS + .75;
+  let L = null;
+  return (t) => {
+    if (!L) {
+      const pad = 44, wTxt = Math.max(nom.offsetWidth, car.offsetWidth, fila.offsetWidth);
+      const wP = Math.min(wTxt + pad * 2 + 30, W - (VERT ? 120 : 240)), hN = nom.offsetHeight, hC = car.offsetHeight + 10, hF = fila.offsetHeight;
+      const hP = pad + hN + 6 + hC + 18 + hF + pad;
+      const x = VERT ? (W - wP) / 2 : 120, y = VERT ? 1470 - hP : H - 110 - hP;
+      L = { pad, wP, hP, hN, hC, hF, x, y };
+      placa.style.width = wP + 'px'; placa.style.height = hP + 'px';
+      barra.style.height = (hN + hC + 6) + 'px'; MG.pon(barra, pad, pad);
+      MG.pon(mNom, pad + 30, pad); MG.pon(mCar, pad + 30, pad + hN + 6); MG.pon(fila, pad + 30, pad + hN + 6 + hC + 18);
+      svg.setAttribute('width', wP); svg.setAttribute('height', 4);
+      svg.innerHTML = `<path d="M0,2 H${wP}" stroke="var(--acento)" stroke-width="3" stroke-linecap="round" fill="none"/><circle r="6" cy="2" fill="var(--acento)"/>`;
+      L.path = svg.querySelector('path'); L.dot = svg.querySelector('circle'); L.path.style.strokeDasharray = wP;
+    }
+    // ---- cámara: la toma respira (zoom lento + deriva), el rótulo flota con ella
+    MG.camara(t, 1, 1.05, W / 2, H * .45);
+    if (luz) { luz.style.left = (W * .2 + Math.sin(t * .4) * 120) + 'px'; luz.style.top = (H * .1 + Math.cos(t * .3) * 80) + 'px'; }
+    MG.pon(lt, L.x + Math.sin(t * .6) * 3, L.y + Math.cos(t * .5) * 3);
+
+    const sal = (a, d = .45) => C.entradaCubica(k(t, a, a + d));   // salidas: aceleran
+    // línea fina que se traza (arriba del rótulo), con su punto a la cabeza
+    const pl = C.salidaExpo(k(t, .2, 1.0)), plS = sal(tS + .3, .4);
+    L.path.style.strokeDashoffset = plS > 0 ? -L.wP * plS : L.wP * (1 - pl);
+    L.dot.setAttribute('cx', L.wP * pl); L.dot.style.opacity = pl > 0 && pl < .999 ? 1 : 0;
+    MG.pon(svg, 0, -18);
+    svg.style.opacity = 1 - plS;
+    // placa de cristal: se abre en horizontal (frenada suave) y se cierra acelerando
+    const pp = C.salidaQuint(k(t, .45, 1.15)) * (1 - sal(tS + .25, .4));
+    placa.style.transform = `scaleX(${pp})`; placa.style.opacity = Math.min(1, pp * 2);
+    // barra de acento: crece desde abajo con rebote
+    const pb = C.reboteSuave(k(t, .7, 1.6)) * (1 - sal(tS + .15, .3));
+    barra.style.transform = `scaleY(${Math.max(0, pb)})`;
+    // nombre letra a letra desde la máscara (salidaExpo), sale hacia arriba acelerando
+    nom.trozos.forEach((s, i) => { const a = .85 + i * .025, p = C.salidaExpo(k(t, a, a + .55)), q = sal(tS + i * .012, .35);
+      s.style.transform = `translateY(${(1 - p) * 110 - q * 110}px)`; s.style.opacity = Math.min(1, p * 1.6) * (1 - q);
+      MG.desenfoca(s, 0, (1 - p) * 10 + q * 10); });
+    // cargo: desliza desde la izquierda con quint
+    const pc = C.salidaQuint(k(t, 1.3, 2.0)), qc = sal(tS + .08, .35);
+    car.style.transform = `translateX(${(1 - pc) * -80}px) translateY(${qc * 70}px)`; car.style.opacity = pc * (1 - qc);
+    MG.desenfoca(car, (1 - pc) * 12, qc * 8);
+    // fila: rebote, luego la etiqueta «en directo» late
+    const ef = MG.entra(fila, t, 1.65, { d: .55, dy: 30, escala0: .9, curva: 'rebote', base: 4 });
+    const qf = sal(tS, .3);
+    MG.pon(fila, L.pad + 30, L.pad + L.hN + 6 + L.hC + 18 + ef.y + qf * 40, ef.s); fila.style.opacity = Math.min(1, ef.p * 1.8) * (1 - qf);
+    const dot = fila.querySelector('i'); if (dot) dot.style.opacity = .55 + .45 * Math.abs(Math.sin(t * 3));
+
+    // ---- sello: el rótulo se recoge en la marca, en la esquina inferior derecha de la zona segura (lejos de la cara)
+    const sx = VERT ? W - 60 - 96 : W - 120 - 96, sy = VERT ? 1480 - 96 : H - 110 - 96;
+    const es = MG.entra(sello, t, tSe, { d: .6, dx: -(sx - L.x) * .35, dy: 0, escala0: .3, curva: 'reboteFuerte', base: 6 });
+    MG.pon(sello, sx + es.x, sy, es.s, `rotate(${-20 * (1 - C.salidaQuint(k(t, tSe, tSe + .8)))}deg)`);
+    const et = MG.entra(selloT, t, tSe + .25, { d: .5, dx: 60, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(selloT, sx - selloT.offsetWidth - 22 + et.x, sy + (96 - selloT.offsetHeight) / 2);
+  };
+});
+</script>
+</body></html>

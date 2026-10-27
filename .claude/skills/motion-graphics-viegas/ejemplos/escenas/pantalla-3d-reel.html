@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «pantalla-3d-reel» · pantalla en 3D en formato Reel (1080×1920): la terminal de Claude Code
+     (interfaces/terminal-claude.html) tumbada en el espacio. La cámara empieza rasante sobre el pedido, sigue las herramientas
+     una a una y la barra de render, y al final la vista previa del reel sale de la terminal hacia la cámara, de frente.
+     La mascota de Claude Code en 3D (obj.mascotaClaude) recorre la interfaz: anda, salta de paso en paso y saluda.
+     Los 180 px de abajo quedan libres para subtítulos. Antes: node scripts/render.mjs pantalla terminal-claude -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+</head><body>
+<script type="module">
+import { escena3d } from '../motor/motor3d.js';
+escena3d({ duracion: 10, ancho: 1080, alto: 1920, fondo: 'marca', fov: 40, niebla: false,
+  profundidad: { apertura: 18, max: 24 }, movimiento: { muestras: 8, obturador: 0.5 } }, ({ THREE, MG, scene, camara, obj, mat, planos, lente, luces }) => {
+  const ui = obj.pantalla('../pantallas/terminal-claude', { ancho: 7, radio: 22 });
+  ui.rotation.x = -1.2; scene.add(ui);
+  const suelo = obj.suelo(); suelo.position.y = -1.2; scene.add(suelo);
+  luces.clave.position.set(3, 9, 6);
+  const reel = ui.recorte(1010, 190, 350, 622, { radio: 18 });          // la vista previa del reel
+  // ---------------- la mascota de Claude Code en 3D, que recorre la interfaz (hija de la pantalla: se mueve en sus px)
+  // base: posición sobre la pantalla (z = altura) y hacia dónde mira · escala: aplastar y estirar · pie: la pone de pie
+  const base = new THREE.Group(), escala = new THREE.Group(), pie = new THREE.Group();
+  const mascota = obj.mascotaClaude({ tam: 0.5 });
+  pie.rotation.x = Math.PI / 2; pie.add(mascota); escala.add(pie); base.add(escala); ui.add(base);
+  const sombra = ui.sombra(120);
+  // luz propia: clave cálida por delante-arriba y contraluz coral por detrás, que la siguen (brillos en el barniz y en los ojos)
+  const luzClave = new THREE.PointLight(0xfff1e8, 2.4, 5, 1.6), luzContra = new THREE.PointLight(0xff8a5c, 3.5, 4, 1.6);
+  ui.add(luzClave, luzContra);
+  // dónde está en cada instante: [x, y] en px de la interfaz, z (altura), si anda, si está en el aire y cuándo aterrizó
+  const CHAR = 14.3, caret = (n) => 44 + CHAR * (2 + n), cv = MG.curvas;
+  const saltos = [   // [t0, t1, desde, hasta, altura del salto, vueltas, altura al llegar]
+    [1.45, 1.85, [800, 250], [476, 318], 0.5, 0], [2.15, 2.55, [476, 318], [547, 422], 0.35, 0],
+    [2.85, 3.25, [547, 422], [447, 526], 0.35, 0], [3.55, 3.95, [447, 526], [433, 630], 0.35, 0],
+    [4.35, 4.75, [433, 630], [300, 738], 0.4, 0], [7.25, 8.05, [590, 738], [940, 540], 0.8, 1, 1.05],   // salta junto a la vista previa y se queda flotando, de cara
+  ];
+  const estado = (t) => {
+    if (t < 0.5) { const u = cv.entradaCubica(MG.k(t, 0, 0.5)); return { x: 330, y: 250, z: MG.lerp(0.55, 0, u), vueltas: 0, aire: true, cae: null }; }   // cae desde arriba (ya en plano)
+    if (t < 1.45) {                                         // anda detrás del cursor mientras se escribe el pedido
+      const n = 44 * cv.suave(MG.k(t, 0.25, 1.4)); return { x: Math.max(330, caret(n) + 70), y: 250, z: 0, vueltas: 0, anda: 1, cae: 0.5 }; }
+    for (const [a, b, d, h, alt, v, zf = 0] of saltos) {
+      if (t >= a && t < b) { const u = (t - a) / (b - a), e = cv.suave(u);
+        return { x: MG.lerp(d[0], h[0], e), y: MG.lerp(d[1], h[1], e), z: 4 * alt * u * (1 - u) + zf * cv.salidaCubica(u), vueltas: v * cv.entradaSalidaQuint(u), aire: true, u, cae: null }; }
+    }
+    if (t >= 4.75 && t < 7.25) {                            // camina sobre la barra de render, al ritmo del progreso
+      const p = cv.entradaSalidaQuint(MG.k(t, 4.7, 7.1)); return { x: 300 + 290 * p, y: 738, z: 0, vueltas: 0, anda: Math.min(1, 0.35 + 2.5 * Math.sin(Math.PI * MG.k(t, 4.7, 7.1))), cae: 4.75 }; }
+    const ultimo = saltos.filter((s) => t >= s[1]).pop();
+    if (ultimo) { const [, b, , h, , , zf = 0] = ultimo; return { x: h[0], y: h[1], z: zf ? zf + 0.05 * Math.sin((t - b) * 3) : 0, vueltas: 0, cae: b }; }
+    return { x: 330, y: 250, z: 0, vueltas: 0, cae: 0.5 };
+  };
+  const pintaMascota = (t) => {
+    const s = estado(t), zz = s.z, a = estado(t - 0.04), b = estado(t + 0.04);
+    base.position.copy(ui.local(s.x, s.y, 0.02 + zz));
+    // mira a la cámara, ladeada un poco hacia donde va: siempre se le ve la cara
+    const vx = (b.x - a.x) / 0.08, rapidez = Math.min(1, Math.abs(vx) / 220);
+    const cam = ui.worldToLocal(camara.position.clone()).sub(base.position), haciaCam = Math.atan2(cam.x, -cam.y);
+    base.rotation.z = haciaCam + Math.sign(vx) * 0.45 * rapidez + s.vueltas * Math.PI * 2 + Math.sin(t * 1.3) * 0.08;
+    // anda: patas por turnos · en el aire: brazos arriba · parpadea de vez en cuando · al final, saluda
+    mascota.andar(t * 3.2, s.anda ?? 0);
+    mascota.brazosArriba(s.aire ? Math.sin(Math.PI * (s.u ?? 0.5)) : 0);
+    mascota.parpadear([2.0, 4.9, 6.6, 9.2].reduce((m, x) => Math.max(m, Math.sin(Math.PI * MG.k(t, x, x + 0.16))), 0));
+    if (t > 8.2) mascota.saludar(cv.suave(MG.k(t, 8.2, 8.6)), t);
+    // de pie sobre la interfaz y, en el salto final, se gira hacia la cámara (que ya mira casi de frente)
+    pie.rotation.x = MG.lerp(Math.PI / 2, 0.3, cv.entradaSalidaQuint(MG.k(t, 7.3, 8.1)));
+    // aplastar y estirar: muelle al aterrizar, anticipación justo antes de saltar y estiramiento en el aire
+    let sq = 1;
+    if (s.cae != null && t >= s.cae) { const d = t - s.cae; sq = 1 - 0.3 * Math.exp(-9 * d) * Math.cos(20 * d); }
+    if (s.aire) sq = 1.1;
+    for (const [x] of saltos) if (t > x - 0.12 && t < x) sq = Math.min(sq, 1 - 0.2 * Math.sin(Math.PI * (t - x + 0.12) / 0.12));
+    const crece = MG.lerp(1, 1.3, cv.salidaCubica(MG.k(t, 7.25, 8.05)));   // al final, algo más grande: presenta el reel
+    escala.scale.set(crece / Math.sqrt(sq), crece / Math.sqrt(sq), crece * sq);
+    sombra.poner(s.x, s.y + 6, { altura: zz, opacidad: 0.8 });
+    const fin = cv.suave(MG.k(t, 7.3, 8.1));                // de frente, la luz va más de lado y más suave (si no, la aplana)
+    luzClave.intensity = MG.lerp(2.4, 1.3, fin);
+    luzClave.position.copy(ui.local(s.x - MG.lerp(110, 240, fin), s.y + MG.lerp(160, -40, fin), 1.1 + zz)); luzContra.position.copy(ui.local(s.x + 90, s.y - 150, 0.7 + zz));
+    return s;
+  };
+  const titulo = MG.el(`<div class="mg-abs" style="width:1080px;text-align:center">
+    <div class="mg-titulo" style="font-size:96px;line-height:1.05">Claude Code</div>
+    <div class="mg-titulo" style="font-size:96px;line-height:1.05"><em>edita tu reel</em></div></div>`);
+  return (t) => {
+    // la cámara sigue a la mascota, suavizada (media de dónde está ± 0,14 s), como un operador. En vertical el plano es muy
+    // estrecho: lo que se siga tiene que ir a distancia ≥ 0,5 o se sale por los lados
+    let sx = 0, sy = 0; for (let i = 0; i < 9; i++) { const e = estado(t - 0.14 + i * 0.035); sx += e.x / 9; sy += e.y / 9; }
+    const sigue = Math.min(cv.suave(MG.k(t, 0.0, 0.35)), 1 - cv.suave(MG.k(t, 7.5, 8.4))) * 0.92;
+    const conSigue = (lista) => lista.map((k) => ({ ...k, objetivo: [MG.lerp(k.objetivo[0], sx, sigue), MG.lerp(k.objetivo[1], sy - 110, sigue)] }));
+    planos.claves(t, ui, conSigue([
+      { t: 0.0, objetivo: [340, 200], inclinacion: 30, giro: -50, distancia: 0.50 },   // de lado, siguiendo a la mascota por el pedido
+      { t: 1.3, objetivo: [700, 220], inclinacion: 30, giro: -42, distancia: 0.52 },
+      { t: 2.0, objetivo: [470, 380], inclinacion: 32, giro: -30, distancia: 0.54 },
+      { t: 4.2, objetivo: [430, 580], inclinacion: 36, giro: -6, distancia: 0.56 },
+      { t: 6.6, objetivo: [520, 740], inclinacion: 40, giro: 14, distancia: 0.56 },
+      { t: 8.6, objetivo: [1070, 440], inclinacion: 66, giro: 2, distancia: 1.12 },
+      { t: 10.0, objetivo: [1050, 410], inclinacion: 76, giro: -10, distancia: 1.3 },
+    ]), { enfoca: false });
+    const s = pintaMascota(t);
+    // el foco sigue a la mascota; al final, entre ella y la vista previa levantada
+    const fin = cv.suave(MG.k(t, 7.6, 8.6)), pl = ui.punto(s.x, s.y, 0.3 + s.z), pr = ui.punto(1185, 500, 0.75);
+    lente.enfocar(pl.lerp(pr, fin * 0.5));
+    reel.levantar(t, 7.7, { altura: 0.75, inclina: 10, d: 1.0 });
+    const e = MG.entra(titulo, t, 8.5, { dy: 90 }); MG.pon(titulo, e.x, 150 + e.y, e.s);
+  };
+});
+</script>
+</body></html>

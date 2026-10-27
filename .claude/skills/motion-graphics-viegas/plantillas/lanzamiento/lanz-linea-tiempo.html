@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-linea-tiempo» · Viegas IA · Motion Lab
+     Roadmap / línea de tiempo: una línea brillante se traza (horizontal en 16:9, vertical en 9:16) y la cámara la recorre sin
+     pararse siguiendo la punta; en cada hito el punto estalla con rebote y un anillo, y su tarjeta (fecha, título, texto) entra
+     con su propia curva, alternando lados en 16:9. El último hito («Hoy» / lanzamiento) se enciende en el color de acento y la
+     cámara hace «zoom a través» de su punto hacia el cierre con logo.
+     Cambia "titulo" (*palabra* = acento), "hitos" ([{fecha, titulo, texto}], 3–6; el último es el destacado), colores
+     ("fondo", "tinta", "acento"), "marca", "lema" y "logo" (ruta o "" = inicial).
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif;
+  --fondo:#141210; --tinta:#F3EDE4; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(100% 70% at 50% 50%, color-mix(in srgb, var(--fondo) 85%, #fff) 0%, var(--fondo) 65%); }
+.mancha{ position:absolute; border-radius:50%; filter:blur(150px); pointer-events:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.pista{ width:var(--ancho); height:var(--alto); }
+.pista > *{ position:absolute; left:0; top:0; }
+.rejilla{ background-image:radial-gradient(rgba(255,255,255,.07) 1.6px, transparent 1.7px); background-size:48px 48px; }
+em{ font-family:var(--serif); font-style:italic; font-weight:400; color:var(--acento); letter-spacing:-.01em; }
+.tit{ font:700 92px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); }
+.tit span{ display:inline-block; }
+.base{ background:rgba(255,255,255,.1); border-radius:99px; }
+.trazo{ border-radius:99px; background:linear-gradient(var(--dir,90deg), color-mix(in srgb, var(--acento) 40%, var(--tinta)), var(--acento)); box-shadow:0 0 28px rgba(var(--halo),.7); }
+.punta{ width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:#fff; box-shadow:0 0 30px 10px rgba(var(--halo),.8); }
+.nodo{ width:40px; height:40px; margin:-20px 0 0 -20px; border-radius:50%; background:var(--fondo); border:6px solid var(--tinta); }
+.nodo.fin{ background:var(--acento); border-color:#fff; box-shadow:0 0 50px 14px rgba(var(--halo),.6); }
+.anillo{ width:40px; height:40px; margin:-20px 0 0 -20px; border-radius:50%; border:3px solid var(--acento); }
+.hito{ width:var(--hw); padding:30px 34px; border-radius:30px; background:rgba(255,255,255,.055); border:1.5px solid rgba(255,255,255,.1); backdrop-filter:blur(10px); }
+.hito small{ display:block; font:700 26px var(--fuente); letter-spacing:.16em; text-transform:uppercase; color:var(--acento); }
+.hito h3{ margin-top:10px; font:700 46px/1.08 var(--fuente); letter-spacing:-.03em; color:var(--tinta); }
+.hito p{ margin-top:10px; font:400 30px/1.3 var(--fuente); color:color-mix(in srgb, var(--tinta) 65%, transparent); }
+.v .hito small{ font-size:30px; } .v .hito h3{ font-size:58px; } .v .hito p{ font-size:38px; }
+.hito.fin{ background:linear-gradient(150deg, var(--acento), color-mix(in srgb, var(--acento) 55%, #000)); border-color:transparent; box-shadow:0 30px 80px rgba(var(--halo),.35); }
+.hito.fin small, .hito.fin p{ color:rgba(255,255,255,.85); }
+.logo{ width:190px; height:190px; border-radius:52px; display:grid; place-items:center; overflow:hidden; color:#fff; font:800 104px var(--fuente);
+  background:linear-gradient(160deg, color-mix(in srgb, var(--acento) 60%, #fff), var(--acento)); box-shadow:0 40px 100px rgba(var(--halo),.45); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:800 128px/1 var(--fuente); letter-spacing:-.05em; color:var(--tinta); white-space:nowrap; }
+.lema{ font:500 42px var(--fuente); color:color-mix(in srgb, var(--tinta) 60%, transparent); white-space:nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "tinta": "#F3EDE4",
+  "acento": "#D97757",
+  "titulo": "Así *llegamos* hasta aquí",
+  "hitos": [
+    { "fecha": "Enero", "titulo": "La idea", "texto": "Editar reels hablando con Claude." },
+    { "fecha": "Abril", "titulo": "Primer prototipo", "texto": "Cortes y subtítulos automáticos." },
+    { "fecha": "Julio", "titulo": "Motion graphics", "texto": "Plantillas editables en HTML." },
+    { "fecha": "Hoy", "titulo": "Lanzamiento", "texto": "Viegas Studio, para todos." }
+  ],
+  "marca": "Viegas Estudio",
+  "lema": "Edita con Claude Code",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+['fondo', 'tinta', 'acento'].forEach((c) => P[c] && raiz.setProperty('--' + c, P[c]));
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const palabras = (s) => esc(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `\u0001${w}`).join(' '))
+  .split(' ').map((w) => w.startsWith('\u0001') ? `<span><em>${w.slice(1)}</em></span>` : `<span>${w}</span>`).join(' ');
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, cl, curvas: C, DT, MB } = MG, D = P.duracion;
+  const manchas = [[.5, .5, 900, .16]].map(([x, y, r, a]) => MG.el(`<div class="mancha" style="width:${r}px;height:${r}px;background:var(--acento);opacity:${a};left:${x * W - r / 2}px;top:${y * H - r / 2}px"></div>`));
+  const hitos = (P.hitos || []).slice(0, 6), n = hitos.length;
+
+  // ---- geometría de la pista (en coordenadas del mundo; la cámara la recorre)
+  const PASO = VERT ? 520 : 640;
+  const LARGO = PASO * (n - 1);
+  const ini = VERT ? { x: 130, y: 900 } : { x: 520, y: 600 };            // primer hito
+  const pt = (d) => VERT ? { x: ini.x, y: ini.y + d } : { x: ini.x + d, y: ini.y };
+  const pista = MG.el(`<div class="pista"></div>`);
+  const rej = MG.el(`<div class="rejilla" style="left:-2000px;top:-2000px;width:${W + LARGO + 4000}px;height:${H + LARGO + 4000}px"></div>`, pista);
+  const G = 10;
+  const base = MG.el(`<div class="base"></div>`, pista), trazo = MG.el(`<div class="trazo" style="--dir:${VERT ? '180deg' : '90deg'}"></div>`, pista);
+  const extra = VERT ? 260 : 340;   // la línea sigue un poco más allá del primero y del último
+  if (VERT) { base.style.cssText += `left:${ini.x - G / 2}px;top:${ini.y - extra}px;width:${G}px;height:${LARGO + 2 * extra}px`; }
+  else { base.style.cssText += `left:${ini.x - extra}px;top:${ini.y - G / 2}px;width:${LARGO + 2 * extra}px;height:${G}px`; }
+  const punta = MG.el(`<div class="punta"></div>`, pista);
+  const HW = VERT ? 760 : 560; if (VERT) document.body.classList.add('v');
+  const nodos = hitos.map((_, i) => MG.el(`<div class="nodo${i === n - 1 ? ' fin' : ''}"></div>`, pista));
+  const anillos = hitos.map(() => MG.el(`<div class="anillo"></div>`, pista));
+  const tarjetas = hitos.map((h, i) => MG.el(`<div class="hito${i === n - 1 ? ' fin' : ''}" style="--hw:${HW}px"><small>${esc(h.fecha)}</small><h3>${esc(h.titulo)}</h3><p>${esc(h.texto)}</p></div>`, pista));
+
+  // ---- titular (fijo en pantalla, fuera de la pista)
+  const tit = MG.el(`<div class="tit">${palabras(P.titulo)}</div>`);
+  tit.style.width = (VERT ? W - 160 : 1300) + 'px';
+  const trozos = [...tit.querySelectorAll(':scope > span')];
+
+  // ---- cierre
+  const inic = (P.marca || '·').trim()[0].toUpperCase();
+  const logo = MG.el(`<div class="logo">${P.logo ? `<img src="${P.logo}" alt="">` : inic}</div>`);
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`), lema = MG.el(`<div class="lema">${esc(P.lema)}</div>`);
+
+  // ---- tiempos: la punta avanza con aceleración y frenada por tramo; la cámara la sigue con curva global (nunca se para)
+  const t0 = .9, tFin = D - 3.3, tZ = D - 2.55, tC = tZ + .45;
+  const seg = (tFin - t0) / (n - 1);
+  const tH = hitos.map((_, i) => t0 + i * seg);                       // llegada a cada hito
+  const avance = (u) => {                                            // distancia trazada (px)
+    if (u <= t0) return -extra * (1 - C.salidaQuint(k(u, t0 - .7, t0)));
+    const i = Math.min(n - 2, Math.floor((u - t0) / seg)), f = k(u, tH[i], tH[i] + seg * .85);
+    return PASO * i + PASO * C.entradaSalidaQuint(f) + (u > tFin ? extra * C.salidaCubica(k(u, tFin, tFin + .8)) : 0);
+  };
+
+  let L = null;
+  return (t) => {
+    if (!L) L = { hs: tarjetas.map((c) => c.offsetHeight), th: tit.offsetHeight, lw: marca.offsetWidth, lmw: lema.offsetWidth };
+    // ---- cámara: sigue la punta con retraso suave + zoom continuo + leve giro (nunca se para)
+    const dCam = lerp(0, LARGO, C.suave(k(t, t0 - .3, tFin + .2)));
+    const c = pt(dCam);
+    const focoX = VERT ? W * .5 : W * .5, focoY = VERT ? H * .55 : H * .52;
+    const z = lerp(1.0, 1.1, t / D);
+    const offX = VERT ? (W / 2 - (ini.x + HW / 2 + 50)) * .0 : 0;
+    const tx = VERT ? 0 : focoX - c.x, ty = VERT ? focoY - c.y : 0;
+    MG.mundo.style.transform = `translate(${tx + Math.sin(t * .5) * 8}px, ${ty + Math.cos(t * .4) * 8}px)`;
+    MG.vista.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+    MG.vista.style.transform = `scale(${z}) rotate(${Math.sin(t * .3) * .6}deg)`;
+    manchas[0].style.transform = `translate(${-tx * .9}px, ${-ty * .9}px)`;
+    // el titular y la mancha no viajan con la pista: compensa la traslación
+    tit.style.left = (-tx) + 'px'; tit.style.top = (-ty) + 'px';
+
+    // ---- zoom a través del último nodo
+    const pf = pt(LARGO), pz = C.entradaCubica(k(t, tZ, tZ + .75));
+    pista.style.transformOrigin = `${pf.x}px ${pf.y}px`; pista.style.transform = `scale(${1 + 12 * pz})`;
+    pista.style.opacity = 1 - C.entradaCubica(k(t, tZ + .35, tZ + .75)); MG.desenfoca(pista, pz * 10, pz * 10);
+
+    // ---- titular: entra arriba y se va (salida acelerada) cuando arranca la línea
+    const TY = VERT ? 270 : 110, TX = VERT ? 80 : 130;
+    const pS = C.entradaCubica(k(t, tH[1] - .2, tH[1] + .3));
+    MG.pon(tit, TX, TY - 120 * pS); tit.style.opacity = 1 - pS; MG.desenfoca(tit, 0, pS * 14);
+    trozos.forEach((s, i) => { const e = MG.entra(s, t, .1 + i * .07, { d: .6, dy: 80, escala0: 1, curva: i % 2 ? 'salidaQuint' : 'salidaExpo', base: 6 }); s.style.transform = `translateY(${e.y}px)`; });
+
+    // ---- línea
+    const a = avance(t), aq = avance(t - DT), v = (a - aq) / DT;
+    const desde = -extra, largoT = Math.max(0, a - desde);
+    Object.assign(trazo.style, VERT ? { left: ini.x - G / 2 + 'px', top: ini.y + desde + 'px', width: G + 'px', height: largoT + 'px' }
+      : { left: ini.x + desde + 'px', top: ini.y - G / 2 + 'px', width: largoT + 'px', height: G + 'px' });
+    base.style.opacity = C.salidaCubica(k(t, .2, .8));
+    const pp = pt(a); MG.pon(punta, pp.x, pp.y); punta.style.opacity = largoT > 2 ? 1 : 0;
+    MG.desenfoca(punta, VERT ? 0 : Math.abs(v) * MB, VERT ? Math.abs(v) * MB : 0);
+
+    // ---- hitos
+    tarjetas.forEach((card, i) => {
+      const q = pt(PASO * i), a0 = tH[i] - .05;
+      const en = MG.entra(nodos[i], t, a0, { d: .5, dy: 0, escala0: 0, curva: 'reboteFuerte', base: 2 });
+      MG.pon(nodos[i], q.x, q.y, en.s * (i === n - 1 ? 1.3 : 1));
+      const pa = C.salidaExpo(k(t, a0, a0 + .9));
+      MG.pon(anillos[i], q.x, q.y, 1 + 3.2 * pa); anillos[i].style.opacity = pa > 0 && pa < 1 ? 1 - pa : 0;
+      const arriba = !VERT && i % 2 === 0;
+      const dx = VERT ? 160 : 0, dy = VERT ? 0 : (arriba ? -120 : 120);
+      const ec = MG.entra(card, t, a0 + .08, { d: .7, dx, dy, escala0: .9, curva: i % 2 ? 'rebote' : 'salidaQuint', base: 6 });
+      const x = VERT ? q.x + 70 : q.x - HW / 2, y = VERT ? q.y - L.hs[i] / 2 : (arriba ? q.y - 60 - L.hs[i] : q.y + 60);
+      card.style.transformOrigin = VERT ? '0 50%' : (arriba ? '50% 100%' : '50% 0');
+      MG.pon(card, x + ec.x, y + ec.y, ec.s);
+    });
+
+    // ---- cierre
+    const bloque = 190 + 60 + 128 + 36 + 50, y0 = (H - bloque) / 2;
+    const off = `translate(${-tx}px, ${-ty}px)`;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .3, curva: 'reboteFuerte', base: 18 });
+    MG.pon(logo, (W - 190) / 2 - tx, y0 - ty, el.s, `rotate(${-14 * (1 - C.salidaQuint(k(t, tC, tC + .9)))}deg)`);
+    const ea = MG.entra(marca, t, tC + .2, { d: .7, dy: 0, escala0: .6, curva: 'salidaExpo', base: 14 });
+    MG.pon(marca, (W - L.lw) / 2 - tx, y0 + 250 - ty, ea.s);
+    const eb = MG.entra(lema, t, tC + .42, { d: .6, dy: 40, escala0: 1, curva: 'salidaQuint', base: 5 });
+    MG.pon(lema, (W - L.lmw) / 2 - tx, y0 + 250 + 128 + 36 + eb.y - ty);
+    if (t < tC) logo.style.opacity = marca.style.opacity = lema.style.opacity = 0;
+  };
+});
+</script>
+</body></html>

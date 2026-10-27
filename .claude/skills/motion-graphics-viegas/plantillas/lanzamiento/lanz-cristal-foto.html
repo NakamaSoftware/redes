@@ -1,0 +1,257 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-cristal-foto» · Viegas IA · Motion Lab
+     Cuestionario de cristal esmerilado sobre una foto (lenguaje «Focus Preference»): el panel de cristal cálido (desenfoque real
+     de la foto de detrás, borde especular, grano fino) entra con muelle; la barra de progreso avanza con su chip «3/6»; la pregunta
+     se escribe; una pastilla de cristal cae torcida y se posa con rebote sobre una palabra; las opciones entran escalonadas; un dedo
+     elige una (la fila se oscurece y el check se dibuja); pulsa «Continuar» y el panel pasa a la segunda pregunta con barrido lateral.
+     Cambia "foto" (ruta; vacío = atardecer con silueta abstracta), "preguntas" ([{texto, palabra_pastilla, opciones:[{emoji, texto}],
+     elegida (índice)}], 1–2), "paso" y "total" (el chip empieza en paso/total y sube uno por pregunta), "acento" (tinte del cristal),
+     "boton", "duracion" (10–12 s). Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','SF Pro Display','Inter','Segoe UI',system-ui,sans-serif; --acento:#FF9A5C; --tinte:255,154,92; --crema:#FFF3E6; }
+html,body{ background:#2A1A22; }
+.mg-fondo{ background:#2A1A22; }
+.mg-vista{ perspective:none; }
+.mg-mundo{ transform-style:flat; }                /* plano: el backdrop-filter del cristal ve la foto */
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.foto{ width:var(--ancho); height:var(--alto); overflow:hidden; }
+.foto img, .foto svg{ position:absolute; }
+.foto img{ width:100%; height:100%; object-fit:cover; inset:0; }
+.rig{ transform-origin:0 0; }
+/* ---- panel de cristal */
+.panel{ position:absolute; left:0; top:0; width:860px; height:1320px; border-radius:96px; overflow:hidden; font-family:var(--fuente); color:var(--crema);
+  background:linear-gradient(165deg, rgba(var(--tinte),.20), rgba(90,45,40,.20) 60%, rgba(40,20,20,.26));
+  -webkit-backdrop-filter:blur(42px) saturate(150%) brightness(.9); backdrop-filter:blur(42px) saturate(150%) brightness(.9);
+  box-shadow:0 50px 140px rgba(30,8,0,.40), inset 0 2px 0 rgba(255,255,255,.45), inset 0 0 0 1.5px rgba(255,255,255,.20), inset 0 -2px 0 rgba(255,255,255,.10); }
+.panel::before{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none;     /* brillo especular */
+  background:linear-gradient(128deg, rgba(255,255,255,.22), rgba(255,255,255,0) 26%, rgba(255,255,255,0) 70%, rgba(255,255,255,.08)); }
+.panel::after{ content:''; position:absolute; inset:0; border-radius:inherit; pointer-events:none; opacity:.20; mix-blend-mode:overlay;   /* grano fino */
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+.barra{ position:absolute; left:0; top:62px; width:860px; height:64px; }
+.barra svg{ position:absolute; top:12px; }
+.pista{ position:absolute; left:132px; top:29px; width:574px; height:7px; border-radius:4px; background:rgba(255,255,255,.18); }
+.lleno{ position:absolute; left:0; top:0; height:100%; border-radius:4px; background:linear-gradient(90deg, rgba(255,255,255,.35), #fff); }
+.chip{ position:absolute; top:-21px; width:100px; height:50px; margin-left:-50px; border-radius:25px; background:#fff; color:#2A1C18; display:grid; place-items:center;
+  font:600 25px var(--fuente); letter-spacing:-.01em; box-shadow:0 6px 18px rgba(40,10,0,.25); font-variant-numeric:tabular-nums; }
+.paginas{ position:absolute; left:0; top:170px; width:860px; height:1150px; overflow:hidden; }
+.pag{ position:absolute; left:0; top:0; width:860px; height:1150px; }
+.preg{ position:absolute; left:58px; top:34px; width:744px; font:600 82px/1.05 var(--fuente); letter-spacing:-.035em; }
+.preg span{ opacity:0; }
+.caret{ position:absolute; width:5px; height:76px; border-radius:3px; background:var(--crema); }
+.pastilla{ position:absolute; left:0; top:0; padding:0 30px; height:74px; border-radius:37px; display:grid; place-items:center; white-space:nowrap;
+  font:600 40px var(--fuente); letter-spacing:-.02em; color:#fff; transform-origin:50% 50%; text-shadow:0 1px 6px rgba(0,0,0,.25);
+  background:linear-gradient(170deg, rgba(120,70,55,.55), rgba(45,22,18,.45)); -webkit-backdrop-filter:blur(10px) saturate(140%); backdrop-filter:blur(10px) saturate(140%);
+  box-shadow:0 18px 40px rgba(30,8,0,.40), inset 0 2px 0 rgba(255,255,255,.65), inset 0 0 0 1.5px rgba(255,255,255,.35), inset 0 -3px 8px rgba(0,0,0,.18); }
+.op{ position:absolute; left:58px; width:744px; height:124px; border-radius:40px; display:flex; align-items:center; gap:26px; padding:0 40px 0 30px;
+  background:rgba(40,22,18,.30); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.10), inset 0 1px 0 rgba(255,255,255,.10); }
+.op .fondo-sel{ position:absolute; inset:0; border-radius:inherit; background:rgba(14,8,6,.78); box-shadow:inset 0 0 0 1.5px rgba(255,255,255,.14); opacity:0; }
+.op .emo{ position:relative; width:64px; height:64px; display:grid; place-items:center; font-size:48px; line-height:1; font-family:'Segoe UI Emoji','Apple Color Emoji','Noto Color Emoji',sans-serif; }
+.op b{ position:relative; flex:1; font:500 38px var(--fuente); letter-spacing:-.02em; }
+.op svg{ position:relative; }
+.btn{ position:absolute; left:58px; top:968px; width:744px; height:124px; border-radius:62px; background:#fff; color:#21140F; display:grid; place-items:center;
+  font:600 40px var(--fuente); letter-spacing:-.02em; box-shadow:0 18px 40px rgba(30,8,0,.25); }
+.dedo{ width:84px; height:84px; margin:-42px 0 0 -42px; border-radius:50%; background:radial-gradient(circle at 40% 35%, rgba(255,255,255,.95), rgba(255,255,255,.72));
+  box-shadow:0 14px 34px rgba(20,5,0,.35), 0 0 0 2px rgba(255,255,255,.55); }
+.onda{ width:84px; height:84px; margin:-42px 0 0 -42px; border-radius:50%; border:3px solid rgba(255,255,255,.9); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 11,
+  "foto": "",
+  "acento": "#FF9A5C",
+  "paso": 3,
+  "total": 6,
+  "boton": "Continuar",
+  "preguntas": [
+    { "texto": "¿Qué tipo de espacio te ayuda a concentrarte?", "palabra_pastilla": "espacio",
+      "opciones": [ { "emoji": "🤫", "texto": "Un sitio en silencio" }, { "emoji": "🌧️", "texto": "Ruido de fondo suave" },
+                    { "emoji": "🎧", "texto": "Con música me concentro" }, { "emoji": "🌍", "texto": "Me adapto a todo" } ], "elegida": 2 },
+    { "texto": "¿A qué hora del día rindes más?", "palabra_pastilla": "hora",
+      "opciones": [ { "emoji": "🌅", "texto": "A primera hora" }, { "emoji": "☀️", "texto": "Después de comer" },
+                    { "emoji": "🌙", "texto": "Por la noche" }, { "emoji": "⚡", "texto": "Depende del día" } ], "elegida": 0 }
+  ]
+}
+</script>
+<script>
+// ---------------------------------------------------------------- parámetros: bloque params + ?clave=valor + formato por hash
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+if (P.acento) { raiz.setProperty('--acento', P.acento); raiz.setProperty('--tinte', hexRgb(P.acento)); }
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+// silueta abstracta de perfil (si no hay foto): lienzo de diseño 1080×1920
+const SILUETA = `M1180 1920 L420 1920 C470 1770 560 1690 596 1570 C606 1490 590 1430 556 1392 C516 1372 470 1362 452 1330 C440 1300 466 1280 460 1258
+  C436 1246 446 1224 458 1208 C436 1194 442 1172 468 1160 C428 1124 396 1086 414 1062 C436 1032 466 1002 476 962 C466 902 476 860 498 820
+  C540 700 650 620 784 610 C900 602 990 640 1040 700 C1120 700 1180 760 1180 860 Z`;
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const preguntas = (P.preguntas || []).slice(0, 2), NQ = preguntas.length;
+
+  // ---- fondo: foto del usuario o atardecer violeta→naranja con silueta suave
+  const foto = MG.el(`<div class="foto">${P.foto ? `<img src="${P.foto}" alt="">` : `
+    <div style="position:absolute;inset:0;background:linear-gradient(180deg,#7E6E9C 0%,#B48AA0 32%,#E9A07E 62%,#F2803F 86%,#E86A2C 100%)"></div>
+    <div style="position:absolute;left:-10%;top:40%;width:80%;height:50%;border-radius:50%;background:#FFC08A;opacity:.45;filter:blur(140px)"></div>
+    <svg viewBox="0 0 ${VERT ? 1080 : 1240} 1920" preserveAspectRatio="xMinYMin meet" style="${VERT ? 'left:0;top:0;width:1080px;height:1920px' : 'left:1060px;top:-330px;width:930px;height:1440px'};overflow:visible">
+      <defs><filter id="sil" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="5"/></filter>
+      <linearGradient id="silg" x1="0" y1="0" x2="1" y2="0" gradientUnits="objectBoundingBox"><stop offset="0" stop-color="#2E1816"/><stop offset=".5" stop-color="#1C0F10"/><stop offset="1" stop-color="#150B0D"/></linearGradient></defs>
+      <path d="${SILUETA}" fill="url(#silg)"/>
+      <path d="${SILUETA}" fill="none" stroke="#FFB27A" stroke-opacity=".28" stroke-width="3"/>
+    </svg>`}</div>`);
+
+  // ---- panel (diseñado a 860×1320; en 16:9 se escala)
+  const rig = MG.el(`<div class="rig"></div>`);
+  const ESC = VERT ? 1 : .7, PX = VERT ? (W - 860) / 2 : 380, PY = VERT ? 290 : (H - 1320 * ESC) / 2;
+  const panel = MG.el(`<div class="panel">
+    <div class="barra">
+      <svg width="44" height="40" style="left:58px" viewBox="0 0 44 40"><path d="M40 20H6M20 5 5 20l15 15" fill="none" stroke="#FFF3E6" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <div class="pista"><div class="lleno"></div><div class="chip"></div></div>
+      <svg width="40" height="40" style="left:762px" viewBox="0 0 40 40"><path d="M7 7l26 26M33 7 7 33" fill="none" stroke="#FFF3E6" stroke-width="4" stroke-linecap="round"/></svg>
+    </div><div class="paginas"></div></div>`, rig);
+  const lleno = panel.querySelector('.lleno'), chip = panel.querySelector('.chip'), cont = panel.querySelector('.paginas');
+
+  // ---- páginas (una por pregunta)
+  const pags = preguntas.map((q) => {
+    const pag = MG.el(`<div class="pag"></div>`, cont);
+    const pal = (q.palabra_pastilla || '').toLowerCase();
+    // cada letra en un span (se revela sin mover la maquetación); la palabra de la pastilla, marcada
+    const html = q.texto.split(' ').map((w) => {
+      const limpio = w.toLowerCase().replace(/[¿?¡!.,;:]/g, '');
+      const letras = [...w].map((c) => `<span>${esc(c)}</span>`).join('');
+      return limpio === pal && pal ? `<i class="obj" style="font-style:normal">${letras}</i>` : letras;
+    }).join('<span> </span>');
+    const preg = MG.el(`<div class="preg">${html}</div>`, pag);
+    const caret = MG.el(`<div class="caret"></div>`, pag);
+    const txtP = q.palabra_pastilla ? q.palabra_pastilla[0].toUpperCase() + q.palabra_pastilla.slice(1) : '';
+    const pastilla = txtP ? MG.el(`<div class="pastilla">${esc(txtP)}</div>`, pag) : null;
+    const ops = (q.opciones || []).slice(0, 4).map((o, i) => MG.el(`<div class="op" style="top:${372 + i * 142}px"><div class="fondo-sel"></div>
+      <div class="emo">${esc(o.emoji || '')}</div><b>${esc(o.texto)}</b>
+      <svg width="40" height="40" viewBox="0 0 40 40"><path d="M7 21l9 9L34 11" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" stroke-dashoffset="1"/></svg></div>`, pag));
+    const btn = MG.el(`<div class="btn">${esc(P.boton || 'Continuar')}</div>`, pag);
+    return { q, pag, preg, caret, pastilla, ops, btn, letras: [...preg.querySelectorAll('span')], el: Math.max(0, Math.min(ops.length - 1, q.elegida ?? 0)) };
+  });
+
+  // ---- dedo (indicador táctil) y su onda
+  const onda = MG.el(`<div class="onda"></div>`, rig), dedo = MG.el(`<div class="dedo"></div>`, rig);
+
+  // ---- tiempos (s) por pregunta: progreso, escritura, pastilla, opciones, toque, botón, cambio de página
+  const T = []; let t0 = .55;
+  pags.forEach((p, i) => {
+    const esc1 = Math.min(1.5, .03 * p.letras.length);
+    const a = { ini: t0, barra: t0 + .15, escr: t0 + .35, finEscr: t0 + .35 + esc1 };
+    a.past = a.finEscr + .1; a.ops = a.past + .25; a.toque = a.ops + 1.25; a.boton = a.toque + .95; a.cambio = a.boton + .3;
+    T.push(a); t0 = a.cambio + .15;
+  });
+
+  let L = null;
+  const mueve = (el, x, y, s = 1) => MG.pon(el, x, y, s);
+  return (t) => {
+    if (!L) {
+      L = pags.map((p) => {
+        const obj = p.preg.querySelector('.obj'); const pr = p.pastilla;
+        const r = obj ? { x: 58 + obj.offsetLeft, y: 34 + obj.offsetTop, w: obj.offsetWidth, h: obj.offsetHeight } : null;
+        return { obj: r, pw: pr ? pr.offsetWidth : 0, pos: p.letras.map((s) => ({ x: s.offsetLeft + s.offsetWidth, y: s.offsetTop })) };
+      });
+    }
+    // ---- cámara: acercamiento lento continuo + deriva; la foto va más lenta (paralaje)
+    const z = lerp(1, 1.07, C.suave(t / D));
+    MG.vista.style.transformOrigin = `${PX + 430 * ESC}px ${PY + 600 * ESC}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .37) * 9}px, ${Math.cos(t * .29) * 11}px)`;
+    foto.style.transformOrigin = '60% 45%';
+    foto.style.transform = `scale(${1.04 + .03 * C.suave(t / D)}) translate(${-Math.sin(t * .37) * 12}px, ${Math.sin(t * .21) * 8}px)`;
+
+    // ---- panel: entra desde abajo con muelle y desenfoque de movimiento
+    const e = MG.entra(panel, t, .05, { d: .8, dy: 380, escala0: .9, curva: 'rebote', base: 10 });
+    rig.style.transform = `translate(${PX}px,${PY}px) scale(${ESC})`;
+    panel.style.transformOrigin = '50% 60%';
+    mueve(panel, 0, e.y, e.s);
+
+    // ---- barra de progreso: cada pregunta avanza un paso (con frenada suave)
+    const tot = Math.max(1, P.total || 6), paso0 = Math.max(1, P.paso || 1);
+    let paso = paso0 - 1;
+    T.forEach((a, i) => { paso += C.afterEffects75(k(t, a.barra, a.barra + .9)); });
+    const fr = Math.min(1, paso / tot);
+    lleno.style.width = (fr * 100) + '%'; chip.style.left = (fr * 100) + '%';
+    chip.textContent = `${Math.max(paso0, Math.min(tot, Math.round(paso + .3)))}/${tot}`;
+    const pulsoChip = T.reduce((m, a) => Math.max(m, Math.sin(Math.PI * k(t, a.barra + .55, a.barra + .95))), 0);
+    chip.style.transform = `scale(${1 + .12 * pulsoChip})`;
+
+    // ---- páginas
+    let dx = 0, dy = 0, tapS = 1, onP = 0, ondaS = 1;
+    pags.forEach((p, i) => {
+      const a = T[i], l = L[i];
+      // barrido lateral: la página sale a la izquierda y la siguiente entra por la derecha
+      const sale = i < NQ - 1 ? C.afterEffects75(k(t, a.cambio, a.cambio + .75)) : 0, saleQ = i < NQ - 1 ? C.afterEffects75(k(t - DT, a.cambio, a.cambio + .75)) : 0;
+      const entraP = i > 0 ? C.afterEffects75(k(t, T[i - 1].cambio, T[i - 1].cambio + .75)) : 1, entraQ = i > 0 ? C.afterEffects75(k(t - DT, T[i - 1].cambio, T[i - 1].cambio + .75)) : 1;
+      const x = -860 * sale + 860 * (1 - entraP), v = (-860 * (sale - saleQ) - 860 * (entraP - entraQ)) / DT;
+      p.pag.style.transform = `translate(${x}px,0) scale(${1 - .06 * sale - .06 * (1 - entraP)})`;
+      p.pag.style.opacity = Math.min(1 - sale * .9, .1 + entraP * .9);
+      p.pag.style.visibility = (sale >= 1 || entraP <= 0) ? 'hidden' : 'visible';
+      MG.desenfoca(p.pag, Math.abs(v) * MB * .6, 0);
+
+      // escritura letra a letra + cursor de texto
+      const n = p.letras.length, vis = Math.floor(n * k(t, a.escr, a.finEscr));
+      p.letras.forEach((s, j) => { s.style.opacity = j < vis ? 1 : 0; });
+      const lp = l.pos[Math.max(0, vis - 1)] || { x: 0, y: 0 };
+      MG.pon(p.caret, 58 + (vis ? lp.x : 0) + 4, 34 + lp.y + 8);
+      const parpadeo = t < a.finEscr ? 1 : (Math.sin((t - a.finEscr) * 9) > 0 ? 1 : 0) * (1 - k(t, a.finEscr + .7, a.finEscr + .8));
+      p.caret.style.opacity = t < a.escr - .2 ? 0 : parpadeo;
+
+      // pastilla: cae torcida y se posa con rebote sobre su palabra
+      if (p.pastilla && l.obj) {
+        const pe = MG.entra(p.pastilla, t, a.past, { d: .7, dy: -320, escala0: 1.25, curva: 'rebote', base: 5 });
+        const rot = lerp(-28, -7, C.rebote(k(t, a.past, a.past + 1.05)));
+        const cx = l.obj.x + l.obj.w / 2 - l.pw / 2 - 18, cy = l.obj.y + l.obj.h / 2 - 37 + 4;
+        MG.pon(p.pastilla, cx + Math.sin(t * 1.3) * 2, cy + pe.y + Math.sin(t * 1.7) * 3, pe.s, `rotate(${rot}deg)`);
+      }
+      // opciones escalonadas
+      p.ops.forEach((o, j) => {
+        const eo = MG.entra(o, t, a.ops + j * .09, { d: .6, dy: 90, escala0: .96, curva: 'salidaQuint', base: 4 });
+        o.style.transform = `translateY(${eo.y}px) scale(${eo.s})`;
+        if (j === p.el) {
+          const sel = C.salidaCubica(k(t, a.toque, a.toque + .35));
+          o.querySelector('.fondo-sel').style.opacity = sel;
+          o.querySelector('path').style.strokeDashoffset = 1 - C.salidaQuint(k(t, a.toque + .12, a.toque + .55));
+          const pul = Math.sin(Math.PI * k(t, a.toque - .05, a.toque + .3));
+          o.style.transform += ` scale(${1 - .03 * pul})`;
+        }
+      });
+      // botón: se hunde al pulsarlo
+      const pb = Math.sin(Math.PI * k(t, a.boton - .05, a.boton + .3));
+      p.btn.style.transform = `scale(${1 - .05 * pb})`; p.btn.style.opacity = C.salidaCubica(k(t, a.ops + .45, a.ops + .9));
+    });
+
+    // ---- dedo: llega a la opción, toca, va al botón, toca y se retira (recorridos con curvas distintas)
+    const pts = [];   // [tiempo, x, y] en coordenadas del panel
+    T.forEach((a, i) => {
+      const yO = 170 + 372 + pags[i].el * 142 + 62;
+      pts.push([a.toque - .75, 960, 1250], [a.toque, 560, yO], [a.toque + .3, 560, yO], [a.boton, 470, 170 + 968 + 62], [a.boton + .3, 470, 170 + 968 + 62], [a.cambio + .5, 940, 1180]);
+    });
+    let dxp = 960, dyp = 1400, vis = 0;
+    for (let j = 0; j < pts.length - 1; j++) {
+      const [ta, xa, ya] = pts[j], [tb, xb, yb] = pts[j + 1];
+      if (t >= ta && t <= tb) { const c = (j % 3 === 2) ? C.entradaSalidaQuint : C.afterEffects75; const u = c(k(t, ta, tb)); dxp = lerp(xa, xb, u); dyp = lerp(ya, yb, u) - Math.sin(Math.PI * u) * 40; }
+    }
+    T.forEach((a) => { vis = Math.max(vis, k(t, a.toque - .75, a.toque - .45) * (1 - k(t, a.cambio + .2, a.cambio + .5))); });
+    let tap = 0, ondaP = -1;
+    T.forEach((a) => { [a.toque, a.boton].forEach((tt) => { tap = Math.max(tap, Math.sin(Math.PI * k(t, tt - .08, tt + .2))); if (t >= tt && t < tt + .55) ondaP = (t - tt) / .55; }); });
+    dedo.style.opacity = vis * .95;
+    MG.pon(dedo, dxp, dyp + e.y, 1 - .22 * tap);
+    if (ondaP >= 0) { MG.pon(onda, dxp, dyp, .6 + 1.6 * C.salidaCubica(ondaP)); onda.style.opacity = (1 - ondaP) * .8; } else onda.style.opacity = 0;
+  };
+});
+</script>
+</body></html>

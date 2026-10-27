@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-carpeta-fotos» · Viegas IA · Motion Lab
+     Carpeta gris que entra con muelle y se abre: tres fotos con marco blanco salen en abanico (rotaciones suaves, sombras,
+     desenfoque de movimiento), el frontal de cristal esmerilado (desenfoque real de lo que tiene detrás + borde especular)
+     sube y se asienta, aparece un botón ↗ que late, titular grande letra a letra y chip. Variante «icono de app»: el icono
+     azul con forma de carpeta y fotos asomando, halo y anillo gris (como un detalle de UI).
+     Cambia "estilo" ("carpeta" | "icono" | "ambos" = carpeta y luego «zoom a través» al icono), "fotos" (3 rutas; vacío =
+     degradados), "titular", "chip", "fondo", "carpeta" (color), "icono" ({nombre, detalle, color}) y "etiqueta" ([negrita, gris]).
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?titular=IDEAS&estilo=icono en la dirección. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','SF Pro Display','Inter','Segoe UI',system-ui,sans-serif; --fondo:#F3F3F1; --texto:#262628; --mute:#9A9A9F;
+  --carpeta:#D4D4D8; --azul:#2448D8; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(70% 55% at 50% 42%, #FFFFFF, var(--fondo) 75%); }
+.mg-mundo{ transform-style:flat; }
+.grupo{ position:absolute; left:0; top:0; width:0; height:0; }
+.grupo > *{ position:absolute; }
+/* carpeta */
+.trasera{ left:-300px; top:-150px; width:600px; height:420px; border-radius:40px;
+  background:linear-gradient(180deg, color-mix(in srgb, var(--carpeta) 70%, #fff), var(--carpeta)); }
+.trasera::before{ content:''; position:absolute; left:0; top:-46px; width:250px; height:90px; border-radius:30px 30px 0 0;
+  background:color-mix(in srgb, var(--carpeta) 70%, #fff); }
+.foto{ left:-150px; top:-180px; width:300px; height:360px; border-radius:38px; background:#fff; padding:16px;
+  box-shadow:0 30px 60px rgba(20,20,30,.16), 0 4px 12px rgba(20,20,30,.08); }
+.foto i{ display:block; width:100%; height:100%; border-radius:24px; background-size:cover; background-position:center; }
+.cristal{ left:-320px; top:-40px; width:640px; height:330px; border-radius:46px; overflow:hidden;
+  background:linear-gradient(180deg, rgba(255,255,255,.42), rgba(246,246,248,.72));
+  -webkit-backdrop-filter:blur(26px) saturate(150%); backdrop-filter:blur(26px) saturate(150%);
+  box-shadow:0 40px 80px rgba(20,20,40,.16), 0 10px 24px rgba(20,20,40,.08), inset 0 1.5px 0 rgba(255,255,255,.95), inset 0 -2px 0 rgba(0,0,0,.04);
+  transform-origin:50% 100%; }
+/* borde especular: degradado en el borde (máscara xor) + brillo que barre */
+.cristal::before{ content:''; position:absolute; inset:0; border-radius:inherit; padding:2px;
+  background:linear-gradient(135deg, rgba(255,255,255,1), rgba(255,255,255,.15) 35%, rgba(255,255,255,.05) 60%, rgba(255,255,255,.8));
+  -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; }
+.cristal .brillo{ position:absolute; top:-40%; width:40%; height:180%; left:0; transform:rotate(18deg);
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.55), transparent); }
+.boton{ left:180px; top:180px; width:104px; height:104px; border-radius:50%; background:#1B1B1E; border:6px solid #fff;
+  display:grid; place-items:center; box-shadow:0 16px 34px rgba(0,0,0,.25); }
+.boton svg{ width:44px; height:44px; }
+.onda{ left:180px; top:180px; width:104px; height:104px; border-radius:50%; border:3px solid rgba(27,27,30,.35); }
+.titular{ left:-700px; width:1400px; top:350px; text-align:center; font:800 200px/1 var(--fuente); letter-spacing:-.03em; color:var(--texto); }
+.titular .mg-trozo{ display:inline-block; }
+.chip{ left:-110px; width:220px; top:590px; text-align:center; padding:14px 0; border-radius:40px; background:rgba(30,30,40,.07);
+  font:500 40px var(--fuente); letter-spacing:-.02em; color:#8E8E94; font-variant-numeric:tabular-nums; }
+/* variante icono */
+.anillo{ left:-430px; top:-430px; width:860px; height:860px; border-radius:50%; background:#fff; border:72px solid #ECEBE8; }
+.halo{ left:-200px; top:-60px; width:400px; height:300px; border-radius:50%; background:var(--azul); filter:blur(70px); opacity:.45; }
+.icono{ left:-150px; top:-150px; width:300px; height:300px; border-radius:78px; overflow:hidden;
+  background:linear-gradient(160deg, color-mix(in srgb, var(--azul) 80%, #6E8BFF), var(--azul));
+  box-shadow:0 34px 60px rgba(36,72,216,.35), inset 0 2px 0 rgba(255,255,255,.35); }
+.icono .mini{ position:absolute; width:150px; height:150px; border-radius:20px; background:#fff; padding:8px; box-shadow:0 8px 18px rgba(0,0,0,.2); }
+.icono .mini i{ display:block; width:100%; height:100%; border-radius:13px; background-size:cover; background-position:center; }
+.icono .bolsillo{ position:absolute; left:0; right:0; bottom:0; height:165px;
+  background:linear-gradient(180deg, rgba(90,130,255,.55), rgba(36,72,216,.92));
+  -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); border-top:1.5px solid rgba(255,255,255,.45);
+  border-radius:34px 34px 0 0; text-align:center; color:#fff; padding-top:44px; }
+.icono .bolsillo::before{ content:''; position:absolute; left:-1px; top:-30px; width:120px; height:40px; border-radius:26px 26px 0 0;
+  background:rgba(90,130,255,.55); border-top:1.5px solid rgba(255,255,255,.45); -webkit-backdrop-filter:blur(10px); backdrop-filter:blur(10px); }
+.icono b{ display:block; font:600 34px var(--fuente); letter-spacing:-.02em; }
+.icono small{ display:inline-block; margin-top:8px; padding:4px 14px; border-radius:20px; background:rgba(255,255,255,.22); font:500 20px var(--fuente); letter-spacing:-.01em; }
+.etiqueta{ left:-500px; width:1000px; top:520px; text-align:center; font:700 40px var(--fuente); letter-spacing:-.025em; color:#1E1E22; }
+.etiqueta span{ color:#A7A7AC; font-weight:500; margin-left:14px; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "estilo": "ambos",
+  "fotos": [],
+  "titular": "PROMPTS",
+  "chip": "2026",
+  "fondo": "#F3F3F1",
+  "carpeta": "#D4D4D8",
+  "icono": { "nombre": "Bauhaus", "detalle": "32 fotos", "color": "#2448D8" },
+  "etiqueta": ["Detalles UI", "Carpeta"]
+}
+</script>
+<script>
+// ---------------------------------------------------------------- parámetros: bloque params + ?clave=valor + formato por hash
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+if (P.fondo) raiz.setProperty('--fondo', P.fondo);
+if (P.carpeta) raiz.setProperty('--carpeta', P.carpeta);
+if (P.icono && P.icono.color) raiz.setProperty('--azul', P.icono.color);
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+// fotos de relleno: degradados con luz (nunca planos)
+const RELLENO = [
+  'radial-gradient(60% 50% at 30% 30%, #FFFFFF, transparent 70%), linear-gradient(160deg, #E4E1FF, #A9B8FF 60%, #7F95F5)',
+  'radial-gradient(55% 45% at 65% 35%, #FFE3C2, transparent 70%), linear-gradient(170deg, #FF9A5C, #E2552A 55%, #8E2A14)',
+  'radial-gradient(60% 50% at 35% 70%, #D9FFE9, transparent 70%), linear-gradient(150deg, #9FE3C1, #3FA07A 60%, #1F5D49)'];
+const fondoFoto = (i) => (P.fotos && P.fotos[i]) ? `url("${P.fotos[i]}")` : RELLENO[i % 3];
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const est = P.estilo || 'ambos';
+  const S = VERT ? 1 : .8;
+  const tOut = est === 'ambos' ? 5.9 : Infinity, tIn = est === 'ambos' ? 6.0 : est === 'icono' ? .2 : Infinity;
+
+  // ---- carpeta (todo en un grupo centrado; el cristal desenfoca lo que hay dentro del grupo)
+  const g = MG.el('<div class="grupo"></div>');
+  const trasera = MG.el('<div class="trasera"></div>', g);
+  const fotos = [0, 1, 2].map((i) => MG.el(`<div class="foto"><i style="background-image:${fondoFoto(i)}"></i></div>`, g));
+  const cristal = MG.el('<div class="cristal"><div class="brillo"></div></div>', g), brillo = cristal.firstChild;
+  const onda = MG.el('<div class="onda"></div>', g);
+  const boton = MG.el('<div class="boton"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7M8.5 7H17v8.5"/></svg></div>', g);
+  const tit = MG.texto(esc(P.titular), 'titular', 'letras'); g.appendChild(tit);
+  const chip = MG.el(`<div class="chip">${esc(P.chip)}</div>`, g);
+  // destino de cada foto: izquierda, centro, derecha (x, y, giro)
+  const DEST = [[-250, -120, -15], [0, -175, -2], [250, -118, 14]], ORDEN = [1, 0, 2];
+
+  // ---- icono de app
+  const gi = MG.el('<div class="grupo"></div>');
+  const anillo = MG.el('<div class="anillo"></div>', gi), halo = MG.el('<div class="halo"></div>', gi);
+  const ic = P.icono || {};
+  const icono = MG.el(`<div class="icono">
+      <div class="mini" style="left:30px;top:34px"><i style="background-image:${fondoFoto(1)}"></i></div>
+      <div class="mini" style="left:122px;top:30px"><i style="background-image:${fondoFoto(0)}"></i></div>
+      <div class="bolsillo"><b>${esc(ic.nombre)}</b><small>${esc(ic.detalle)}</small></div></div>`, gi);
+  const minis = [...icono.querySelectorAll('.mini')], bolsillo = icono.querySelector('.bolsillo');
+  const et = P.etiqueta || [];
+  const etiqueta = MG.el(`<div class="etiqueta">${esc(et[0])}<span>${esc(et[1])}</span></div>`, gi);
+
+  // centro vertical: la carpeta y el titular forman un bloque de −370 a 650 (unidades de diseño)
+  const cx = W / 2, cyC = H / 2 - 140 * S, cyI = H / 2 - (VERT ? 40 : 30);
+
+  return (t) => {
+    // ---- cámara: zoom lento + deriva; nunca se para
+    const z = lerp(1, 1.07, C.suave(t / D));
+    MG.vista.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .5) * 10}px, ${Math.cos(t * .37) * 12}px) rotate(${Math.sin(t * .3) * .4}deg)`;
+
+    // ================= CARPETA
+    const vis = t < tOut + .8 && est !== 'icono';
+    g.style.display = vis ? '' : 'none';
+    if (vis) {
+      // entrada del bloque con muelle desde abajo
+      const E = (u) => C.rebote(k(u, .15, 1.6)), p = E(t), vy = 520 * (E(t) - E(t - DT)) / DT;
+      const pO = C.entradaCubica(k(t, tOut, tOut + .6)), pO2 = C.entradaCubica(k(t - DT, tOut, tOut + .6));
+      const s = lerp(.72, 1, p) * (1 - .78 * pO);
+      g.style.transform = `translate(${cx}px, ${cyC + (1 - p) * 520}px) scale(${S * s}) rotate(${(1 - p) * -7}deg)`;
+      g.style.opacity = 1 - pO;
+      MG.desenfoca(g, pO * 10, Math.abs(vy) * MB * S + Math.abs(pO - pO2) / DT * 6);
+      trasera.style.opacity = cristal.style.opacity = Math.min(1, p * 2.2);
+
+      // apertura: el frontal se inclina hacia delante y vuelve con muelle (sube) mientras salen las fotos
+      const tO = 1.3, a = C.salidaCubica(k(t, tO, tO + .28)), b = C.rebote(k(t, tO + .22, tO + 1.5));
+      const flote = Math.sin(t * 1.3) * 4;
+      cristal.style.transform = `perspective(1400px) translateY(${30 * a * (1 - b) + flote * .4}px) rotateX(${-24 * a * (1 - b)}deg)`;
+      brillo.style.left = lerp(-50, 130, C.afterEffects75(k(t, tO + .6, tO + 1.9))) + '%';
+
+      // fotos en abanico (la del centro primero), con rotación, sombra y desenfoque de movimiento
+      ORDEN.forEach((i, n) => {
+        const ti = tO + .12 + n * .11, F = (u) => C.rebote(k(u, ti, ti + 1.3)), q = F(t), q0 = F(t - DT);
+        const [x1, y1, r1] = DEST[i], x0 = 0, y0 = 140;
+        const x = lerp(x0, x1, q) + Math.sin(t * .9 + i * 2) * 5 * q, y = lerp(y0, y1, q) + Math.cos(t * 1.1 + i) * 6 * q, r = lerp(0, r1, q) + Math.sin(t * .8 + i) * .8 * q;
+        const vx = (x1 - x0) * (q - q0) / DT, vyy = (y1 - y0) * (q - q0) / DT;
+        MG.pon(fotos[i], x, y, lerp(.8, 1, q), `rotate(${r}deg)`);
+        fotos[i].style.opacity = k(t, ti - .5, ti - .05);
+        MG.desenfoca(fotos[i], Math.abs(vx) * MB, Math.abs(vyy) * MB);
+      });
+
+      // botón ↗: aparece con rebote fuerte y late con una onda
+      const tb = tO + 1.0, sb = C.reboteFuerte(k(t, tb, tb + 1.1)), lat = t > tb + .8 ? 1 + .05 * Math.max(0, Math.sin((t - tb - .8) * Math.PI / .7)) ** 2 : 1;
+      MG.pon(boton, 0, flote * .4, sb * lat, `rotate(${(1 - C.salidaQuint(k(t, tb, tb + .9))) * -90}deg)`);
+      boton.style.opacity = k(t, tb, tb + .15);
+      const ph = t > tb + .8 ? ((t - tb - .8) % 1.4) / 1.4 : 0;
+      MG.pon(onda, 0, flote * .4, 1 + C.salidaCubica(ph) * .9); onda.style.opacity = t > tb + .8 ? .9 * (1 - ph) : 0;
+
+      // titular letra a letra con desenfoque + chip
+      const tT = tO + 1.05;
+      tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tT + i * .045, { d: .7, dy: 130, escala0: 1, curva: 'rebote', base: 9 });
+        sp.style.transform = `translateY(${e.y}px)`; });
+      const ec = MG.entra(chip, t, tT + .35 + tit.trozos.length * .045, { d: .6, dy: 40, escala0: .8, curva: 'rebote', base: 5 });
+      MG.pon(chip, 0, ec.y, ec.s);
+    }
+
+    // ================= ICONO DE APP («zoom a través»: llega desde muy cerca, desenfocado)
+    const visI = t >= tIn - .05;
+    gi.style.display = visI ? '' : 'none';
+    if (visI) {
+      const pI = C.salidaQuint(k(t, tIn, tIn + 1.0)), pI0 = C.salidaQuint(k(t - DT, tIn, tIn + 1.0));
+      const sI = lerp(2.6, 1, pI) * (1 + .01 * Math.sin(t * 1.4));
+      gi.style.transform = `translate(${cx}px, ${cyI}px) scale(${S * (VERT ? 1 : .95)})`;
+      // anillo: crece con muelle
+      const ra = C.rebote(k(t, tIn + .15, tIn + 1.4));
+      MG.pon(anillo, 0, 0, lerp(.55, 1, ra)); anillo.style.opacity = k(t, tIn + .1, tIn + .5);
+      MG.pon(icono, 0, Math.sin(t * 1.2) * 8, sI, `rotate(${(1 - pI) * 14 + Math.sin(t * .9) * 1.2}deg)`);
+      icono.style.opacity = k(t, tIn, tIn + .25);
+      MG.desenfoca(icono, (1 - pI) * 16, (1 - pI) * 16 + Math.abs(pI - pI0) / DT * 1.2);
+      MG.pon(halo, 0, 40 + Math.sin(t * 1.2) * 8, lerp(.5, 1, pI) * (1 + .06 * Math.sin(t * 1.7)));
+      halo.style.opacity = .45 * k(t, tIn + .3, tIn + 1);
+      // fotos que asoman con rebote
+      minis.forEach((m, i) => { const q = C.rebote(k(t, tIn + .55 + i * .12, tIn + 1.7 + i * .12));
+        m.style.transform = `translateY(${lerp(110, 0, q)}px) rotate(${lerp(0, i ? 9 : -8, q) + Math.sin(t + i) * 1.2}deg)`; });
+      bolsillo.style.transform = `translateY(${(1 - C.salidaQuint(k(t, tIn + .3, tIn + 1.1))) * 40}px)`;
+      const ee = MG.entra(etiqueta, t, tIn + 1.0, { d: .7, dy: 50, escala0: 1, curva: 'salidaQuint', base: 6 });
+      MG.pon(etiqueta, 0, ee.y);
+    }
+  };
+});
+</script>
+</body></html>

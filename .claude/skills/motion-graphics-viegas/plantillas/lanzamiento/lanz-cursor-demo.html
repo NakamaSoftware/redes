@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-cursor-demo» · Viegas IA · Motion Lab · categoría Producto y SaaS
+     Demo de producto con cursor, al estilo de los vídeos de lanzamiento de SaaS: una ventana de app flotante en capas
+     (barra lateral, documento, panel de ajustes) con piezas que flotan delante a distinta profundidad (parallax). Un cursor
+     entra con frenada suave, hace clic en un interruptor (onda + muelle), pasa por encima del botón «Publicar» y aparece un
+     tooltip, hace clic, el botón carga y pasa a «Publicado» con ✓, entra una notificación y estalla un confeti determinista.
+     La cámara sigue al cursor con retardo (nunca se para) y entra con «zoom a través» en el botón para el cierre con logo.
+     Cambia "app" (nombre en la ventana), "documento" (título), "lineas" (texto del documento), "ajuste" (texto del interruptor),
+     "boton" / "boton2" (antes / después), "tooltip", "aviso" ({titulo, texto}), "cierre" (*palabra* = acento), "marca",
+     "logo" (ruta o "" = inicial), "fondo", "fondo2", "tinta", "acento", "duracion".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif; --mono:'JetBrains Mono',Consolas,monospace;
+  --fondo:#121014; --fondo2:#2A1A14; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87;
+  --tarjeta:#1A181D; --borde:rgba(255,255,255,.09); --mute:#9C968F; }
+html,body{ background:var(--fondo); }
+body{ -webkit-font-smoothing:antialiased; }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 108%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-style:normal; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:650 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.card{ background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02)),var(--tarjeta); border:1.5px solid var(--borde); border-radius:34px;
+  box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07); overflow:hidden; }
+.chip{ font:600 28px var(--fuente); letter-spacing:.12em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:14px 28px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.1); }
+
+.win{ border-radius:30px; }
+.win .top{ height:64px; display:flex; align-items:center; gap:12px; padding:0 26px; border-bottom:1.5px solid var(--borde); font:600 24px var(--fuente); color:var(--mute); }
+.win .top b{ width:16px; height:16px; border-radius:50%; background:rgba(255,255,255,.14); }
+.win .top span{ margin-left:16px; }
+.cuerpo{ display:flex; height:calc(100% - 66px); }
+.lat{ width:30%; border-right:1.5px solid var(--borde); padding:26px 20px; box-sizing:border-box; }
+.lat i{ display:block; height:20px; border-radius:8px; background:rgba(255,255,255,.07); margin:0 0 22px; }
+.lat i.on{ background:rgba(var(--halo),.35); }
+.doc{ flex:1; padding:34px 36px; box-sizing:border-box; position:relative; }
+.doc h2{ margin:0 0 22px; font:650 46px/1.1 var(--fuente); letter-spacing:-.03em; color:var(--tinta); }
+.doc p{ margin:0 0 14px; font:400 26px/1.45 var(--fuente); color:var(--mute); }
+.ph{ height:150px; border-radius:20px; margin-top:20px; background:linear-gradient(135deg, rgba(var(--halo),.55), rgba(var(--halo),.08) 60%, rgba(255,255,255,.04)); }
+.panel{ padding:28px; box-sizing:border-box; }
+.panel .t{ font:600 22px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--mute); margin-bottom:20px; }
+.fila{ display:flex; align-items:center; justify-content:space-between; gap:18px; font:500 28px var(--fuente); color:var(--tinta); }
+.sw{ width:88px; height:50px; border-radius:99px; position:relative; flex:none; background:rgba(255,255,255,.14); }
+.sw i{ position:absolute; top:5px; left:5px; width:40px; height:40px; border-radius:50%; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,.35); }
+.btn{ height:84px; border-radius:22px; display:grid; place-items:center; font:650 32px var(--fuente); color:#1A110D; background:var(--acento);
+  box-shadow:0 18px 50px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); white-space:nowrap; position:relative; overflow:hidden; }
+.btn .lbl{ position:absolute; inset:0; display:grid; place-items:center; }
+.spin{ width:36px; height:36px; border-radius:50%; border:5px solid rgba(26,17,13,.25); border-top-color:#1A110D; }
+.tip{ padding:16px 24px; border-radius:16px; background:var(--tinta); color:var(--fondo); font:600 26px var(--fuente); white-space:nowrap; box-shadow:0 16px 40px rgba(0,0,0,.4); }
+.tip:after{ content:''; position:absolute; left:50%; top:-10px; margin-left:-10px; border:10px solid transparent; border-top:0; border-bottom-color:var(--tinta); }
+.toast{ display:flex; gap:20px; align-items:center; padding:24px 28px; box-sizing:border-box; }
+.toast .ic{ width:64px; height:64px; border-radius:18px; background:var(--acento); display:grid; place-items:center; color:#1A110D; font:800 34px var(--fuente); flex:none; }
+.toast b{ display:block; font:650 30px var(--fuente); color:var(--tinta); letter-spacing:-.02em; }
+.toast span{ font:400 24px var(--fuente); color:var(--mute); }
+.cur{ width:56px; height:56px; filter:drop-shadow(0 6px 10px rgba(0,0,0,.5)); transform-origin:8px 6px; }
+.onda{ width:120px; height:120px; border-radius:50%; border:4px solid var(--acento); }
+.conf{ width:14px; height:26px; border-radius:4px; }
+.pild{ display:flex; gap:12px; align-items:center; padding:16px 22px; border-radius:99px; font:600 24px var(--fuente); color:var(--tinta); white-space:nowrap; }
+.pild i{ width:14px; height:14px; border-radius:50%; background:#7FD49B; box-shadow:0 0 14px #7FD49B; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#121014",
+  "fondo2": "#2A1A14",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "app": "Tu App · Editor",
+  "documento": "Lanzamiento de otoño",
+  "lineas": ["Todo listo para enseñarlo al mundo.", "Revisado por el equipo."],
+  "ajuste": "Visible para todos",
+  "boton": "Publicar",
+  "boton2": "Publicado ✓",
+  "tooltip": "Todo listo",
+  "aviso": { "titulo": "¡Ya está en línea!", "texto": "Tu proyecto se ha publicado" },
+  "cierre": "Lanza en *un clic*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'puntos', tamano: 44, intensidad: .3 }, halo: { fuerza: .22, x: 50, y: 55 } }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  // ---- cámara: encuadra (fx, fy) con zoom z; la escena nunca se para
+  const cam = (MG, fx, fy, z, rot = 0) => { MG.vista.style.transformOrigin = '0 0';
+    MG.vista.style.transform = `translate(${W / 2 - fx * z}px,${H / 2 - fy * z}px) scale(${z}) rotate(${rot}deg)`; };
+
+  // maquetación: ventana grande + panel de ajustes delante + notificación arriba
+  const L = VERT ? { win: [90, 420, 900, 760], pan: [170, 1010, 740, 300], toast: [130, 290, 820, 116], pild: [560, 1370] }
+                 : { win: [250, 150, 1000, 760], pan: [1130, 380, 560, 320], toast: [1110, 150, 600, 116], pild: [330, 860] };
+  const win = MG.el(`<div class="card win" style="width:${L.win[2]}px;height:${L.win[3]}px"><div class="top"><b></b><b></b><b></b><span>${esc(P.app)}</span></div>
+    <div class="cuerpo"><div class="lat"><i class="on" style="width:80%"></i><i style="width:64%"></i><i style="width:72%"></i><i style="width:50%"></i><i style="width:68%"></i></div>
+    <div class="doc"><h2>${esc(P.documento)}</h2>${(P.lineas || []).map((l) => `<p>${esc(l)}</p>`).join('')}<div class="ph"></div></div></div></div>`);
+  const pan = MG.el(`<div class="card panel" style="width:${L.pan[2]}px;height:${L.pan[3]}px"><div class="t">Ajustes</div>
+    <div class="fila"><span>${esc(P.ajuste)}</span><div class="sw"><i></i></div></div><div class="btn" style="margin-top:34px"><span class="lbl l1">${esc(P.boton)}</span><span class="lbl l2"><span class="spin"></span></span><span class="lbl l3">${esc(P.boton2)}</span></div></div>`);
+  const sw = pan.querySelector('.sw'), btn = pan.querySelector('.btn'), l1 = pan.querySelector('.l1'), l2 = pan.querySelector('.l2'), l3 = pan.querySelector('.l3');
+  const pild = MG.el(`<div class="card pild"><i></i>3 personas editando</div>`);
+  const toast = MG.el(`<div class="card toast" style="width:${L.toast[2]}px"><div class="ic">✓</div><div><b>${esc(P.aviso.titulo)}</b><span>${esc(P.aviso.texto)}</span></div></div>`);
+  const tip = MG.el(`<div class="tip">${esc(P.tooltip)} ✓</div>`);
+  const ondas = [0, 1].map(() => MG.el(`<div class="onda"></div>`));
+  // confeti determinista (semilla fija)
+  let sem = 7; const rnd = () => (sem = (sem * 16807) % 2147483647) / 2147483647;
+  const paleta = ['var(--acento)', '#F4EDE4', '#F2C58A', '#8AA8FF', '#7FD49B'];
+  const conf = Array.from({ length: 46 }, () => ({ el: MG.el(`<div class="conf" style="background:${paleta[Math.floor(rnd() * 5)]}"></div>`),
+    a: -Math.PI / 2 + (rnd() - .5) * 2.4, v: 700 + rnd() * 900, g: 1500 + rnd() * 600, r: rnd() * 720 - 360, d: rnd() * .12 }));
+  const cur = MG.el(`<svg class="cur" viewBox="0 0 28 28"><path d="M5 3 L5 22 L10.5 17 L14 25 L17.5 23.5 L14 15.8 L21 15.8 Z" fill="#fff" stroke="#111" stroke-width="1.6" stroke-linejoin="round"/></svg>`);
+  const logo = MG.el(logoHTML());
+  const cie = MG.texto(md(P.cierre), 'tit'); const anchoC = VERT ? W - 160 : 1400; cie.style.width = anchoC + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+
+  const tSw = 2.5, tHov = 3.7, tClk = 4.45, tOk = 5.25, tZ = D - 2.5, tC = tZ + .7;
+  let G = null;
+  return (t) => {
+    if (!G) { const swR = [L.pan[0] + 28 + (L.pan[2] - 56) - 44, L.pan[1] + 28 + 42 + 30], bR = [L.pan[0] + L.pan[2] / 2, L.pan[1] + 28 + 42 + 20 + 50 + 34 + 42];
+      G = { sw: swR, bt: bR }; }
+    // recorrido del cursor: fuera → interruptor → botón (hover) → clic → se aparta
+    const WP = [[0, VERT ? 1150 : 1900, VERT ? 1750 : 1150], [tSw - .05, G.sw[0], G.sw[1]], [tHov, G.bt[0] + 60, G.bt[1] + 10], [tClk - .05, G.bt[0] + 20, G.bt[1]],
+      [tOk + .9, G.bt[0] + 200, G.bt[1] + 150], [D, G.bt[0] + 240, G.bt[1] + 190]];
+    const curP = (u) => { let i = 0; while (i < WP.length - 2 && u > WP[i + 1][0]) i++; const a = WP[i], b = WP[i + 1];
+      const s0 = i === 0 ? 1.2 : a[0] + .15, e = [C.salidaQuint, C.afterEffects75, C.salidaCubica, C.afterEffects75, C.lineal][i](k(u, s0, b[0]));
+      // arco suave entre puntos
+      return [lerp(a[1], b[1], e) + Math.sin(e * Math.PI) * 40, lerp(a[2], b[2], e) - Math.sin(e * Math.PI) * 60]; };
+    const [cx, cy] = curP(t), [qx, qy] = curP(t - DT);
+    const clic = (tc) => { const u = t - tc; return u > -.08 && u < .2 ? 1 - .14 * Math.sin(Math.PI * k(u, -.08, .2)) : 1; };
+    MG.pon(cur, cx - 8, cy - 6, clic(tSw) * clic(tClk)); cur.style.opacity = t > 1.2 && t < tC ? 1 : 0;
+    MG.desenfoca(cur, Math.abs(cx - qx) / DT * MB * .7, Math.abs(cy - qy) / DT * MB * .7);
+
+    // cámara: sigue al cursor con retardo + deriva; «zoom a través» del botón
+    const [dx, dy] = curP(t - .45), seg = .22 * k(t, 1.6, 2.4);
+    let fx = lerp(W / 2, dx, seg) + Math.sin(t * .5) * 9, fy = lerp(H / 2, dy, seg) + Math.cos(t * .35) * 7;
+    let z = lerp(1, 1.12, C.afterEffects(k(t, 0, tZ)));
+    const za = C.salidaCubica(k(t, tZ - .6, tZ + .15)), zt = C.entradaCubica(k(t, tZ, tC));
+    if (t < tC) { fx = lerp(fx, G.bt[0], za); fy = lerp(fy, G.bt[1], za); cam(MG, fx, fy, z * lerp(1, 1.4, za) * (1 + 11 * zt)); }
+    else cam(MG, W / 2, H / 2, lerp(1.22, 1, C.salidaQuint(k(t, tC - .05, tC + 1.3))) * lerp(1, 1.04, k(t, tC, D)));
+    MG.halo(50 + Math.sin(t * .4) * 12, 55 + Math.cos(t * .3) * 8);
+    const vis = t < tC ? 1 : 0;
+    // parallax: las capas delanteras se mueven más que la ventana
+    const px = (f) => [Math.sin(t * .6) * 14 * f, Math.cos(t * .5) * 10 * f];
+
+    const ew = MG.entra(win, t, .2, { d: .7, dy: 260, escala0: .9, curva: 'salidaQuint', base: 8 }); const [w1, w2] = px(.4);
+    MG.pon(win, L.win[0] + ew.x + w1, L.win[1] + ew.y + w2, ew.s); win.style.transformOrigin = '50% 100%';
+    const ep = MG.entra(pan, t, .7, { d: .6, dx: VERT ? 0 : 240, dy: VERT ? 240 : 0, escala0: .85, curva: 'rebote', base: 8 }); const [p1, p2] = px(1.2);
+    MG.pon(pan, L.pan[0] + ep.x + p1, L.pan[1] + ep.y + p2, ep.s);
+    const ei = MG.entra(pild, t, 1.0, { d: .55, dx: -160, dy: 0, escala0: .7, curva: 'reboteFuerte', base: 6 }); const [i1, i2] = px(1.6);
+    MG.pon(pild, L.pild[0] + ei.x + i1, L.pild[1] + ei.y + i2, ei.s);
+    G.sw = [L.pan[0] + p1 + L.pan[2] - 28 - 44, L.pan[1] + p2 + 28 + 42 + 30]; G.bt = [L.pan[0] + p1 + L.pan[2] / 2, L.pan[1] + p2 + 28 + 42 + 50 + 34 + 42];
+    // interruptor
+    const ps = C.rebote(k(t, tSw, tSw + .45));
+    sw.querySelector('i').style.transform = `translateX(${38 * ps}px)`; sw.style.background = `color-mix(in srgb, var(--acento) ${Math.min(100, ps * 100)}%, rgba(255,255,255,.14))`;
+    // botón: hover → clic (aplasta) → carga → publicado (verde)
+    const hov = k(t, tHov - .1, tHov + .2) * (1 - k(t, tClk, tClk + .1));
+    const apl = clic(tClk) < 1 ? 1 - (1 - clic(tClk)) * .5 : 1, ok = C.rebote(k(t, tOk, tOk + .5));
+    btn.style.transform = `scale(${(1 + .03 * hov) * apl * (1 + .06 * Math.sin(Math.PI * k(t, tOk, tOk + .35)))})`;
+    btn.style.background = `color-mix(in srgb, #7FD49B ${Math.min(100, ok * 100)}%, var(--acento))`;
+    const sCarga = k(t, tClk + .05, tClk + .25) * (1 - k(t, tOk - .1, tOk + .05));
+    l1.style.opacity = 1 - k(t, tClk, tClk + .15); l1.style.transform = `translateY(${-40 * C.entradaCubica(k(t, tClk, tClk + .2))}px)`;
+    l2.style.opacity = sCarga; l2.querySelector('.spin').style.transform = `rotate(${t * 540}deg)`;
+    l3.style.opacity = k(t, tOk, tOk + .15); l3.style.transform = `translateY(${40 * (1 - C.salidaQuint(k(t, tOk, tOk + .4)))}px)`;
+    // tooltip (entra con muelle, sale inversa)
+    const et = C.rebote(k(t, tHov, tHov + .4)), st = C.entradaCubica(k(t, tClk + .1, tClk + .35)), ts = Math.max(0, et * (1 - st));
+    MG.pon(tip, G.bt[0] - tip.offsetWidth / 2, G.bt[1] + 42 + 22 - 20 * (1 - et) + 30 * st, .6 + .4 * ts); tip.style.opacity = Math.min(1, ts * 1.5) * vis; tip.style.transformOrigin = '50% 0';
+    // ondas de clic
+    [tSw, tClk].forEach((tc, i) => { const u = k(t, tc, tc + .55), [ox, oy] = i ? G.bt : G.sw;
+      MG.pon(ondas[i], ox - 60, oy - 60, .2 + 1.4 * C.salidaCubica(u)); ondas[i].style.opacity = u > 0 && u < 1 ? (1 - u) * vis : 0; });
+    // notificación
+    const en = MG.entra(toast, t, tOk + .25, { d: .6, dy: -200, escala0: .9, curva: 'rebote', base: 8 }); const [n1, n2] = px(1.8);
+    MG.pon(toast, L.toast[0] + en.x + n1, L.toast[1] + en.y + n2, en.s);
+    // confeti
+    conf.forEach((c, i) => { const u = t - (tOk + .05 + c.d); if (u <= 0 || !vis) { c.el.style.opacity = 0; return; }
+      const x = G.bt[0] + Math.cos(c.a) * c.v * u, y = G.bt[1] + Math.sin(c.a) * c.v * u + .5 * c.g * u * u * .9 - 0;
+      MG.pon(c.el, x, y, 1, `rotate(${c.r * u + i * 30}deg)`); c.el.style.opacity = Math.max(0, 1 - u / 1.6); });
+    [win, pan, pild, toast].forEach((el) => { if (!vis) el.style.opacity = 0; });
+
+    // cierre
+    const bloque = 150 + 60 + cie.offsetHeight + 50 + 60, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - anchoC) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .55 + cie.trozos.length * .08, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+});
+</script>
+</body></html>

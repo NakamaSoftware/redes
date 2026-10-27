@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla genérica «gen-lower-third» · Cualquier profesional · Viegas IA · Motion Lab
+     Rótulo con nombre y profesión (fondo transparente por defecto, para poner encima de tu vídeo): un punto de acento estalla,
+     se estira en barra (salidaExpo), la placa de cristal se abre detrás con desenfoque suave, el nombre sube y la profesión entra
+     0,12 s después; al salir, todo se recoge con la curva inversa. Abajo a la izquierda, lejos de la cara.
+     Cambia "nombre", "profesion", "detalle" (p. ej. @usuario o ciudad), "posicion" (abajo-izquierda|abajo-derecha|arriba-izquierda), "transparente".
+     Formato: #16x9 (por defecto) · #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.lt{ display:flex; align-items:stretch; }
+.lt .barra{ width:14px; border-radius:8px; background:var(--acento); box-shadow:0 0 30px rgba(var(--halo),.7); transform-origin:50% 100%; }
+.lt .placa{ overflow:hidden; margin-left:18px; border-radius:20px; background:rgba(var(--fondo-rgb),.62); backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px); border:1px solid rgba(var(--claro),.14); }
+.lt .in{ padding:26px 40px 26px 34px; white-space:nowrap; }
+.lt b{ display:block; font:600 64px/1.05 var(--fuente); letter-spacing:-.03em; color:var(--texto); }
+.lt small{ display:block; font:500 34px var(--fuente); color:var(--brillo, var(--acento)); margin-top:6px; }
+.lt i{ display:block; font:500 24px var(--mono); font-style:normal; letter-spacing:.12em; color:var(--mute); margin-top:12px; text-transform:uppercase; }
+.punto{ width:40px; height:40px; margin:-20px 0 0 -20px; border-radius:50%; background:var(--acento); box-shadow:0 0 40px var(--acento); }
+.muestra{ background:radial-gradient(60% 70% at 62% 40%, #2a3350, #0b0f1c 70%); }
+.muestra .s{ position:absolute; width:560px; height:760px; border-radius:280px 280px 60px 60px; background:linear-gradient(180deg,#34446e,#161e36); }
+.muestra .s::before{ content:''; position:absolute; left:50%; top:-250px; width:300px; height:300px; margin-left:-150px; border-radius:50%; background:#34446e; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "16x9",
+  "duracion": 6,
+  "paleta": "noche",
+  "acento": "",
+  "transparente": true,
+  "verMuestra": false,
+  "nombre": "Dra. Carmen Ruiz",
+  "profesion": "Fisioterapeuta deportiva",
+  "detalle": "@fisiocarmen · Bilbao",
+  "posicion": "abajo-izquierda"
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: P.transparente && !P.verMuestra ? 'transparente' : 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - .9;
+  if (P.verMuestra) { const m = MG.el(`<div class="muestra" style="width:${W}px;height:${H}px"><div class="s"></div></div>`); MG.pon(m.firstChild, W * (VERT ? .5 : .62) - 280, H - 640); }
+  document.querySelectorAll('.n-blob').forEach((b) => { b.style.display = P.transparente ? 'none' : ''; });
+  const lt = MG.el(`<div class="lt"><span class="barra"></span><div class="placa"><div class="in"><b>${P.nombre}</b><small>${P.profesion}</small>${P.detalle ? `<i>${P.detalle}</i>` : ''}</div></div></div>`);
+  const barra = lt.querySelector('.barra'), placa = lt.querySelector('.placa'), [nb, ns, ni] = [lt.querySelector('b'), lt.querySelector('small'), lt.querySelector('i')];
+  const punto = MG.el(`<div class="punto"></div>`);
+  let L;
+  return (t) => {
+    if (!L) { const m = VERT ? 70 : 110, w = lt.offsetWidth, h = lt.offsetHeight; L = { w, h, pw: placa.offsetWidth,
+      x: /derecha/.test(P.posicion) ? W - m - w : m, y: /arriba/.test(P.posicion) ? (VERT ? 260 : 90) : H - h - (VERT ? 560 : 120) }; }
+    MG.camara(t, 1, 1.02);
+    if (!P.transparente) N.vivo(t, 1, 1.02);
+    const sal = C.entradaCubica(k(t, fin, fin + .45));
+    // 1) punto que estalla  2) barra que crece  3) placa que se abre  4) textos escalonados  5) salida inversa
+    const pp = N.pop(t, .1, .45); MG.pon(punto, L.x + 7, L.y + L.h, pp * (1 - k(t, .45, .6))); punto.style.opacity = 1 - k(t, .5, .6);
+    barra.style.transform = `scaleY(${C.salidaExpo(k(t, .4, .9)) * (1 - C.entradaCubica(k(t, fin + .2, fin + .55)))})`;
+    const ab = C.salidaQuint(k(t, .65, 1.25)) * (1 - sal);
+    placa.style.width = (L.pw * ab) + 'px'; placa.style.opacity = ab > .01 ? 1 : 0;
+    [nb, ns, ni].filter(Boolean).forEach((el, i) => { const e = MG.entra(el, t, .8 + i * .12, { dy: 50, curva: 'salidaQuint', d: .55 }); const s2 = C.entradaCubica(k(t, fin - .1 + i * .04, fin + .25 + i * .04));
+      el.style.transform = `translateY(${e.y - s2 * 30}px)`; el.style.opacity = Math.min(+el.style.opacity, 1 - s2); });
+    MG.pon(lt, L.x, L.y);
+  };
+});
+</script>
+</body></html>

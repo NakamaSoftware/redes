@@ -1,0 +1,217 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-ruta-mundo» · Viegas IA · Motion Lab
+     Mapa del mundo de puntos (generado aquí, sin descargas) que se enciende desde la primera ciudad; una ruta en arco
+     se dibuja de ciudad en ciudad con un avión que la recorre (desenfoque de movimiento y estela), los pines caen con
+     rebote al llegar, los kilómetros cuentan, la cámara sigue al avión, se aleja para ver la ruta entera y entra con
+     «zoom a través» en el último destino hasta el cierre con logo, titular y marca.
+     Cambia "ciudades" ([{nombre, lon, lat}], 2–5), "etiqueta", "unidad", "titular" (*palabra* = acento), "marca",
+     "logo" (ruta o "" = inicial), colores "fondo", "fondo2", "tinta", "acento".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *, .capa > *{ position:absolute; left:0; top:0; }
+.capa{ position:absolute; left:0; top:0; width:var(--ancho); height:var(--alto); }
+em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+svg.ruta{ overflow:visible; }
+.pin{ width:56px; height:76px; transform-origin:28px 76px; }
+.anillo{ width:140px; height:140px; border-radius:50%; border:3px solid var(--acento); }
+.ciudad{ font:600 34px var(--fuente); color:var(--tinta); white-space:nowrap; padding:12px 24px; border-radius:99px;
+  background:rgba(20,18,16,.72); border:1.5px solid rgba(var(--tintaRgb),.16); backdrop-filter:blur(10px); box-shadow:0 14px 40px rgba(0,0,0,.4); }
+.avion{ width:64px; height:64px; margin:-32px 0 0 -32px; filter:drop-shadow(0 0 16px rgba(var(--halo),.9)); }
+.panel{ display:flex; align-items:center; gap:22px; padding:22px 34px; border-radius:30px; background:rgba(var(--tintaRgb),.06); border:1.5px solid rgba(var(--tintaRgb),.14);
+  backdrop-filter:blur(14px); white-space:nowrap; }
+.panel small{ font:600 26px var(--fuente); letter-spacing:.18em; text-transform:uppercase; color:var(--acento); }
+.panel b{ font:700 56px var(--fuente); letter-spacing:-.03em; color:var(--tinta); font-variant-numeric:tabular-nums; }
+.panel span{ font:500 30px var(--fuente); color:rgba(var(--tintaRgb),.6); }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "ciudades": [
+    { "nombre": "Madrid", "lon": -3.7, "lat": 40.4 },
+    { "nombre": "Nueva York", "lon": -74.0, "lat": 40.7 },
+    { "nombre": "Ciudad de México", "lon": -99.1, "lat": 19.4 },
+    { "nombre": "Buenos Aires", "lon": -58.4, "lat": -34.6 }
+  ],
+  "etiqueta": "Ruta",
+  "unidad": "km",
+  "titular": "Llegamos a *todo el mundo*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+// continentes simplificados (lon, lat): basta para un mapa de puntos
+const TIERRA = [
+  [[-168,66],[-162,70],[-140,70],[-120,72],[-95,72],[-80,74],[-62,66],[-55,52],[-66,45],[-70,42],[-76,35],[-81,31],[-80,25],[-84,30],[-90,29],[-97,26],[-97,21],[-92,18],[-87,21],[-88,15],[-83,9],[-79,8],[-85,11],[-92,15],[-105,20],[-110,24],[-112,30],[-117,32],[-124,40],[-124,48],[-133,56],[-150,60],[-160,58],[-165,62]],
+  [[-55,60],[-42,60],[-20,70],[-18,80],[-60,82],[-70,77],[-55,70]],
+  [[-80,9],[-75,11],[-62,11],[-50,0],[-35,-5],[-39,-15],[-48,-26],[-58,-35],[-65,-42],[-68,-55],[-74,-52],[-73,-40],[-71,-30],[-70,-18],[-76,-14],[-81,-5],[-80,0]],
+  [[-10,36],[-9,43],[-2,44],[-4,48],[2,51],[5,53],[8,57],[5,62],[14,68],[20,70],[30,71],[40,68],[45,60],[40,48],[30,45],[28,41],[23,37],[20,40],[15,38],[12,44],[8,44],[3,43],[-1,37],[-6,36]],
+  [[26,41],[36,36],[35,31],[44,13],[52,16],[58,22],[62,25],[68,24],[72,20],[77,8],[80,15],[88,22],[92,21],[98,16],[103,2],[105,10],[109,12],[108,21],[118,24],[122,31],[120,38],[126,38],[129,35],[131,43],[140,48],[142,54],[135,55],[140,60],[155,60],[162,58],[165,62],[180,66],[180,72],[140,73],[110,77],[80,73],[68,69],[55,68],[45,66],[40,66],[30,70],[40,48],[30,45]],
+  [[-17,21],[-16,12],[-8,4],[5,5],[9,4],[9,-1],[12,-6],[13,-12],[12,-18],[15,-27],[18,-34],[22,-34],[28,-33],[33,-27],[35,-20],[40,-15],[40,-10],[39,-4],[43,2],[51,11],[44,11],[38,18],[33,27],[32,31],[20,32],[10,37],[0,36],[-6,35],[-10,30],[-13,27]],
+  [[114,-22],[122,-18],[130,-12],[137,-12],[142,-11],[146,-19],[153,-26],[150,-37],[141,-38],[135,-35],[129,-32],[115,-34]],
+  [[130,31],[135,34],[140,36],[142,40],[141,45],[145,44],[140,41],[137,37],[132,34]],
+  [[-5,50],[1,51],[-1,55],[-3,58],[-6,57],[-5,54]],
+  [[44,-25],[47,-25],[50,-15],[49,-12],[44,-17]],
+  [[95,5],[106,-6],[115,-8],[120,-9],[125,-8],[131,-3],[141,-3],[150,-10],[141,-9],[132,-4],[120,1],[117,7],[108,2],[100,2]],
+  [[172,-34],[178,-38],[174,-41],[167,-46],[171,-44]],
+];
+const dentro = (x, y, pol) => { let d = false; for (let i = 0, j = pol.length - 1; i < pol.length; j = i++) { const [xi, yi] = pol[i], [xj, yj] = pol[j];
+  if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) d = !d; } return d; };
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const capa = document.createElement('div'); capa.className = 'capa'; document.body.appendChild(capa);
+  // proyección equirectangular
+  const MW = 3400, LAT0 = 82, LAT1 = -58, MH = MW * (LAT0 - LAT1) / 360;
+  const pr = (lon, lat) => [(lon + 180) / 360 * MW, (LAT0 - lat) / (LAT0 - LAT1) * MH];
+  const ciudades = (P.ciudades || []).slice(0, 5).map((c) => ({ ...c, p: pr(Number(c.lon), Number(c.lat)) }));
+  // puntos del mapa en un lienzo
+  const cv = document.createElement('canvas'); cv.width = MW; cv.height = MH; MG.mundo.appendChild(cv); cv.style.position = 'absolute';
+  const ctx = cv.getContext('2d'), PASO = 17, puntos = [];
+  for (let y = PASO / 2; y < MH; y += PASO) for (let x = PASO / 2; x < MW; x += PASO) {
+    const lon = x / MW * 360 - 180, lat = LAT0 - y / MH * (LAT0 - LAT1);
+    if (TIERRA.some((pol) => dentro(lon, lat, pol))) puntos.push([x, y]);
+  }
+  const rgbT = getComputedStyle(document.documentElement).getPropertyValue('--tintaRgb').trim() || '244,237,228';
+  const rgbA = getComputedStyle(document.documentElement).getPropertyValue('--halo').trim() || '217,119,87';
+  // ruta: arcos entre ciudades
+  const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg'); svg.setAttribute('class', 'ruta'); svg.setAttribute('width', MW); svg.setAttribute('height', MH);
+  svg.style.position = 'absolute'; MG.mundo.appendChild(svg);
+  const tramos = [];
+  for (let i = 0; i < ciudades.length - 1; i++) {
+    const [x1, y1] = ciudades[i].p, [x2, y2] = ciudades[i + 1].p, dx = x2 - x1, dy = y2 - y1, len = Math.hypot(dx, dy);
+    const s = (dx >= 0 ? -1 : 1), mx = (x1 + x2) / 2 + dy * .28 * -s * 0 - Math.abs(dy) * 0, my = (y1 + y2) / 2 - len * .32;
+    const cxp = (x1 + x2) / 2 + (dy / len) * len * .25 * s, cyp = (y1 + y2) / 2 - (dx / len) * len * .25 * s;
+    const d = `M${x1} ${y1} Q${cxp} ${cyp} ${x2} ${y2}`;
+    const g = document.createElementNS(NS, 'path'); g.setAttribute('d', d); g.setAttribute('fill', 'none'); g.style.stroke = `rgba(${rgbA},.25)`; g.setAttribute('stroke-width', 16); g.setAttribute('stroke-linecap', 'round'); g.style.filter = 'blur(6px)'; svg.appendChild(g);
+    const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none'); p.style.stroke = 'var(--acento)'; p.setAttribute('stroke-width', 5); p.setAttribute('stroke-linecap', 'round'); svg.appendChild(p);
+    const L = p.getTotalLength(); [g, p].forEach((q) => { q.style.strokeDasharray = L; q.style.strokeDashoffset = L; });
+    // km reales (gran círculo)
+    const R = 6371, rad = Math.PI / 180, a = ciudades[i], b = ciudades[i + 1];
+    const h = Math.sin((b.lat - a.lat) * rad / 2) ** 2 + Math.cos(a.lat * rad) * Math.cos(b.lat * rad) * Math.sin((b.lon - a.lon) * rad / 2) ** 2;
+    tramos.push({ p, g, L, km: 2 * R * Math.asin(Math.sqrt(h)) });
+  }
+  const pins = ciudades.map((c, i) => ({
+    anillo: MG.el(`<div class="anillo"></div>`),
+    pin: MG.el(`<svg class="pin" viewBox="0 0 56 76"><path d="M28 74 C28 74 4 46 4 28 A24 24 0 0 1 52 28 C52 46 28 74 28 74Z" fill="${i === ciudades.length - 1 ? 'var(--acento)' : 'var(--tinta)'}"/><circle cx="28" cy="28" r="10" fill="var(--fondo)"/></svg>`),
+    nombre: MG.el(`<div class="ciudad">${esc(c.nombre)}</div>`),
+  }));
+  const avion = MG.el(`<svg class="avion" viewBox="0 0 64 64"><path d="M60 32 L38 28 L24 6 L18 6 L26 28 L12 30 L6 22 L2 22 L6 32 L2 42 L6 42 L12 34 L26 36 L18 58 L24 58 L38 36 Z" fill="var(--tinta)"/></svg>`);
+  const panel = MG.el(`<div class="panel"><small>${esc(P.etiqueta)}</small><b class="km">0</b><span>${esc(P.unidad)} · <i class="nc">1</i>/${ciudades.length}</span></div>`, capa);
+  const kmEl = panel.querySelector('.km'), ncEl = panel.querySelector('.nc');
+
+  const logo = MG.el(logoHTML(), capa);
+  const anchoTit = VERT ? W - 160 : 1500;
+  const tit = MG.texto(md(P.titular), 'tit'); capa.appendChild(tit); tit.style.width = anchoTit + 'px'; tit.style.fontSize = (VERT ? 116 : 136) + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`, capa);
+
+  // tiempos
+  const tR0 = 1.1, tR1 = D - 4.3, nT = tramos.length, tF = tR1 + .9, tC = D - 2.4;
+  const tramo = (t) => { const x = k(t, tR0, tR1) * nT, i = Math.min(nT - 1, Math.floor(x)); return { i, u: x >= nT ? 1 : x - i }; };
+  const llegada = (j) => j === 0 ? .55 : tR0 + j * (tR1 - tR0) / nT;
+  const posAvion = (t) => { const { i, u } = tramo(t), e = C.afterEffects(u), q = tramos[i].p.getPointAtLength(tramos[i].L * e); return [q.x, q.y, i, e]; };
+  const xs = ciudades.map((c) => c.p[0]), ys = ciudades.map((c) => c.p[1]);
+  tramos.forEach((tr) => { for (let i = 0; i <= 20; i++) { const q = tr.p.getPointAtLength(tr.L * i / 20); xs.push(q.x); ys.push(q.y); } });
+  ys.push(Math.min(...ys) - 80);   // sitio para los pines
+  const bx = (Math.min(...xs) + Math.max(...xs)) / 2, by = (Math.min(...ys) + Math.max(...ys)) / 2;
+  const zFit = Math.min(1.4, (W - (VERT ? 400 : 700)) / (Math.max(...xs) - Math.min(...xs) + 1), (H * (VERT ? .42 : .52)) / (Math.max(...ys) - Math.min(...ys) + 1));
+  return (t) => {
+    // mapa de puntos: se enciende como una onda desde la primera ciudad; brillo cerca del avión
+    const [ax, ay, ti, te] = posAvion(t), [o0x, o0y] = ciudades[0].p, onda = C.salidaCubica(k(t, 0, 1.6)) * 3800;
+    ctx.clearRect(0, 0, MW, MH);
+    for (const [x, y] of puntos) {
+      const d0 = Math.hypot(x - o0x, y - o0y), a = k(onda - d0, 0, 260); if (a <= 0) continue;
+      const dA = Math.hypot(x - ax, y - ay), cerca = t > tR0 - .2 && t < tF ? Math.max(0, 1 - dA / 260) : 0;
+      ctx.fillStyle = cerca > .02 ? `rgba(${rgbA},${(.25 + .6 * cerca) * a})` : `rgba(${rgbT},${.2 * a})`;
+      ctx.beginPath(); ctx.arc(x, y, 3.3 + cerca * 2.2, 0, 6.2832); ctx.fill();
+    }
+    // ruta dibujada hasta el avión
+    tramos.forEach((tr, j) => { const e = j < ti ? 1 : j > ti ? 0 : te; const off = tr.L * (1 - e); tr.p.style.strokeDashoffset = off; tr.g.style.strokeDashoffset = off; });
+    const [bxA, byA] = posAvion(t - DT), [ax2, ay2] = posAvion(t + DT), ang = Math.atan2(ay2 - byA, ax2 - bxA) * 180 / Math.PI;
+    const vel = Math.hypot(ax - bxA, ay - byA) / DT, enVuelo = t > tR0 - .1 && t < tR1 + .1;
+    avion.style.opacity = enVuelo ? Math.min(1, k(t, tR0 - .1, tR0 + .2)) * (1 - k(t, tR1 - .05, tR1 + .1)) : 0;
+    avion.style.transform = `translate(${ax}px,${ay}px) rotate(${ang}deg) scale(${1 + .25 * Math.sin(te * Math.PI)})`;
+    MG.desenfoca(avion, Math.min(12, vel * MB * .5), 0);
+    // pines que caen con rebote, anillo que late y nombre
+    pins.forEach((q, j) => { const [x, y] = ciudades[j].p, t0 = llegada(j);
+      const e = MG.entra(q.pin, t, t0, { d: .55, dy: -160, escala0: .5, curva: 'reboteFuerte', base: 5 });
+      q.pin.style.transform = `translate(${x - 28}px,${y - 76 + e.y}px) scale(${e.s})`;
+      const r = k(t, t0 + .1, t0 + 1.1); q.anillo.style.opacity = t > t0 ? (1 - r) * .9 : 0;
+      q.anillo.style.transform = `translate(${x - 70}px,${y - 70}px) scale(${.2 + r * 1.3})`;
+      const en = MG.entra(q.nombre, t, t0 + .2, { d: .5, dx: 0, dy: 30, curva: 'salidaQuint', base: 4 });
+      const izq = j % 2 === 1 ? -q.nombre.offsetWidth - 46 : 46;
+      MG.pon(q.nombre, x + izq, y - 26 + en.y); });
+    // contador de km y ciudades
+    let km = 0; tramos.forEach((tr, j) => { km += tr.km * (j < ti ? 1 : j > ti ? 0 : te); }); if (t < tR0) km = 0;
+    kmEl.textContent = Math.round(km).toLocaleString('es-ES'); ncEl.textContent = 1 + ciudades.filter((c, j) => j > 0 && t >= llegada(j)).length;
+    const ep = MG.entra(panel, t, .3, { d: .7, dy: -80, curva: 'salidaQuint', base: 6 });
+    MG.pon(panel, (W - panel.offsetWidth) / 2, (VERT ? 290 : 70) + ep.y); panel.style.opacity = Math.min(1, ep.p * 1.8) * (1 - k(t, tC - .5, tC - .2));
+
+    // cámara: sigue al avión, se aleja a la ruta completa y entra con «zoom a través» en el destino
+    const ua = C.afterEffects75(k(t, tR1 - .15, tF)), zt = C.entradaCubica(k(t, tC - .6, tC + .05));
+    const [lx, ly] = ciudades[ciudades.length - 1].p;
+    let fx = lerp(lerp(o0x, ax, C.salidaCubica(k(t, .4, tR0 + .3))), bx, ua), fy = lerp(lerp(o0y, ay, C.salidaCubica(k(t, .4, tR0 + .3))), by, ua);
+    fx = lerp(fx, lx, zt); fy = lerp(fy, ly, zt);
+    const zV = (VERT ? 1.15 : 1.25) + .08 * Math.sin(t * .7), z0 = lerp(VERT ? 1.5 : 1.6, zV, C.salidaQuint(k(t, 0, 1.4)));
+    const z = lerp(z0, zFit * lerp(1, 1.06, k(t, tF, tC)), ua) * (1 + 7 * zt);
+    MG.vista.style.transformOrigin = '0 0';
+    MG.vista.style.transform = `translate(${W / 2 + Math.sin(t * .5) * 12}px, ${H * lerp(VERT ? .53 : .55, VERT ? .54 : .6, ua) + Math.cos(t * .4) * 9}px) scale(${z}) translate(${-fx}px, ${-fy}px)`;
+    MG.vista.style.opacity = 1 - C.salidaCubica(k(t, tC - .2, tC + .15));
+    MG.desenfoca(MG.vista, zt * 12, zt * 12);
+
+    // cierre
+    const vis = t > tC - .1;
+    [logo, tit, marca].forEach((e) => { e.style.visibility = vis ? 'visible' : 'hidden'; });
+    const zc = C.salidaQuint(k(t, tC - .1, tC + 1.3));
+    const bloque = 150 + 60 + tit.offsetHeight + 60 + 50, y0 = (H - bloque) / 2, sc = lerp(1.25, 1, zc) * lerp(1, 1.04, k(t, tC, D));
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s * sc, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(tit, (W - anchoTit) / 2, y0 + 210, sc);
+    tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .07, { d: .6, dy: 90, escala0: 1, curva: 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + tit.trozos.length * .07, { d: .6, dy: 40, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 210 + tit.offsetHeight + 60 + em.y);
+  };
+});
+</script>
+</body></html>

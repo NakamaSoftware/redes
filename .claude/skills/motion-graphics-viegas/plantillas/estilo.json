@@ -1,0 +1,10 @@
+{
+  "marca": "Viegas Estudio",
+  "colores": { "fondo": "#0D0C0F", "rejilla": "#1A181C", "acento": "#D97757", "acento2": "#E78F72", "texto": "#F4F2EE", "mute": "#A39F98", "tarjeta": "#18171B" },
+  "fuentes": { "titulos": "SF Compact Display Bold", "texto": "SF Compact Display Semibold", "codigo": "Consolas" },
+  "curva_por_defecto": "rebote",
+  "escalonado_s": [0.05, 0.3],
+  "zoom_camara": [1.0, 1.1],
+  "desenfoque_movimiento": "sigma = |v| / 160",
+  "zonas_libres": { "subtitulos_px": 180, "suscribete": "centro abajo" }
+}

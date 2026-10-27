@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-chat-ia» · Viegas IA · Motion Lab
+     Conversación con una IA al estilo de la interfaz de ChatGPT/Claude, para Reels y vídeos de YouTube que hablan de prompts:
+     saludo en el centro, la pregunta se escribe letra a letra en la barra (con ritmo de tecleo, nunca lineal), se envía y sube
+     como burbuja gris a la derecha con un muelle suave; aparece «Pensando…» con un punto que late y un barrido de brillo; la
+     respuesta se escribe en streaming PALABRA A PALABRA con el degradado de ChatGPT (cada palabra entra con opacidad 0→1 y un
+     leve desenfoque gaussiano, así el final de la frase es un degradado que se va llenando), con párrafos, viñetas, negritas
+     y un bloque de código opcional. La cámara hace un zoom lento hacia la línea que se está escribiendo y el chat se desplaza
+     solo como en la app; las palabras clave se resaltan con un rotulador de color que se dibuja.
+     Cambia "modelo" (nombre de la IA), "icono" ("claude", "chatgpt", ruta a SVG/PNG o "" = inicial), "tema" ("oscuro" | "claro"),
+     "saludo", "placeholder", "pregunta", "respuesta" (markdown simple: párrafos con línea en blanco, "- " viñetas, **negrita**,
+     bloque ``` de código), "claves" (palabras o frases a resaltar), "acento", "velocidad" (1 = normal, 1.5 = más rápido) y "duracion".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter','Segoe UI',system-ui,sans-serif; --mono:'JetBrains Mono','Cascadia Code',Consolas,monospace;
+  --acento:#10A37F; --halo:16,163,127;
+  /* tema oscuro (ChatGPT) */
+  --bg:#212121; --tinta:#ECECEC; --mute:#9B9B9B; --burbuja:#303030; --barra:#303030; --borde:rgba(255,255,255,.08);
+  --codigo:#171717; --codcab:#2F2F2F; --boton:#ECECEC; --botontx:#212121; --sombra:rgba(0,0,0,.35); --brillo:255,255,255; }
+:root.claro{ --bg:#FFFFFF; --tinta:#0D0D0D; --mute:#8F8F8F; --burbuja:#F1F1F1; --barra:#FFFFFF; --borde:rgba(0,0,0,.10);
+  --codigo:#F7F7F8; --codcab:#ECECEE; --boton:#0D0D0D; --botontx:#FFFFFF; --sombra:rgba(0,0,0,.08); --brillo:0,0,0; }
+html,body{ background:var(--bg); }
+.mg-fondo{ background:var(--bg); }
+.mg-vista{ perspective:none; }
+.mg-mundo{ transform-style:flat; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+body{ -webkit-font-smoothing:antialiased; font-feature-settings:'cv11','ss01'; }
+/* halo muy suave detrás de la respuesta (da profundidad sin ensuciar la interfaz) */
+.halo{ border-radius:50%; filter:blur(140px); background:rgba(var(--halo),.10); pointer-events:none; }
+/* cabecera */
+.cab{ display:flex; align-items:center; gap:14px; color:var(--tinta); font:600 var(--fcab) var(--fuente); letter-spacing:-.015em; white-space:nowrap; }
+.cab .ver{ color:var(--mute); font-weight:500; }
+.cab svg{ width:.8em; height:.8em; color:var(--mute); margin-left:-4px; }
+/* saludo inicial */
+.saludo{ color:var(--tinta); font:600 var(--fsal)/1.15 var(--fuente); letter-spacing:-.03em; text-align:center; }
+/* icono de la IA */
+.ico{ width:var(--fico); height:var(--fico); border-radius:50%; display:grid; place-items:center; flex:none; overflow:hidden;
+  border:1.5px solid var(--borde); background:var(--bg); color:var(--tinta); font:700 calc(var(--fico)*.48) var(--fuente); }
+.ico img{ width:64%; height:64%; object-fit:contain; }
+.ico svg{ width:62%; height:62%; }
+/* barra de escribir */
+.barra{ background:var(--barra); border:1.5px solid var(--borde); border-radius:var(--rbar); box-shadow:0 18px 50px var(--sombra);
+  padding:var(--pbar); display:flex; align-items:flex-end; gap:20px; }
+.barra .txt{ flex:1; min-width:0; font:400 var(--fbar)/1.35 var(--fuente); color:var(--tinta); letter-spacing:-.01em; padding:6px 0; white-space:pre-wrap; }
+.barra .ph{ color:var(--mute); }
+.cursor{ display:inline-block; width:3px; height:1.15em; background:var(--tinta); vertical-align:-.2em; margin-left:2px; border-radius:2px; }
+.mas{ width:var(--fbtn); height:var(--fbtn); flex:none; display:grid; place-items:center; color:var(--tinta); }
+.mas svg{ width:52%; height:52%; }
+.env{ width:var(--fbtn); height:var(--fbtn); flex:none; border-radius:50%; display:grid; place-items:center; background:var(--boton); color:var(--botontx); }
+.env svg{ width:48%; height:48%; }
+/* burbuja del usuario */
+.burbuja{ background:var(--burbuja); color:var(--tinta); border-radius:var(--rbur); padding:var(--pbur); font:400 var(--fbur)/1.4 var(--fuente);
+  letter-spacing:-.012em; max-width:var(--mbur); width:max-content; }
+/* pensando */
+.pensando{ display:flex; align-items:center; gap:22px; font:500 var(--fres) var(--fuente); letter-spacing:-.01em; }
+.punto{ width:.62em; height:.62em; border-radius:50%; background:var(--tinta); flex:none; }
+.brillo{ color:transparent; -webkit-background-clip:text; background-clip:text;
+  background-image:linear-gradient(90deg, var(--mute) 0%, var(--mute) 35%, var(--tinta) 50%, var(--mute) 65%, var(--mute) 100%); background-size:300% 100%; }
+/* respuesta */
+.resp{ color:var(--tinta); font:400 var(--fres)/1.5 var(--fuente); letter-spacing:-.012em; }
+.resp p{ margin:0 0 .62em; }
+.resp ul{ margin:0 0 .62em; padding:0; list-style:none; }
+.resp li{ position:relative; padding-left:1.15em; margin-bottom:.32em; }
+.resp .vin{ position:absolute; left:.28em; top:0; }
+.resp b{ font-weight:650; }
+.w{ display:inline; }
+.clave{ background-image:linear-gradient(rgba(var(--halo),.42), rgba(var(--halo),.42)); background-repeat:no-repeat;
+  background-position:0 92%; background-size:0% .42em; border-radius:.12em; padding:0 .06em; margin:0 -.06em; -webkit-box-decoration-break:clone; box-decoration-break:clone; }
+.cod{ background:var(--codigo); border:1.5px solid var(--borde); border-radius:var(--rcod); overflow:hidden; margin:.2em 0 .62em; }
+.cod .cc{ background:var(--codcab); display:flex; justify-content:space-between; padding:.42em .9em; font:500 var(--fcodc) var(--fuente); color:var(--mute); }
+.cod pre{ margin:0; padding:.8em .9em; font:400 var(--fcod)/1.55 var(--mono); color:var(--tinta); white-space:pre-wrap; letter-spacing:-.01em; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 12,
+  "tema": "oscuro",
+  "modelo": "ChatGPT",
+  "icono": "chatgpt",
+  "acento": "#10A37F",
+  "velocidad": 1,
+  "saludo": "¿En qué puedo ayudarte?",
+  "placeholder": "Pregunta lo que quieras",
+  "pregunta": "¿Cómo escribo un buen prompt para editar mis reels?",
+  "respuesta": "Un buen prompt tiene **tres partes**:\n\n- **Contexto:** quién eres y para quién es el vídeo.\n- **Tarea:** qué quieres exactamente, paso a paso.\n- **Formato:** cómo quieres recibir el resultado.\n\nPor ejemplo:\n```\nEdita mi reel: quita los silencios,\nañade subtítulos y música suave.\n```",
+  "claves": ["tres partes", "paso a paso"]
+}
+</script>
+<script>
+// ---------------------------------------------------------------- parámetros: bloque params + ?clave=valor + formato por hash
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+if (P.tema === 'claro') document.documentElement.classList.add('claro');
+if (P.acento) { raiz.setProperty('--acento', P.acento); raiz.setProperty('--halo', hexRgb(P.acento)); }
+// medidas por formato: en 9x16 el cuerpo de la respuesta va a 46 px (legible en el móvil)
+const M = VERT
+  ? { col: 900, fcab: 44, fsal: 72, fico: 64, fbar: 44, fbtn: 76, rbar: 56, pbar: '22px 22px 22px 26px', fbur: 44, rbur: 44, pbur: '26px 36px', mbur: 780, fres: 46, fcod: 36, fcodc: 30, rcod: 28, top: 70, bar0: 64 }
+  : { col: 1120, fcab: 30, fsal: 56, fico: 46, fbar: 32, fbtn: 54, rbar: 40, pbar: '16px 16px 16px 20px', fbur: 32, rbur: 30, pbur: '18px 26px', mbur: 760, fres: 33, fcod: 26, fcodc: 22, rcod: 20, top: 56, bar0: 40 };
+for (const c of ['fcab', 'fsal', 'fico', 'fbar', 'fbtn', 'rbar', 'fbur', 'rbur', 'mbur', 'fres', 'fcod', 'fcodc', 'rcod']) raiz.setProperty('--' + c, M[c] + 'px');
+raiz.setProperty('--pbar', M.pbar); raiz.setProperty('--pbur', M.pbur);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+const norm = (s) => s.toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[^\p{L}\p{N}]+/gu, '');
+
+// iconos: «claude» usa el logo real de motor/logos; «chatgpt» un nudo genérico dibujado aquí (no el logo de la marca)
+const SVG_NUDO = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.2c2.2 0 4 1.6 4.3 3.7 2-.4 4 .7 4.6 2.7.7 2-.3 4.1-2.1 5 .9 1.9.3 4.1-1.4 5.3-1.7 1.2-4 .9-5.4-.6-1.4 1.5-3.7 1.8-5.4.6-1.7-1.2-2.3-3.4-1.4-5.3-1.8-.9-2.8-3-2.1-5 .6-2 2.6-3.1 4.6-2.7C8 4.8 9.8 3.2 12 3.2Z"/><path d="M9 9.2 12 7.5l3 1.7v3.6l-3 1.7-3-1.7Z"/></svg>';
+const iconoHTML = () => {
+  const i = (P.icono ?? '').trim();
+  if (i === 'claude') return '<div class="ico"><img src="../motor/logos/claude.svg" alt=""></div>';
+  if (i === 'chatgpt') return `<div class="ico">${SVG_NUDO}</div>`;
+  if (i) return `<div class="ico"><img src="${i}" alt=""></div>`;
+  return `<div class="ico">${esc((P.modelo || '·').trim()[0].toUpperCase())}</div>`;
+};
+
+// ---------------------------------------------------------------- markdown simple → bloques con palabras sueltas
+// cada palabra es un <span class="w"> y se anima por separado; las claves envuelven sus palabras en <span class="clave">
+function trocea(md) {
+  const bloques = [], lineas = String(md).replace(/\r/g, '').split('\n');
+  for (let i = 0; i < lineas.length; i++) {
+    const l = lineas[i];
+    if (/^```/.test(l.trim())) { const cod = []; i++; while (i < lineas.length && !/^```/.test(lineas[i].trim())) cod.push(lineas[i++]); bloques.push({ tipo: 'cod', lang: l.trim().slice(3), texto: cod.join('\n') }); continue; }
+    if (/^\s*[-*•]\s+/.test(l)) { const ult = bloques[bloques.length - 1]; const it = l.replace(/^\s*[-*•]\s+/, '');
+      if (ult && ult.tipo === 'ul') ult.items.push(it); else bloques.push({ tipo: 'ul', items: [it] }); continue; }
+    if (!l.trim()) { bloques.push({ tipo: 'sep' }); continue; }
+    const ult = bloques[bloques.length - 1];
+    if (ult && ult.tipo === 'p') ult.texto += ' ' + l.trim(); else bloques.push({ tipo: 'p', texto: l.trim() });
+  }
+  return bloques.filter((b) => b.tipo !== 'sep');
+}
+const CLAVES = (Array.isArray(P.claves) ? P.claves : String(P.claves || '').split(',')).map((c) => c.trim().split(/\s+/).map(norm)).filter((c) => c.length && c[0]);
+function inline(txt) {   // → HTML con .w por palabra (negritas con **) y grupos .clave
+  const toks = []; let bold = false, pegado = false;
+  for (const parte of txt.split('**')) {   // «**partes**:» → el signo va pegado a su palabra (sin espacio delante)
+    parte.split(/\s+/).forEach((w, j) => { if (!w) return; const pre = toks[toks.length - 1];
+      if (j === 0 && pre && pegado && !/^\s/.test(parte)) pre.w2 = (pre.w2 || '') + (bold ? `<b>${esc(w)}</b>` : esc(w)); else toks.push({ w, bold }); });
+    pegado = !/\s$/.test(parte); bold = !bold; }
+  const marca = new Array(toks.length).fill(-1);
+  CLAVES.forEach((c, ci) => { for (let i = 0; i + c.length <= toks.length; i++) if (c.every((x, j) => norm(toks[i + j].w) === x) && marca.slice(i, i + c.length).every((m) => m < 0)) for (let j = 0; j < c.length; j++) marca[i + j] = ci * 1000 + i; });
+  let html = '';
+  toks.forEach((o, i) => {
+    const abre = marca[i] >= 0 && marca[i] !== marca[i - 1], cierra = marca[i] >= 0 && marca[i] !== marca[i + 1];
+    const w = `<span class="w">${o.bold ? `<b>${esc(o.w)}</b>` : esc(o.w)}${o.w2 || ''}</span>`;
+    html += (i ? ' ' : '') + (abre ? '<span class="clave">' : '') + w + (cierra ? '</span>' : '');
+  });
+  return html;
+}
+function respuestaHTML(bloques) {
+  return bloques.map((b) => {
+    if (b.tipo === 'p') return `<p>${inline(b.texto)}</p>`;
+    if (b.tipo === 'ul') return `<ul>${b.items.map((it) => `<li><span class="vin">•</span>${inline(it)}</li>`).join('')}</ul>`;
+    // código: cada palabra con su espacio (se respetan saltos de línea)
+    const cod = b.texto.split('\n').map((l) => l.split(/(\s+)/).map((x) => (x && !/^\s+$/.test(x) ? `<span class="w">${esc(x)}</span>` : esc(x))).join('')).join('\n');
+    return `<div class="cod"><div class="cc"><span>${esc(b.lang || 'texto')}</span><span>Copiar</span></div><pre>${cod}</pre></div>`;
+  }).join('');
+}
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT } = MG, D = P.duracion, vel = Math.max(.3, P.velocidad || 1);
+  const X0 = (W - M.col) / 2;
+  const halo = MG.el(`<div class="halo" style="width:${M.col * 1.1}px;height:${M.col * .9}px"></div>`);
+
+  // ---- interfaz
+  const cab = MG.el(`<div class="cab">${esc(P.modelo)}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="m6 9 6 6 6-6"/></svg></div>`);
+  const saludo = MG.el(`<div class="saludo" style="width:${M.col}px">${esc(P.saludo)}</div>`);
+  const barra = MG.el(`<div class="barra" style="width:${M.col}px"><div class="mas"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></div>
+    <div class="txt"></div><div class="env"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M6 11l6-6 6 6"/></svg></div></div>`);
+  const txtBarra = barra.querySelector('.txt'), env = barra.querySelector('.env');
+  const burbuja = MG.el(`<div class="burbuja">${esc(P.pregunta)}</div>`);
+  const avatar = MG.el(iconoHTML());
+  const pensando = MG.el(`<div class="pensando"><div class="punto"></div><span class="brillo">Pensando…</span></div>`);
+  const punto = pensando.querySelector('.punto'), brillo = pensando.querySelector('.brillo');
+  const resp = MG.el(`<div class="resp" style="width:${M.col}px">${respuestaHTML(trocea(P.respuesta))}</div>`);
+  const palabras = [...resp.querySelectorAll('.w')], vinetas = [...resp.querySelectorAll('.vin')], codigos = [...resp.querySelectorAll('.cod')];
+  const claves = [...resp.querySelectorAll('.clave')];
+
+  // ---- tiempos (s)
+  const preg = [...String(P.pregunta)], tEsc0 = .75, tEsc1 = tEsc0 + Math.min(2.1, .35 + preg.length * .036) / Math.sqrt(vel);
+  const tEnv = tEsc1 + .3, tPen = tEnv + .45, tRes = tPen + 1.15 / Math.sqrt(vel);
+  // ritmo de streaming: cada palabra su hueco; pausa tras puntuación y entre bloques; el código sale más rápido (por tokens)
+  const huecos = palabras.map((w, i) => {
+    const s = w.textContent, enCod = !!w.closest('.cod');
+    let h = enCod ? .075 : .118 + ((i * 7919) % 13) / 13 * .05;   // variación determinista: no suena a metrónomo
+    if (/[.:;!?]$/.test(s)) h += .16; else if (/,$/.test(s)) h += .07;
+    const sig = palabras[i + 1]; if (sig && sig.closest('p,li,.cod') !== w.closest('p,li,.cod')) h += .1;
+    return h / vel;
+  });
+  const total = huecos.reduce((a, b) => a + b, 0), cabe = Math.max(1, total / Math.max(1, D - 1.4 - tRes));   // si no cabe, se aprieta
+  const tw = []; huecos.reduce((a, h, i) => (tw[i] = a, a + h / cabe), tRes);
+  const tFin = (tw[tw.length - 1] ?? tRes) + .4;
+  const FADE = .42;   // lo que tarda cada palabra en llenarse: deja un degradado de ~4 palabras al final de la frase
+
+  let L = null;
+  return (t) => {
+    if (!L) {
+      const rr = resp.getBoundingClientRect(), f = rr.height / resp.offsetHeight || 1;
+      const fondo = (el) => (el.getBoundingClientRect().bottom - rr.top) / f, centro = (el) => { const r = el.getBoundingClientRect(); return ((r.top + r.bottom) / 2 - rr.top) / f; };
+      L = { hb: barra.offsetHeight, hbur: burbuja.offsetHeight, wbur: burbuja.offsetWidth, fondos: palabras.map(fondo), centros: palabras.map(centro), hcab: cab.offsetHeight };
+      L.yBar = H - M.bar0 - L.hb;
+      L.yBur = M.top + L.hcab + (VERT ? 70 : 44);
+      L.yAv = L.yBur + L.hbur + (VERT ? 56 : 36);
+      L.yRes = L.yAv + M.fico + (VERT ? 26 : 18);
+      L.lim = L.yBar - (VERT ? 70 : 44);      // la respuesta no pasa por debajo de la barra: el chat sube
+    }
+    // ---- progreso del streaming (continuo, para cámara y desplazamiento)
+    let n = 0; while (n < tw.length && t >= tw[n]) n++;
+    const frac = n > 0 && n < tw.length ? C.salidaCubica(k(t, tw[n - 1], tw[n])) : n >= tw.length ? 1 : 0;
+    const iA = Math.max(0, n - 1), iB = Math.min(tw.length - 1, n);
+    const fondoV = n === 0 ? 0 : lerp(L.fondos[iA], L.fondos[iB], n < tw.length ? frac : 1);
+    const centroV = n === 0 ? 0 : lerp(L.centros[iA], L.centros[iB], n < tw.length ? frac : 1);
+    const scroll = Math.max(0, L.yRes + fondoV - L.lim);
+
+    // ---- cámara: deriva siempre; zoom lento hacia la línea que se escribe (curva AE 75 %), sin parar nunca
+    const pz = C.afterEffects75(k(t, tPen - .3, tFin + .6)), zMax = VERT ? .07 : .16;
+    const z = 1.012 + .018 * C.suave(t / D) + zMax * pz;
+    const fy = lerp(H * .55, L.yRes - scroll + centroV, C.afterEffects(k(t, tPen - .3, tRes + 1.2)));
+    const fx = lerp(W / 2, X0 + M.col * (VERT ? .5 : .42), pz);
+    MG.vista.style.transformOrigin = `${fx}px ${fy}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .37) * 6}px, ${Math.cos(t * .29) * 7}px) rotate(${Math.sin(t * .23) * .18}deg)`;
+    MG.pon(halo, fx - M.col * .55 + Math.sin(t * .4) * 40, fy - M.col * .45);
+    halo.style.opacity = C.suave(k(t, tPen, tRes + 1));
+
+    // ---- cabecera y saludo
+    const ec = MG.entra(cab, t, .05, { d: .6, dy: -30, escala0: 1, curva: 'salidaQuint', base: 6 });
+    MG.pon(cab, X0 + 4 + ec.x, M.top + ec.y);
+    const ys = VERT ? H * .40 : H * .36;
+    if (t < tEnv) { const e = MG.entra(saludo, t, .2, { d: .8, dy: 50, escala0: .97, curva: 'salidaQuint', base: 10 }); MG.pon(saludo, X0, ys + e.y, e.s); }
+    else { const p = C.entradaCubica(k(t, tEnv, tEnv + .35)); MG.pon(saludo, X0, ys - 40 * p, 1 - .03 * p); saludo.style.opacity = 1 - p; saludo.style.filter = p > 0 ? `blur(${p * 12}px)` : 'none'; }
+
+    // ---- barra: sube con frenada suave; la pregunta se escribe con ritmo de tecleo (rápido-lento, nunca lineal)
+    const eb = MG.entra(barra, t, .3, { d: .75, dy: 120, escala0: .96, curva: 'salidaQuint', base: 8 });
+    const nC = t < tEnv ? Math.floor(preg.length * MGcurvas.bezier(.25, .05, .55, .95)(k(t, tEsc0, tEsc1)) + 1e-6) : 0;
+    const parpadeo = (t < tEsc0 || t >= tEsc1) ? (Math.sin(t * Math.PI * 2 * 1.1) > -.2 ? 1 : 0) : 1;
+    txtBarra.innerHTML = nC > 0 ? esc(preg.slice(0, nC).join('')) + `<span class="cursor" style="opacity:${parpadeo}"></span>`
+      : `<span class="cursor" style="opacity:${t < tEnv ? parpadeo : 0}"></span><span class="ph">${esc(P.placeholder)}</span>`;
+    const activo = nC > 0 ? 1 : 0, pulso = C.atras(k(t, tEnv - .12, tEnv + .2));
+    env.style.opacity = .28 + .72 * activo; env.style.transform = `scale(${t > tEnv - .12 && t < tEnv + .25 ? 1 - .12 * Math.sin(Math.PI * k(t, tEnv - .12, tEnv + .25)) : 1})`;
+    MG.pon(barra, X0, L.yBar + eb.y, eb.s);
+    barra.style.transformOrigin = '50% 100%';
+
+    // ---- burbuja del usuario: sale de la barra y sube a su sitio con un muelle suave
+    const yBur = L.yBur - scroll;
+    if (t >= tEnv - .02) {
+      const p = C.reboteSuave(k(t, tEnv, tEnv + 1.05)), q = C.reboteSuave(k(t - DT, tEnv, tEnv + 1.05));
+      const y0 = L.yBar + 10, y = lerp(y0, yBur, p), v = Math.abs((p - q) * (yBur - y0) / DT);
+      MG.pon(burbuja, X0 + M.col - L.wbur, y, lerp(.86, 1, Math.min(1, p)));
+      burbuja.style.transformOrigin = '100% 100%';
+      burbuja.style.opacity = Math.min(1, k(t, tEnv, tEnv + .18));
+      MG.desenfoca(burbuja, 0, v * MG.MB * .8);
+    } else burbuja.style.opacity = 0;
+
+    // ---- avatar + «Pensando…» (punto que late y barrido de brillo)
+    const ea = MG.entra(avatar, t, tPen, { d: .55, dy: 24, escala0: .7, curva: 'rebote', base: 4 });
+    MG.pon(avatar, X0 + ea.x, L.yAv - scroll + ea.y, ea.s);
+    const pIn = C.salidaQuint(k(t, tPen + .08, tPen + .5)), pOut = C.entradaCubica(k(t, tRes - .25, tRes + .05));
+    pensando.style.opacity = pIn * (1 - pOut);
+    pensando.style.filter = (1 - pIn) + pOut > .01 ? `blur(${(1 - pIn) * 8 + pOut * 10}px)` : 'none';
+    MG.pon(pensando, X0 + M.fico + (VERT ? 26 : 18) + (1 - pIn) * -20, L.yAv - scroll + (M.fico - pensando.offsetHeight) / 2);
+    const lat = .5 - .5 * Math.cos(t * Math.PI * 2 / .9);
+    punto.style.transform = `scale(${.72 + .38 * C.suave(lat)})`; punto.style.opacity = .55 + .45 * lat;
+    brillo.style.backgroundPosition = `${100 - ((t - tPen) / 1.1 % 1) * 150}% 0`;
+
+    // ---- respuesta: palabra a palabra con opacidad 0→1 y desenfoque gaussiano leve (el degradado de ChatGPT)
+    MG.pon(resp, X0, L.yRes - scroll);
+    palabras.forEach((w, i) => {
+      const p = C.salidaCubica(k(t, tw[i], tw[i] + FADE));
+      w.style.opacity = p.toFixed(3);
+      w.style.filter = p > 0 && p < .98 ? `blur(${((1 - p) * 5).toFixed(2)}px)` : 'none';
+    });
+    resp.querySelectorAll('li').forEach((li, i) => { const w0 = li.querySelector('.w'); const j = palabras.indexOf(w0);
+      vinetas[i].style.opacity = j >= 0 ? C.salidaCubica(k(t, tw[j] - .05, tw[j] + .3)) : 1; });
+    codigos.forEach((c) => { const j = palabras.indexOf(c.querySelector('.w')), a = j >= 0 ? tw[j] - .25 : tRes;
+      const p = C.salidaQuint(k(t, a, a + .45)); c.style.opacity = p; c.style.transform = `translateY(${(1 - p) * 18}px) scale(${lerp(.985, 1, p)})`;
+      c.style.filter = p > 0 && p < .98 ? `blur(${(1 - p) * 6}px)` : 'none'; });
+    // ---- rotulador: se dibuja de izquierda a derecha cuando la clave ya está escrita (rápido al salir, frena al final)
+    claves.forEach((c) => { const ws = [...c.querySelectorAll('.w')], j = palabras.indexOf(ws[ws.length - 1]), a = tw[j] + .22;
+      const p = C.afterEffects75(k(t, a, a + .5 + .08 * ws.length));
+      c.style.backgroundSize = `${(p * 100).toFixed(2)}% .42em`; });
+  };
+});
+</script>
+</body></html>

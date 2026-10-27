@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Pieza «3d-titular» · 3D con three.js · Viegas IA · Motion Lab
+     Titular en 3D extruido de verdad (Inter Tight 700 con bisel): cada letra llega desde detrás de la cámara girando,
+     muy rápida y con frenada suave + rebote, con desenfoque de movimiento por obturador. La palabra clave va en el acento.
+     Cámara en dolly + órbita; al final las letras salen hacia el fondo acelerando (curva inversa).
+     Titular con saltos de línea «\n» · "clave": palabras en el acento.
+     Formato: #9x16 (por defecto) · #16x9 · #1x1 · #4x5 · Fondo transparente: ?fondo=transparente · Tema: noche-azul. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+<style>
+.sub{ position:absolute; left:0; text-align:center; font:500 30px var(--mono); letter-spacing:.22em; text-transform:uppercase; color:var(--mute); white-space:nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 6,
+  "titular": "Edita\ntus reels\ncon Claude",
+  "clave": ["Claude"],
+  "subtitulo": "en minutos, no en horas",
+  "acento": "#D97757",
+  "salida": true,
+  "fondo": "marca"
+}
+</script>
+<script type="module">
+import { pieza3d, THREE } from '../motor/piezas3d.js';
+pieza3d({ duracion: 6, profundidad: { apertura: 10, max: 18 }, movimiento: { muestras: 10, obturador: 0.6 }, nieblaCerca: 16, nieblaLejos: 50 },
+  ({ P, W, H, VERT, MG, scene, camara, obj, mat, acento, lente, encuadre, bokeh, texto3d, luces }) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion;
+  const blanco = new THREE.MeshPhysicalMaterial({ color: 0xE9EEF7, roughness: 0.35, metalness: 0.05, clearcoat: 0.4, clearcoatRoughness: 0.4, envMapIntensity: 0.6 });
+  let txt = null, dist = 12;
+  texto3d(P.titular, { tam: 1, mats: [blanco, acento()], clave: P.clave, interlinea: 1.24 }).then((g) => {
+    txt = g; scene.add(g); g.position.y = -g.alto / 2 + 0.6;
+    dist = encuadre(g.ancho + 0.6, g.alto * (VERT ? 1.7 : 1.35));
+  });
+  const suelo = obj.suelo(new THREE.ShadowMaterial({ opacity: 0.35 })); scene.add(suelo);
+  const bk = bokeh(32, { radio: 10, alto: 12, z: -12, fondo: 6, tam: 0.1 }); scene.add(bk);
+  luces.clave.intensity = 1.6; luces.clave.position.set(3, 7, 9);
+  const sub = MG.el(`<div class="sub">${P.subtitulo}</div>`); sub.style.width = W + 'px';
+  const tmp = new THREE.Vector3();
+  return (t) => {
+    if (!txt) return;
+    suelo.position.y = txt.position.y - 0.05;
+    const n = txt.letras.length, paso = Math.min(0.06, 1.3 / n);
+    txt.letras.forEach((l, i) => {
+      const t0 = 0.2 + i * paso, p = C.salidaExpo(k(t, t0, t0 + 0.55)), r = C.rebote(k(t, t0 + 0.15, t0 + 1.2));
+      const b = l.m.userData.base;
+      l.m.position.set(b.x, b.y + (1 - p) * 1.5, b.z + (1 - p) * 14);                        // llega desde detrás de la cámara
+      l.m.rotation.set((1 - r) * -1.4, (1 - p) * 0.8 * (i % 2 ? 1 : -1), 0);
+      l.m.scale.setScalar(lerp(0.6, 1, Math.min(1.2, r)));
+      l.m.visible = t > t0;
+      if (P.salida) { const x = C.entradaCubica(k(t, D - 0.75 + i * 0.012, D - 0.1 + i * 0.012)); if (x > 0) { l.m.position.z -= x * 18; l.m.rotation.x += x * 1.2; } }
+    });
+    const ang = lerp(-12, 10, t / D) * Math.PI / 180, R = dist * lerp(1.08, 0.96, t / D);
+    camara.position.set(Math.sin(ang) * R, lerp(-0.6, 0.6, t / D), Math.cos(ang) * R); camara.lookAt(0, VERT ? -0.7 : -0.2, 0);
+    bk.flota(t);
+    lente.enfocar(txt.getWorldPosition(tmp).setY(0.4));
+    const y = VERT ? H * 0.64 : H * 0.84;
+    let e = MG.entra(sub, t, 1.8, { d: 0.7, dy: 50, curva: 'salidaExpo' }); MG.pon(sub, 0, y + e.y, e.s);
+    if (P.salida) { const x = C.entradaCubica(k(t, D - 0.6, D)); if (x > 0) { sub.style.opacity = 1 - x; MG.desenfoca(sub, 0, x * 16); MG.pon(sub, 0, y + x * 80); } }
+  };
+});
+</script>
+</body></html>

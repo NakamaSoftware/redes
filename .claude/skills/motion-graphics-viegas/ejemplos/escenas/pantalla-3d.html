@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «pantalla-3d» · una interfaz real en 3D (como el vídeo de GLEA en Threads, octubre de 2026): el editor de
+     interfaces/editor-viegas.html tumbado en el espacio, la cámara lo sobrevuela rasante con enfoque de cine, el panel de
+     Claude sale de la pantalla hacia la cámara y al final se ve entero. Desenfoque de profundidad + de movimiento (lente3d).
+     Antes de renderizarla: node scripts/render.mjs pantalla editor-viegas   (con --calidad final para el 4K). -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+</head><body>
+<script type="module">
+import { escena3d } from '../motor/motor3d.js';
+escena3d({ duracion: 8, ancho: 1920, alto: 1080, fondo: 'marca', fov: 32, niebla: false,
+  profundidad: { apertura: 16, max: 22 }, movimiento: { muestras: 8, obturador: 0.5 } }, ({ THREE, MG, scene, obj, planos, luces }) => {
+  // la interfaz: 8 unidades de ancho, tumbada hacia atrás (casi como un portátil abierto del todo sobre la mesa)
+  const ui = obj.pantalla('../pantallas/editor-viegas', { ancho: 8, radio: 20 });
+  ui.rotation.x = -1.25; scene.add(ui);
+  const suelo = obj.suelo(); suelo.position.y = -1.0; scene.add(suelo);
+  luces.clave.position.set(4, 9, 5);
+  // el panel de Claude sale de la pantalla hacia la cámara cuando empieza a responder (y vuelve al final)
+  const chat = ui.recorte(1516, 76, 392, 560, { radio: 16 });
+  const titulo = MG.el(`<div class="mg-abs" style="width:1920px;display:flex;justify-content:center"><div class="mg-cristal mg-titulo" style="font-size:72px;padding:22px 48px;border-radius:999px;backdrop-filter:blur(18px)">Tu interfaz, <em>en 3D</em></div></div>`);
+  return (t) => {
+    // un solo movimiento de cámara que pasa por 5 claves sin pararse, siguiendo lo que pasa en la interfaz:
+    // rasante por los medios y el visor → el panel de Claude, que se levanta y va marcando ✓ → la línea de tiempo
+    // (subtítulos, zooms, −14 LUFS) → la interfaz entera con el título y el clic en «Exportar 4K»
+    planos.claves(t, ui, [
+      { t: 0.0, objetivo: [260, 360], inclinacion: 13, giro: -28, distancia: 0.28 },
+      { t: 1.9, objetivo: [950, 330], inclinacion: 19, giro: -16, distancia: 0.40 },
+      { t: 3.6, objetivo: [1712, 330], inclinacion: 56, giro: 6, distancia: 0.66, enfoque: [1712, 330, 0.6] },
+      { t: 5.5, objetivo: [1050, 860], inclinacion: 30, giro: 12, distancia: 0.48 },
+      { t: 8.0, objetivo: [990, 470], inclinacion: 60, giro: -2, distancia: 1.16 },
+    ]);
+    chat.levantar(t, 2.2, { altura: 0.6, inclina: 8, d: 1.0, vuelta: 6.2 });   // y vuelve a su sitio antes del clic en «Exportar 4K»
+    const e = MG.entra(titulo, t, 6.6, { dy: 80 }); MG.pon(titulo, e.x, 48 + e.y, e.s);
+  };
+});
+</script>
+</body></html>

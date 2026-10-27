@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-poster-editorial» · Viegas IA · Motion Lab
+     Póster editorial de lanzamiento: tipografía enorme y condensada que llena el encuadre en 2-3 líneas, una palabra por golpe
+     (al compás), bloques de color plano que barren la pantalla, una imagen (o un sello gráfico) que entra ENTRE las letras,
+     sellos en mono en las esquinas y cierre con logo.
+     Cambia "pantallas" (líneas de cada póster; "fondo": fondo | acento | tinta; "imagen": true para meter la imagen entre las letras),
+     "imagen" (ruta a tu foto o recorte PNG; vacío = sello gráfico), "fuente", "fondo", "tinta", "acento", "sellos", "marca", "logo", "lema".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). Duración 8-12 s: el compás se reparte solo. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=JetBrains+Mono:wght@500;700&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+.mg-mundo > * { position: absolute; left: 0; top: 0; }
+.pz { position: absolute; left: 0; top: 0; width: var(--ancho); height: var(--alto); overflow: hidden; will-change: transform; }
+.bloque { position: absolute; inset: 0; }
+.lin { position: absolute; left: 0; top: 0; white-space: nowrap; font-family: var(--titular); line-height: .86; text-transform: uppercase;
+  letter-spacing: -.01em; transform-origin: 0 100%; }
+.img { position: absolute; left: 0; top: 0; overflow: hidden; box-shadow: 0 30px 80px rgba(0,0,0,.28); }
+.img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sello-g { position: absolute; left: 0; top: 0; }
+.esq { position: absolute; font: 700 var(--esq) 'JetBrains Mono', var(--mono); letter-spacing: .14em; text-transform: uppercase; white-space: nowrap; z-index: 50; }
+.esq i { display: inline-block; width: .7em; height: .7em; border-radius: 50%; background: var(--acento); margin-right: .7em; vertical-align: .02em; }
+.logo { position: absolute; left: 0; top: 0; display: grid; place-items: center; overflow: hidden; font-family: var(--titular); }
+.logo img { width: 100%; height: 100%; object-fit: contain; }
+.lema { position: absolute; left: 0; top: 0; font: 700 var(--esq) 'JetBrains Mono', var(--mono); letter-spacing: .16em; text-transform: uppercase; white-space: nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fuente": "Anton",
+  "fondo": "#EFE8DC",
+  "tinta": "#15130F",
+  "acento": "#FF4A1C",
+  "pantallas": [
+    { "lineas": ["Nuevo", "estudio", "abierto"], "fondo": "fondo" },
+    { "lineas": ["Edita", "con", "Claude"], "fondo": "acento", "imagen": true },
+    { "lineas": ["En", "minutos"], "fondo": "tinta" }
+  ],
+  "imagen": "",
+  "textoSello": "Nuevo · Lanzamiento · ",
+  "sellos": ["Viegas Estudio", "Lanzamiento · 2026", "viegasestudio.com"],
+  "marca": "Viegas Estudio",
+  "lema": "Disponible hoy",
+  "logo": ""
+}
+</script>
+<script>
+// ---------------------------------------------------------------- parámetros y formato (#9x16 por defecto · #16x9)
+const P = JSON.parse(document.getElementById('params').textContent);
+const FMT = (location.hash.slice(1) || P.formato || '9x16'), VERT = FMT !== '16x9';
+const W = VERT ? 1080 : 1920, H = VERT ? 1920 : 1080, U = Math.min(W, H) / 1080;
+const R = document.documentElement.style;
+R.setProperty('--fondo', P.fondo); R.setProperty('--tinta', P.tinta); R.setProperty('--acento', P.acento);
+R.setProperty('--titular', `'${P.fuente}', 'Anton', 'Bebas Neue', Impact, 'Arial Narrow', sans-serif`);
+R.setProperty('--esq', Math.round(22 * U) + 'px');
+const COL = { fondo: P.fondo, acento: P.acento, tinta: P.tinta };
+// color del texto según el bloque de fondo (y el de la línea resaltada, la última)
+const TXT = { fondo: [P.tinta, P.acento], acento: [P.tinta, P.fondo], tinta: [P.fondo, P.acento] };
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG;
+  const expo = C.bezier(.16, 1, .3, 1);          // entrada: llega muy rápido y frena suave
+  const inv = C.bezier(.7, 0, .84, 0);           // salida inversa: arranca suave y se va acelerando
+  const M = VERT ? { x: 72, top: 230, bot: 360 } : { x: 120, top: 120, bot: 130 };   // márgenes (zona segura de Reels / YouTube)
+
+  // ---------------------------------------------------------------- compás: cada palabra es un golpe
+  const pant = P.pantallas.map((p) => ({ ...p, n: p.lineas.length + (p.imagen ? 1 : 0) }));
+  const golpesCierre = 3, total = pant.reduce((a, p) => a + p.n + 1.6, 0) + golpesCierre + 2.2;
+  const B = (P.duracion - .2) / total;           // duración de un golpe (s)
+  let cur = .12;
+  pant.forEach((p) => { p.t0 = cur; p.golpes = []; for (let i = 0; i < p.n; i++) p.golpes.push(cur + (i + .35) * B); cur += (p.n + 1.6) * B; });
+  const tCierre = cur, golpes = pant.flatMap((p) => p.golpes);
+  for (let i = 0; i < golpesCierre; i++) golpes.push(tCierre + (i + .35) * B);
+
+  // ---------------------------------------------------------------- pósters
+  pant.forEach((p, ip) => {
+    const [cT, cR] = TXT[p.fondo] || TXT.fondo;
+    p.el = MG.el(`<div class="pz"><div class="bloque" style="background:${COL[p.fondo] || P.fondo}"></div></div>`);
+    p.lin = p.lineas.map((s, i) => MG.el(`<div class="lin" style="color:${i === p.lineas.length - 1 && p.lineas.length > 1 ? cR : cT};font-size:100px">${s}</div>`, p.el));
+    if (p.imagen) {
+      const iw = VERT ? W * .52 : W * .25, ih = iw * (VERT ? 1.15 : 1.2);
+      if (P.imagen) p.img = MG.el(`<div class="img" style="width:${iw}px;height:${ih}px"><img src="${P.imagen}" alt=""></div>`, p.el);
+      else {   // sin imagen: sello circular con texto alrededor (gráfico, no foto)
+        const d = iw * .95, id = 'arco' + ip, txt = (P.textoSello || 'Nuevo · ').repeat(3);
+        p.img = MG.el(`<svg class="sello-g" width="${d}" height="${d}" viewBox="0 0 200 200"><defs><path id="${id}" d="M100,100 m-74,0 a74,74 0 1,1 148,0 a74,74 0 1,1 -148,0"/></defs>
+          <circle cx="100" cy="100" r="98" fill="${cT}"/><circle cx="100" cy="100" r="54" fill="none" stroke="${COL[p.fondo]}" stroke-width="1.5" stroke-dasharray="3 4"/>
+          <text font-family="JetBrains Mono, Consolas, monospace" font-weight="700" font-size="15" letter-spacing="3" fill="${COL[p.fondo]}"><textPath href="#${id}" textLength="462">${txt.toUpperCase()}</textPath></text>
+          <path d="M100 66 L108 92 L134 100 L108 108 L100 134 L92 108 L66 100 L92 92Z" fill="${p.fondo === 'acento' ? P.fondo : P.acento}"/></svg>`, p.el);
+        p.img._w = d; p.img._h = d;
+      }
+      if (!p.img._w) { p.img._w = iw; p.img._h = ih; }
+    }
+  });
+
+  // ---------------------------------------------------------------- cierre con logo
+  const cierre = { el: MG.el(`<div class="pz"><div class="bloque" style="background:${P.fondo}"></div></div>`) };
+  const LS = Math.round((VERT ? 260 : 230) * U * (VERT ? 1 : 1.25));
+  cierre.logo = MG.el(`<div class="logo" style="width:${LS}px;height:${LS}px;background:${P.logo ? 'transparent' : P.acento};color:${P.fondo};font-size:${LS * .62}px">${P.logo ? `<img src="${P.logo}" alt="">` : (P.marca || '·').trim()[0].toUpperCase()}</div>`, cierre.el);
+  cierre.nom = MG.el(`<div class="lin" style="color:${P.tinta};font-size:100px">${P.marca}</div>`, cierre.el);
+  cierre.lema = MG.el(`<div class="lema" style="color:${P.tinta}"><i style="display:inline-block;width:.7em;height:.7em;border-radius:50%;background:${P.acento};margin-right:.8em"></i>${P.lema}</div>`, cierre.el);
+
+  // sellos de las esquinas: fuera de la cámara, siempre nítidos
+  const S = P.sellos || [];
+  const esq = [`<i></i>${S[0] || ''}`, '', S[1] || '', S[2] || ''].map((h) => MG.el(`<div class="esq">${h}</div>`, document.body));
+  const ex = VERT ? 64 : 70, ey = VERT ? 150 : 52;
+
+  // ---------------------------------------------------------------- maquetación (cuando ya hay fuentes): cada línea llena el ancho
+  let L;
+  function maqueta() {
+    const aw = W - 2 * M.x, ah = H - M.top - M.bot;
+    [...pant, Object.assign(cierre, { lin: [cierre.nom], cierre: true })].forEach((p) => {
+      const tam = p.lin.map((el) => { el.style.fontSize = '100px'; return Math.min(100 * aw / el.offsetWidth, 100 * ah * (VERT ? .42 : .5) / .86 / 1); });
+      const hueco = p.img ? (VERT ? .1 : .04) * ah : 0;
+      let alto = tam.reduce((a, f) => a + f * .86, 0) + (p.lin.length - 1) * 14 * U + hueco;
+      const lim = p.cierre ? ah * .3 : ah, f = alto > lim ? lim / alto : 1;
+      let y = p.cierre ? 0 : M.top + (ah - alto * f) / 2;
+      p.pos = p.lin.map((el, i) => { const fs = tam[i] * f; el.style.fontSize = fs + 'px'; const o = { x: M.x, y, fs }; y += fs * .86 + 14 * U + (i === 0 ? hueco * f : 0); return o; });
+      if (p.img) { const a = p.pos[0], b = p.pos[Math.min(1, p.pos.length - 1)];
+        p.imgPos = { x: VERT ? W - M.x - p.img._w * 1.02 : Math.min(W - M.x - p.img._w, M.x + Math.max(...p.lin.map((l) => l.offsetWidth)) + 90 * U), y: (a.y + a.fs * .86 + b.y + b.fs * .86) / 2 - p.img._h * .55 }; }
+      if (!VERT && !p.cierre) {   // 16:9: el bloque (líneas + imagen) se centra en horizontal para no dejar media pantalla vacía
+        const fin = Math.max(...p.lin.map((el) => M.x + el.offsetWidth), p.img ? p.imgPos.x + p.img._w : 0), dx = (W - M.x - fin) / 2;
+        p.pos.forEach((o) => { o.x += dx; }); if (p.img) p.imgPos.x += dx;
+      }
+    });
+    const n = cierre.nom.offsetWidth, hNom = cierre.pos[0].fs * .86, tot = LS + 60 * U + hNom + 50 * U + 30 * U;
+    const y0 = (H - tot) / 2 - (VERT ? 40 : 10);
+    L = { logo: { x: (W - LS) / 2, y: y0 }, nom: { x: (W - n) / 2, y: y0 + LS + 60 * U }, lema: { x: (W - cierre.lema.offsetWidth) / 2, y: y0 + LS + 60 * U + hNom + 50 * U } };
+  }
+
+  // entrada de una pieza en su golpe: sube rápido, frena suave, con desenfoque de movimiento vertical
+  function golpe(el, t, t0, x, y, dy, extra = '') {
+    const d = .34, p = expo(k(t, t0, t0 + d)), q = expo(k(t - DT, t0, t0 + d));
+    el.style.opacity = t < t0 ? 0 : Math.min(1, p * 2.2);
+    MG.desenfoca(el, 0, Math.abs(dy * (p - q) / DT) * MB * 1.4 + (1 - p) * 2);
+    el.style.transform = `translate(${x}px,${y + dy * (1 - p)}px) ${extra}`;
+    return p;
+  }
+  // barrido del bloque de color entre pósters (alterna dirección), con desenfoque de movimiento en el borde
+  const DIR = [[0, 1], [1, 0], [0, -1], [-1, 0]];
+  function barre(el, t, t0, i, sale) {
+    const d = .42, p = expo(k(t, t0, t0 + d)), q = expo(k(t - DT, t0, t0 + d)), [dx, dy] = DIR[i % 4];
+    el.style.visibility = t < t0 ? 'hidden' : 'visible';
+    el.style.transform = `translate(${dx * W * (1 - p)}px,${dy * H * (1 - p)}px)`;
+    MG.desenfoca(el, Math.abs(dx * W * (p - q) / DT) * MB * .8, Math.abs(dy * H * (p - q) / DT) * MB * .8);
+    if (sale) {   // el póster que se va: salida inversa (arranca suave y acelera) en sentido contrario, un poco más lento
+      const s = inv(k(t, t0, t0 + d * 1.1));
+      sale.style.transform = `translate(${-dx * W * .28 * s}px,${-dy * H * .28 * s}px) scale(${1 - .06 * s})`;
+    }
+  }
+
+  return (t) => {
+    if (!L) maqueta();
+    // cámara: zoom lento continuo + pequeño «golpe» en cada palabra + deriva de rotación (nunca quieta)
+    let g = 0; for (const h of golpes) if (t >= h) g = h;
+    const punch = g ? .022 * Math.exp(-(t - g) * 7) : 0;
+    MG.vista.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+    MG.vista.style.transform = `scale(${lerp(1.0, 1.07, C.suave(t / P.duracion)) + punch}) rotate(${Math.sin(t * .45) * .35}deg)`;
+
+    let activo = pant[0];
+    pant.forEach((p, ip) => {
+      if (ip > 0) barre(p.el, t, p.t0 - .05, ip - 1, pant[ip - 1].el);
+      if (t >= p.t0) activo = p;
+      p.lin.forEach((el, i) => {
+        const gi = p.img && i >= 2 ? i + 1 : i;      // con imagen, la tercera línea espera a que entre la imagen
+        const o = p.pos[i]; golpe(el, t, p.golpes[gi], o.x, o.y, o.fs * .55);
+      });
+      if (p.img) {   // la imagen entra entre la 1.ª y la 2.ª línea: escala con rebote, giro que se asienta y desenfoque
+        const t0 = p.golpes[2] ?? p.golpes[p.golpes.length - 1], e = C.rebote(k(t, t0, t0 + .6)), q = C.rebote(k(t - DT, t0, t0 + .6));
+        const rot = -7 + (1 - e) * 18 + Math.sin(t * 1.3) * 1.2, sc = lerp(.55, 1, e);
+        p.img.style.opacity = t < t0 ? 0 : Math.min(1, e * 2);
+        p.img.style.transform = `translate(${p.imgPos.x}px,${p.imgPos.y + (1 - e) * 160 * U}px) rotate(${rot}deg) scale(${sc})`;
+        MG.desenfoca(p.img, 0, Math.abs(160 * U * (e - q) / DT) * MB + Math.max(0, 1 - e) * 4);
+        p.img.style.zIndex = 2; p.lin.forEach((el, i) => { el.style.zIndex = i === 1 ? 3 : 1; });   // queda DETRÁS de la 2.ª línea
+      }
+    });
+
+    // cierre: logo con rebote, nombre que llena el ancho, lema en mono
+    barre(cierre.el, t, tCierre - .05, pant.length - 1, pant[pant.length - 1].el);
+    if (t >= tCierre) activo = null;
+    const [g0, g1, g2] = golpes.slice(-3);
+    const e = C.reboteFuerte(k(t, g0, g0 + .8));
+    cierre.logo.style.opacity = t < g0 ? 0 : Math.min(1, k(t, g0, g0 + .15));
+    cierre.logo.style.transform = `translate(${L.logo.x}px,${L.logo.y}px) scale(${Math.max(0, e)}) rotate(${(1 - Math.min(1, e)) * -25 + Math.sin(t * 1.1) * 1.5}deg)`;
+    golpe(cierre.nom, t, g1, L.nom.x, L.nom.y, cierre.pos[0].fs * .55);
+    golpe(cierre.lema, t, g2, L.lema.x, L.lema.y, 50 * U);
+
+    // sellos de las esquinas: color según el bloque activo, contador de póster
+    const fondoAct = activo ? activo.fondo : 'fondo', cE = (TXT[fondoAct] || TXT.fondo)[0];
+    esq[1].innerHTML = activo ? `Nº ${String(pant.indexOf(activo) + 1).padStart(2, '0')} / ${String(pant.length).padStart(2, '0')}` : 'Fin';
+    [[ex, ey], [W - ex - esq[1].offsetWidth, ey], [ex, H - ey - esq[2].offsetHeight], [W - ex - esq[3].offsetWidth, H - ey - esq[3].offsetHeight]].forEach(([x, y], i) => {
+      const t0 = .15 + i * .08, p = expo(k(t, t0, t0 + .5));
+      esq[i].style.color = cE; esq[i].style.opacity = p;
+      esq[i].style.transform = `translate(${x}px,${y + (1 - p) * (i < 2 ? -30 : 30)}px)`;
+    });
+  };
+});
+</script>
+</body></html>

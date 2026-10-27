@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-artefacto-ia» · Viegas IA · Motion Lab
+     Chat con una IA que construye en vivo: la petición sube como burbuja, la respuesta se escribe en streaming palabra a
+     palabra (cada palabra con fundido y desenfoque), aparece la ficha del artefacto y el panel se abre deslizándose desde
+     el lado (en 9:16, desde abajo). Dentro, el código se escribe línea a línea con colores, la pestaña salta a «Vista previa»
+     con un barrido y la página se monta pieza a pieza (barra, titular, botón, tarjetas) con muelles distintos; el cursor
+     pulsa el botón, la cámara entra en la vista previa con «zoom a través» y cierre con frase y logo.
+     Cambia "peticion", "respuesta" (texto del streaming), "artefacto" (nombre del archivo), "codigo" (líneas), "web"
+     ({marca, titular (*palabra* = acento), boton, tarjetas:[3 textos]}), "cierre" (*palabra* = acento), "marca", "logo"
+     (ruta o "" = inicial), colores "fondo", "fondo2", "tinta", "acento", "duracion".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --mono:'JetBrains Mono',Consolas,monospace;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 70% 100%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-style:normal; color:var(--acento); }
+.burb{ border-radius:28px 28px 8px 28px; background:rgba(var(--tintaRgb),.1); padding:22px 30px; font:500 34px/1.35 var(--fuente); color:var(--tinta); width:max-content; box-sizing:border-box; }
+.ia{ display:flex; gap:18px; align-items:flex-start; }
+.ia .av{ width:56px; height:56px; border-radius:16px; background:var(--acento); flex:none; display:grid; place-items:center; color:var(--fondo); }
+.ia .av svg{ width:34px; height:34px; }
+.ia .tx{ font:400 33px/1.45 var(--fuente); color:rgba(var(--tintaRgb),.9); }
+.ia .tx span{ display:inline-block; margin-right:.26em; }
+.ficha{ display:flex; align-items:center; gap:18px; padding:18px 22px; border-radius:20px; background:#1D1A1E; border:1.5px solid rgba(var(--halo),.5); width:max-content; }
+.ficha .i{ width:50px; height:50px; border-radius:12px; background:rgba(var(--halo),.15); color:var(--acento); display:grid; place-items:center; font:600 22px var(--mono); }
+.ficha .n{ font:600 28px var(--fuente); color:var(--tinta); }
+.ficha .d{ font:400 22px var(--mono); color:rgba(var(--tintaRgb),.5); }
+.panel{ border-radius:30px; background:#1A181B; border:1.5px solid rgba(var(--tintaRgb),.12); box-shadow:0 40px 100px rgba(0,0,0,.55), 0 0 90px rgba(var(--halo),.12); overflow:hidden; box-sizing:border-box; }
+.panel .cab{ height:84px; display:flex; align-items:center; gap:16px; padding:0 26px; border-bottom:1.5px solid rgba(var(--tintaRgb),.08); }
+.panel .cab .nom{ font:600 28px var(--fuente); color:var(--tinta); flex:1; white-space:nowrap; }
+.tabs{ position:relative; display:flex; background:rgba(var(--tintaRgb),.06); border-radius:14px; padding:5px; }
+.tabs b{ position:relative; z-index:1; font:600 22px var(--fuente); color:rgba(var(--tintaRgb),.6); padding:10px 18px; white-space:nowrap; }
+.tabs .sel{ position:absolute; top:5px; bottom:5px; border-radius:10px; background:rgba(var(--tintaRgb),.14); }
+.cuerpo{ position:absolute; left:0; right:0; top:84px; bottom:0; }
+.cod{ position:absolute; inset:0; padding:26px 30px; font:400 25px/1.62 var(--mono); color:rgba(var(--tintaRgb),.82); white-space:pre; overflow:hidden; }
+.cod .ln{ display:block; }
+.cod .n{ color:rgba(var(--tintaRgb),.25); display:inline-block; width:2.2em; }
+.cod .t{ color:var(--acento); } .cod .a{ color:#E8B26A; } .cod .s{ color:#9FC98B; }
+.vp{ position:absolute; inset:0; background:#F6F1EA; overflow:hidden; }
+.vp > *{ position:absolute; left:0; top:0; }
+.vp .nav{ display:flex; align-items:center; gap:18px; font:700 26px var(--fuente); color:#1A1716; white-space:nowrap; }
+.vp .nav i{ width:34px; height:34px; border-radius:10px; background:var(--acento); display:inline-block; }
+.vp .nav span{ font:500 20px var(--fuente); color:#7A716B; }
+.vp .h{ font:800 var(--fh)/1.0 var(--fuente); letter-spacing:-.045em; color:#1A1716; }
+.vp .bt{ background:var(--acento); color:#fff; font:700 26px var(--fuente); padding:20px 34px; border-radius:99px; white-space:nowrap; box-shadow:0 14px 34px rgba(var(--halo),.4); }
+.vp .tj{ border-radius:20px; background:#fff; box-shadow:0 12px 30px rgba(0,0,0,.08); padding:22px; box-sizing:border-box; font:600 22px/1.3 var(--fuente); color:#1A1716; }
+.vp .tj i{ display:block; width:44px; height:44px; border-radius:12px; background:rgba(var(--halo),.2); margin-bottom:14px; }
+.barrido{ position:absolute; top:0; bottom:0; width:40%; background:linear-gradient(90deg, transparent, rgba(var(--halo),.35), transparent); }
+.cursor{ width:44px; height:44px; }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:700 116px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+:root.v .burb{ font-size:42px; padding:26px 34px; }
+:root.v .ia .tx{ font-size:40px; }
+:root.v .ia .av{ width:68px; height:68px; border-radius:20px; }
+:root.v .ficha .n{ font-size:34px; } :root.v .ficha .d{ font-size:26px; } :root.v .ficha .i{ width:62px; height:62px; font-size:26px; }
+:root.h .burb{ font-size:38px; } :root.h .ia .tx{ font-size:36px; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "peticion": "Hazme una web para mi estudio",
+  "respuesta": "Claro. Te preparo una página de inicio limpia, con tu marca y un botón de reserva.",
+  "artefacto": "estudio.html",
+  "codigo": ["<header class=\"nav\">", "  <logo>Tu Estudio</logo>", "</header>", "<h1>Diseño que <em>vende</em></h1>", "<button>Reserva tu cita</button>", "<section class=\"tarjetas\">", "  <card>Branding</card>", "  <card>Web</card>", "  <card>Contenido</card>", "</section>"],
+  "web": { "marca": "Tu Estudio", "titular": "Diseño que *vende*", "boton": "Reserva tu cita", "tarjetas": ["Branding", "Web", "Contenido"] },
+  "cierre": "Pídelo y *aparece*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style; document.documentElement.classList.add(VERT ? 'v' : 'h');
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = () => P.logo ? `<div class="logo"><img src="${P.logo}" alt=""></div>` : `<div class="logo">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+const AST = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l1.6 6.4L20 6l-4.4 4.8L22 12l-6.4 1.2L20 18l-6.4-2.4L12 22l-1.6-6.4L4 18l4.4-4.8L2 12l6.4-1.2L4 6l6.4 2.4z"/></svg>';
+// colorea una línea de código (etiquetas, atributos, cadenas)
+const colorea = (l) => esc(l).replace(/(&lt;\/?)([a-z0-9]+)|([a-z-]+)(?==)|("[^"]*")/gi, (m, a, b, c, d) => a ? `${a}<span class="t">${b}</span>` : c ? `<span class="a">${c}</span>` : `<span class="s">${d}</span>`);
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'puntos', tamano: 44, intensidad: .3 }, halo: { fuerza: .22, x: 70, y: 80 } }, (MG) => {
+  const { k, lerp, curvas: C, DT } = MG, D = P.duracion;
+  // disposición
+  const CH = VERT ? { x: 80, y: 290, w: 860 } : { x: 110, y: 190, w: 620 };
+  const PN = VERT ? { x: 80, y: 820, w: 860, h: 660 } : { x: 790, y: 120, w: 1020, h: 840 };
+  const burb = MG.el(`<div class="burb">${esc(P.peticion)}</div>`); burb.style.maxWidth = CH.w + 'px';
+  const pal = String(P.respuesta).split(' ');
+  const ia = MG.el(`<div class="ia"><div class="av">${AST}</div><div class="tx">${pal.map((w) => `<span>${esc(w)}</span>`).join('')}</div></div>`); ia.style.width = CH.w + 'px';
+  const spans = [...ia.querySelectorAll('.tx span')];
+  const ficha = MG.el(`<div class="ficha"><div class="i">&lt;/&gt;</div><div><div class="n">${esc(P.artefacto)}</div><div class="d">artefacto · HTML</div></div></div>`);
+  const cod = P.codigo || [];
+  const web = P.web || {};
+  const panel = MG.el(`<div class="panel"><div class="cab"><div class="nom">${esc(P.artefacto)}</div><div class="tabs"><div class="sel"></div><b>Código</b><b>Vista previa</b></div></div>
+    <div class="cuerpo"><div class="cod">${cod.map((l, i) => `<span class="ln"><span class="n">${i + 1}</span>${colorea(l)}</span>`).join('')}</div>
+    <div class="vp"><div class="nav"><i></i>${esc(web.marca || P.marca)}<span>Inicio · Servicios · Contacto</span></div><div class="h">${md(web.titular || '')}</div>
+    <div class="bt">${esc(web.boton || '')}</div>${(web.tarjetas || []).slice(0, 3).map((x) => `<div class="tj"><i></i>${esc(x)}</div>`).join('')}<div class="barrido"></div>
+    <svg class="cursor" viewBox="0 0 24 24"><path d="M5 3l14 8-6 1.5L10 19z" fill="#1A1716" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/></svg></div></div></div>`);
+  panel.style.width = PN.w + 'px'; panel.style.height = PN.h + 'px';
+  const tabs = panel.querySelectorAll('.tabs b'), sel = panel.querySelector('.tabs .sel');
+  const lns = [...panel.querySelectorAll('.cod .ln')], vp = panel.querySelector('.vp');
+  const vNav = vp.querySelector('.nav'), vH = vp.querySelector('.h'), vBt = vp.querySelector('.bt'), vTj = [...vp.querySelectorAll('.tj')], vBar = vp.querySelector('.barrido'), vCur = vp.querySelector('.cursor');
+  const BW = PN.w, BH = PN.h - 84;
+  vp.style.setProperty('--fh', (VERT ? 92 : 104) + 'px');
+  const logo = MG.el(logoHTML());
+  const anchoTit = VERT ? W - 180 : 1500;
+  const cie = MG.texto(md(P.cierre), 'tit'); cie.style.width = anchoTit + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+
+  const tB = .3, tR0 = 1.0, tR1 = tR0 + Math.min(1.3, pal.length * .08), tF = tR1 + .1, tP = tF + .35;
+  const tC0 = tP + .55, tC1 = tC0 + Math.min(2, cod.length * .17), tV = tC1 + .25;
+  const tW = tV + .35, tClick = tW + 1.25, tZ = Math.max(tClick + .5, D - 2.6), tC = tZ + .7;
+  return (t) => {
+    // chat
+    const eb = MG.entra(burb, t, tB, { d: .6, dy: 120, dx: 60, escala0: .9, curva: 'rebote', base: 5 });
+    MG.pon(burb, CH.x + CH.w - burb.offsetWidth + eb.x, CH.y + eb.y, eb.s);
+    const ei = MG.entra(ia, t, tR0 - .2, { d: .5, dy: 30, curva: 'salidaQuint', base: 3 });
+    const yIa = CH.y + burb.offsetHeight + 34;
+    MG.pon(ia, CH.x, yIa + ei.y);
+    spans.forEach((s, i) => { const ts = tR0 + i * (tR1 - tR0) / spans.length, e = C.salidaCubica(k(t, ts, ts + .35));
+      s.style.opacity = e; s.style.filter = e < 1 ? `blur(${(1 - e) * 6}px)` : 'none'; s.style.transform = `translateY(${(1 - e) * 8}px)`; });
+    const ef = MG.entra(ficha, t, tF, { d: .55, dy: 60, escala0: .85, curva: 'reboteFuerte', base: 6 });
+    MG.pon(ficha, CH.x + 74 + ef.x, yIa + ia.offsetHeight + 26 + ef.y, ef.s);
+    ficha.style.borderColor = `rgba(var(--halo),${.5 + .4 * Math.max(0, Math.sin((t - tF) * 6)) * (t < tP + .6 ? 1 : 0)})`;
+    // panel: se desliza (16:9 desde la derecha, 9:16 desde abajo) con entrada rápida y frenada suave
+    const ep = MG.entra(panel, t, tP, { d: .75, dx: VERT ? 0 : 700, dy: VERT ? 520 : 0, escala0: .92, curva: 'salidaQuint', base: 8 });
+    MG.pon(panel, PN.x + ep.x, PN.y + ep.y, ep.s, `perspective(1800px) rotateY(${VERT ? 0 : (1 - ep.p) * -14}deg) rotateX(${VERT ? (1 - ep.p) * 12 : 0}deg)`);
+    // pestañas
+    const sw = C.salidaExpo(k(t, tV, tV + .45)), a = tabs[0], b = tabs[1];
+    sel.style.left = lerp(a.offsetLeft, b.offsetLeft, sw) + 'px'; sel.style.width = lerp(a.offsetWidth, b.offsetWidth, sw) + 'px';
+    a.style.color = `rgba(var(--tintaRgb),${lerp(1, .55, sw)})`; b.style.color = `rgba(var(--tintaRgb),${lerp(.55, 1, sw)})`;
+    // código línea a línea (cada línea entra con su pequeño deslizamiento)
+    lns.forEach((l, i) => { const tl = tC0 + i * (tC1 - tC0) / lns.length, e = C.salidaQuint(k(t, tl, tl + .22));
+      l.style.opacity = e; l.style.transform = `translateX(${(1 - e) * -30}px)`; });
+    const cuerpoCod = panel.querySelector('.cod'); cuerpoCod.style.transform = `translateY(${-Math.max(0, (lns.length * 25 * 1.62 + 52) - BH) * C.suave(k(t, tC0, tC1))}px)`;
+    // vista previa: barrido y montaje
+    const ve = C.salidaCubica(k(t, tV, tV + .4)); vp.style.clipPath = `inset(0 ${100 - ve * 100}% 0 0)`;
+    vBar.style.left = lerp(-40, 120, C.entradaSalidaQuint(k(t, tV, tV + .7))) + '%'; vBar.style.opacity = t > tV && t < tV + .7 ? 1 : 0;
+    const pad = 40;
+    const en = MG.entra(vNav, t, tW, { d: .5, dy: -40, curva: 'salidaQuint', base: 3 }); MG.pon(vNav, pad, 30 + en.y);
+    vH.style.width = (BW - pad * 2) + 'px';
+    const eh = MG.entra(vH, t, tW + .12, { d: .6, dy: 70, curva: 'rebote', base: 5 }); const yH = VERT ? 120 : 150; MG.pon(vH, pad, yH + eh.y);
+    const yBt = yH + vH.offsetHeight + 34;
+    const press = 1 - .08 * Math.sin(Math.PI * k(t, tClick, tClick + .25));
+    const ebt = MG.entra(vBt, t, tW + .3, { d: .55, dy: 0, escala0: .5, curva: 'reboteFuerte', base: 4 }); MG.pon(vBt, pad, yBt, ebt.s * press);
+    vBt.style.boxShadow = `0 14px 34px rgba(var(--halo),.4), 0 0 0 ${18 * Math.sin(Math.PI * k(t, tClick, tClick + .6))}px rgba(var(--halo),.25)`;
+    const tw = (BW - pad * 2 - 2 * 22) / 3, yT = yBt + 130;
+    vTj.forEach((c, i) => { c.style.width = tw + 'px'; const e = MG.entra(c, t, tW + .45 + i * .1, { d: .55, dy: 120, escala0: .9, curva: ['rebote', 'salidaExpo', 'reboteSuave'][i % 3], base: 5 });
+      MG.pon(c, pad + i * (tw + 22) + e.x, yT + e.y, e.s); });
+    // cursor que llega al botón y pulsa
+    const cx = pad + vBt.offsetWidth * .7, cy = yBt + vBt.offsetHeight * .6, cm = C.afterEffects75(k(t, tW + .6, tClick));
+    MG.pon(vCur, lerp(BW * .85, cx, cm), lerp(BH * .95, cy, cm), 1 - .15 * Math.sin(Math.PI * k(t, tClick, tClick + .25)));
+    vCur.style.opacity = C.salidaCubica(k(t, tW + .6, tW + .8));
+    // cámara: deriva, se acerca al panel y entra en la vista previa
+    const zt = C.entradaCubica(k(t, tZ, tC)), zc = C.salidaQuint(k(t, tC - .05, tC + 1.3));
+    const fx = PN.x + pad + vBt.offsetWidth / 2, fy = PN.y + 84 + yBt + vBt.offsetHeight / 2;
+    const foco = C.afterEffects(k(t, tP, tV + .5));
+    const z = t < tC ? lerp(1, 1.08, k(t, 0, tZ)) * (1 + 8 * zt) : lerp(1.25, 1, zc) * lerp(1, 1.04, k(t, tC, D));
+    const ox = t < tC ? lerp(W / 2, lerp(W / 2, fx, foco), 1) : W / 2, oy = t < tC ? lerp(H / 2, fy, foco * (VERT ? .6 : .5)) : H / 2;
+    const ox2 = t < tC ? lerp(ox, fx, C.salidaCubica(k(t, tClick, tZ))) : ox, oy2 = t < tC ? lerp(oy, fy, C.salidaCubica(k(t, tClick, tZ))) : oy;
+    MG.vista.style.transformOrigin = `${ox2}px ${oy2}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .5) * 8}px, ${Math.cos(t * .37) * 6}px) rotate(${Math.sin(t * .29) * .5}deg)`;
+    MG.halo(60 + Math.sin(t * .4) * 12, 75 + Math.cos(t * .3) * 10);
+    if (t > tC) [burb, ia, ficha, panel].forEach((e) => e.style.opacity = 0);
+    // cierre
+    cie.style.fontSize = (VERT ? 112 : 124) + 'px';
+    const bloque = 150 + 60 + cie.offsetHeight + 50 + 60, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-20 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - anchoTit) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + cie.trozos.length * .08, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+});
+</script>
+</body></html>

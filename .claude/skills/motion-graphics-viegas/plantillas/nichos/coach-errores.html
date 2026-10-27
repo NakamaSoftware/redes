@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «coach-errores» · Coach / formador · Viegas IA · Motion Lab
+     Lista «3 errores que…»: el título entra por palabras, cada error llega desde la derecha en su tarjeta (rebote, cada una 0,35 s
+     después de la anterior), la ✕ estalla con rebote fuerte y una línea tacha el error. Cierre con «Guarda esto» y la marca.
+     Cambia "titulo" (*palabra* = acento), "errores" (2–4), "cierre", "marca", "logo". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.err{ display:flex; align-items:center; gap:34px; padding:34px 40px; }
+.err .num{ font:400 92px/1 var(--serif); font-style:italic; color:var(--acento); width:110px; flex:none; }
+.err .tx{ font:600 50px/1.15 var(--fuente); letter-spacing:-.02em; color:var(--texto); position:relative; }
+.err .tx s{ position:absolute; left:0; top:52%; height:6px; width:100%; background:#EF4444; border-radius:6px; transform-origin:0 50%; }
+.err .x{ margin-left:auto; flex:none; width:84px; height:84px; border-radius:50%; background:rgba(239,68,68,.16); border:2px solid rgba(239,68,68,.6); display:grid; place-items:center; color:#EF4444; font:700 46px var(--fuente); }
+.cierre{ font:500 40px var(--fuente); color:var(--texto); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Emprendedores",
+  "titulo": "3 errores que *frenan* tu negocio",
+  "errores": ["Trabajar sin precios claros", "Decir que sí a todos los clientes", "Publicar sin una oferta concreta"],
+  "cierre": "Guárdalo y revisa cuál cometes tú",
+  "marca": "Método Foco",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 200);
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const tit = N.frase(P.titulo, 'n-tit', cw);
+  const cards = P.errores.map((e, i) => MG.el(`<div class="n-card err" style="width:${cw}px"><span class="num">0${i + 1}</span><span class="tx">${e}<s></s></span><span class="x">✕</span></div>`));
+  const cierre = MG.el(`<div class="cierre">🔖 ${P.cierre}</div>`);
+  const marca = MG.el(N.marca(.85));
+  let L;
+  return (t) => {
+    if (!L) {
+      const hT = tit.offsetHeight, hc = cards[0].offsetHeight, gap = VERT ? 34 : 22, total = hT + 70 + cards.length * (hc + gap) + 90 + cierre.offsetHeight;
+      L = { y: (H - total) / 2 + (VERT ? 40 : 30), hT, hc, gap };
+    }
+    N.vivo(t);
+    N.es(chip, t, .05, fin, { x: N.cx(chip), y: L.y - 110, dy: -60, curva: 'salidaQuint', oy: -70 });
+    MG.pon(tit, (W - cw) / 2, L.y);
+    if (t < fin) MG.animaTexto(tit, t, .2, { paso: .07 }); else N.es(tit, t, 0, fin, { x: (W - cw) / 2, y: L.y, oy: -120 });
+    cards.forEach((c, i) => {
+      const t0 = 1.1 + i * .9, y = L.y + L.hT + 70 + i * (L.hc + L.gap);
+      N.es(c, t, t0, fin + .08 * (i + 1), { x: (W - cw) / 2, y, dx: 520, dy: 0, d: .65, oy: -90, s0: .96 });
+      const px = N.pop(t, t0 + .45, .5); c.querySelector('.x').style.transform = `scale(${px}) rotate(${(1 - Math.min(1, px)) * -90}deg)`;
+      c.querySelector('s').style.transform = `scaleX(${C.salidaQuint(k(t, t0 + .6, t0 + 1.05))})`;
+      c.querySelector('.tx').style.opacity = 1 - .45 * k(t, t0 + .6, t0 + 1);
+    });
+    const yC = L.y + L.hT + 70 + cards.length * (L.hc + L.gap) + 40;
+    N.es(cierre, t, 1.1 + cards.length * .9 + .3, fin + .4, { x: N.cx(cierre), y: yC, dy: 80, curva: 'reboteSuave', oy: -60 });
+    N.es(marca, t, 1.1 + cards.length * .9 + .5, fin + .45, { x: N.cx(marca), y: H - (VERT ? 330 : 140), dy: 60, oy: -50 });
+  };
+});
+</script>
+</body></html>

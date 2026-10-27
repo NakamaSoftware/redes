@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-liquid-glass» · Viegas IA · Motion Lab
+     El material «Liquid Glass» (iOS 26 / WWDC25) hecho de verdad, todo en una sola pasada de WebGL (three.js):
+       1) fondo degradado azul/crema con una ola de luz que se mueve despacio;
+       2) detrás, un objeto 3D de cristal (MeshPhysicalMaterial: transmission, ior, thickness, clearcoat, iridescence) que gira
+          despacio: «flor» (por defecto), «ola», «tarjetas» o «logo» (tu logo SVG extruido en cristal);
+       3) una cápsula de cristal líquido entra con muelle (se estira al subir y se aplasta al frenar) y dentro aparece el titular;
+          la cápsula REFRACTA lo que tiene detrás: lente en los bordes (desplaza el fondo), esmerilado gaussiano suave,
+          aberración cromática sutil, borde especular, reflejo iridiscente y sombra difusa;
+       4) tarjetas de cristal escalonadas que entran cada una con su curva;
+       5) «zoom a través» y cierre con el logo dentro de un icono de cristal + marca + lema.
+     Desenfoque de movimiento real: cada fotograma promedia subfotogramas del obturador (180°), más cuantos más rápido va.
+     Cambia en params: "titular", "subtitulo", "objeto" (flor | ola | tarjetas | logo), "colorObjeto" (#hex o "" = el del objeto),
+     "fondo" (4 colores: profundo, medio, crema, cielo), "tarjetas" [{n, t}], "marca", "lema", "logo" (ruta a SVG/PNG; "" = rayo
+     de Viegas), "duracion". Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?titular=Hola en la dirección. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@500;600;700&family=Geist+Mono:wght@500&display=block">
+<style>
+html,body{ margin:0; background:#7FA6EE; overflow:hidden; }
+canvas{ position:absolute; left:0; top:0; display:block; }
+</style>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "titular": "Liquid Glass",
+  "subtitulo": "El cristal que se mueve contigo",
+  "objeto": "flor",
+  "colorObjeto": "",
+  "fondo": ["#1C46C9", "#76A0EC", "#F4E8D2", "#B9CEF3"],
+  "tarjetas": [{ "n": "01", "t": "Refracción" }, { "n": "02", "t": "Brillo" }, { "n": "03", "t": "Profundidad" }],
+  "marca": "Viegas Estudio",
+  "lema": "edición · motion · ia",
+  "logo": ""
+}
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
+
+// ---------------------------------------------------------------- parámetros: bloque params + ?clave=valor + formato por hash
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (Array.isArray(d) || (d && typeof d === 'object')) ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W, D = P.duracion;
+const DPR = Math.max(1, window.devicePixelRatio || 1);
+window.__duracion = D; window.__ancho = W; window.__alto = H;
+
+// ---------------------------------------------------------------- curvas (nada lineal)
+const cl = (x) => (x < 0 ? 0 : x > 1 ? 1 : x), k = (t, a, b) => cl((t - a) / (b - a)), lerp = (a, b, x) => a + (b - a) * x;
+const muelle = (f, d) => (u) => (u <= 0 ? 0 : u >= 1 ? 1 : 1 - Math.exp(-d * u) * Math.cos(2 * Math.PI * f * u) + Math.exp(-d) * Math.cos(2 * Math.PI * f) * u * u * u);
+const C = {
+  salidaQuint: (x) => 1 - (1 - cl(x)) ** 5, salidaCubica: (x) => 1 - (1 - cl(x)) ** 3, entradaCubica: (x) => cl(x) ** 3,
+  salidaExpo: (x) => (cl(x) >= 1 ? 1 : 1 - Math.pow(2, -10 * cl(x))), entradaQuart: (x) => cl(x) ** 4,
+  entradaSalidaQuint: (x) => { x = cl(x); return x < 0.5 ? 16 * x ** 5 : 1 - Math.pow(-2 * x + 2, 5) / 2; },
+  muelle: muelle(1.15, 5.2), muelleSuave: muelle(0.9, 6.2), muelleVivo: muelle(1.45, 4.6),
+};
+
+// ---------------------------------------------------------------- maqueta por formato (px CSS)
+const M = VERT
+  ? { obj: [0, 0.35], objEsc: 1, capY: 840, fs: 132, capMax: 960, sub: 46, cardsY: 1640, cw: 292, gap: 26, ch: [300, 380, 460], lab: 40, logoY: 820, logo: 270 }
+  : { obj: [0.05, 0.3], objEsc: 0.92, capY: 430, fs: 124, capMax: 1300, sub: 42, cardsY: 1000, cw: 300, gap: 28, ch: [180, 230, 280], lab: 36, logoY: 470, logo: 240 };
+const T = { obj: 0.0, cap: 0.65, tit: 1.0, sub: 1.65, car: 2.9, sal: 6.6, logo: 7.15, marca: 7.6, lema: 7.95 };
+
+// ---------------------------------------------------------------- render
+const cv = document.createElement('canvas'); cv.style.width = W + 'px'; cv.style.height = H + 'px'; document.body.appendChild(cv);
+const R = new THREE.WebGLRenderer({ canvas: cv, antialias: true, preserveDrawingBuffer: true, powerPreference: 'high-performance' });
+R.setPixelRatio(DPR); R.setSize(W, H, false);
+R.toneMapping = THREE.NoToneMapping; R.autoClear = false;   // la acumulación suma subfotogramas: nada de borrar entre pasadas
+const BW = Math.round(W * DPR), BH = Math.round(H * DPR);
+const rt = (w, h, o = {}) => new THREE.WebGLRenderTarget(w, h, Object.assign({ type: THREE.HalfFloatType, depthBuffer: false }, o));
+const rtEscena = rt(BW, BH, { depthBuffer: true, samples: 4 });
+const rtA = rt(BW >> 1, BH >> 1), rtB = rt(BW >> 1, BH >> 1), rtAcum = rt(BW, BH);
+
+// ---------------------------------------------------------------- escena 3D: fondo (plano pegado a la cámara) + objeto de cristal
+const escena = new THREE.Scene();
+const cam = new THREE.PerspectiveCamera(VERT ? 38 : 30, W / H, 0.1, 100); escena.add(cam);
+const pmrem = new THREE.PMREMGenerator(R);
+escena.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+escena.environmentIntensity = 0.9;
+const hex = (h) => new THREE.Color(h);   // three convierte el hex sRGB a lineal
+const fondoMat = new THREE.ShaderMaterial({
+  uniforms: { t: { value: 0 }, asp: { value: W / H }, base: { value: VERT ? 0.2 : 0.36 },
+    c1: { value: hex(P.fondo[0]) }, c2: { value: hex(P.fondo[1]) }, c3: { value: hex(P.fondo[2]) }, c4: { value: hex(P.fondo[3]) } },
+  vertexShader: 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0); }',
+  fragmentShader: `
+    uniform float t, asp, base; uniform vec3 c1, c2, c3, c4; varying vec2 vUv;
+    void main(){
+      vec2 p = vec2((vUv.x - .5) * asp, vUv.y - .5);
+      float w1 = .085 * sin(p.x * 2.4 + t * .33) + .04 * sin(p.x * 5.3 - t * .47 + 1.3) + .02 * sin(p.x * 9.1 + t * .6);
+      float cur = p.y - (base + w1 - p.x * .22);                 // > 0 por encima de la ola
+      float w2 = .07 * sin(p.x * 1.9 - t * .26 + 2.) + .03 * sin(p.x * 4.4 + t * .38);
+      float cur2 = p.y - (base - .2 + w2 - p.x * .3);
+      vec3 arriba = mix(c3, c4, smoothstep(.02, .55, cur + .08 * sin(p.x * 1.3 + t * .2)));
+      vec3 abajo = mix(c2, c1, smoothstep(-.05, .75, -cur + .1 * sin(p.x * 1.7 - t * .18)));
+      abajo = mix(abajo, mix(c2, c3, .25), .35 * exp(-abs(cur2) * 9.));                // pliegue de tela iluminado
+      float lado = smoothstep(-.012, .012, cur);
+      vec3 col = mix(abajo, arriba, lado);
+      col += vec3(1.) * (.85 * exp(-abs(cur) * 70.) + .32 * exp(-abs(cur) * 13.));        // la ola de luz
+      col += vec3(.92, .96, 1.) * (.30 * exp(-abs(cur2) * 55.) + .12 * exp(-abs(cur2) * 11.));
+      col *= 1. - .18 * smoothstep(.35, 1.1, length(p * vec2(.8, 1.)));                   // viñeta suave
+      gl_FragColor = vec4(col, 1.);
+    }`,
+  depthWrite: false,
+});
+const fondo = new THREE.Mesh(new THREE.PlaneGeometry(1, 1), fondoMat);
+{ const dist = 30, h = 2 * dist * Math.tan(THREE.MathUtils.degToRad(cam.fov / 2)) * 1.12; fondo.scale.set(h * W / H, h, 1); fondo.position.z = -dist; fondo.renderOrder = -1; cam.add(fondo); }
+
+escena.add(new THREE.HemisphereLight(0xe8f0ff, 0x2a3f8f, 0.6));
+const sol = new THREE.DirectionalLight(0xffffff, 2.2); sol.position.set(-3, 5, 6); escena.add(sol);
+const contra = new THREE.DirectionalLight(0xaecbff, 1.4); contra.position.set(4, -2, -5); escena.add(contra);
+
+const vidrio = (color, o = {}) => new THREE.MeshPhysicalMaterial(Object.assign({
+  color, transmission: 1, thickness: 0.9, ior: 1.45, roughness: 0.1, metalness: 0, clearcoat: 1, clearcoatRoughness: 0.06,
+  iridescence: 0.55, iridescenceIOR: 1.3, iridescenceThicknessRange: [180, 620], attenuationColor: color, attenuationDistance: 1.4,
+  specularIntensity: 1, envMapIntensity: 1.1, side: THREE.DoubleSide, transparent: false }, o));
+
+// --- objetos
+function flor(col) {
+  const g = new THREE.Group(), cA = new THREE.Color(col), cB = cA.clone().lerp(new THREE.Color('#FFD08A'), 0.45);
+  const petalo = (largo, ancho, curva) => {
+    const geo = new THREE.SphereGeometry(1, 120, 60), p = geo.attributes.position, v = new THREE.Vector3();
+    for (let i = 0; i < p.count; i++) {
+      v.fromBufferAttribute(p, i);
+      const u = (v.y + 1) / 2;                                              // 0 base → 1 punta
+      const ancho2 = ancho * (0.18 + 0.82 * Math.sin(Math.PI * Math.pow(u, 0.75)) ** 0.8);
+      let x = v.x * ancho2, y = u * largo, z = v.z * 0.07 * (0.6 + 0.4 * Math.sin(Math.PI * u));
+      z += curva * (u * u) * largo * 0.55 - Math.abs(x) * x * 0.0 + (x * x) * 0.35;  // copa y canal
+      p.setXYZ(i, x, y, z);
+    }
+    geo.computeVertexNormals(); return geo;
+  };
+  const N = 6, cabeza = new THREE.Group(), petalos = new THREE.Group(); cabeza.add(petalos); g.add(cabeza);
+  for (let i = 0; i < N; i++) {
+    const ext = i % 2 === 0, h = new THREE.Group(); h.rotation.z = (i / N) * Math.PI * 2 + (ext ? 0 : 0.2);
+    const m = new THREE.Mesh(petalo(ext ? 1.9 : 1.55, ext ? 0.8 : 0.66, ext ? 0.55 : 0.75), vidrio(ext ? cA : cB, { thickness: 0.6, transmission: 0.82, attenuationColor: new THREE.Color('#FFB07A'), attenuationDistance: 4, emissive: new THREE.Color('#FF5A1F'), emissiveIntensity: 0.32, sheen: 0.4, sheenColor: new THREE.Color('#FFD2A8') }));
+    m.rotation.x = ext ? -0.6 : -0.95; h.add(m); petalos.add(h);
+  }
+  const centro = new THREE.Mesh(new THREE.SphereGeometry(0.2, 48, 24), vidrio(new THREE.Color('#FFC46B'), { transmission: 0.7, thickness: 0.5 }));
+  centro.position.z = 0.15; cabeza.add(centro);
+  for (let i = 0; i < 7; i++) {
+    const a = i / 7 * Math.PI * 2, s = new THREE.Mesh(new THREE.SphereGeometry(0.055, 20, 12), new THREE.MeshPhysicalMaterial({ color: '#FFB347', roughness: 0.3, clearcoat: 1 }));
+    s.position.set(Math.cos(a) * 0.3, Math.sin(a) * 0.3, 0.45 + 0.08 * Math.sin(a * 3)); petalos.add(s);
+  }
+  cabeza.rotation.x = -0.5;                                                     // la flor mira hacia la cámara y un poco arriba
+  const tallo = new THREE.CatmullRomCurve3([new THREE.Vector3(0, -0.05, -0.15), new THREE.Vector3(0.05, -0.6, -0.35), new THREE.Vector3(0.35, -2.4, -0.4), new THREE.Vector3(-0.3, -4.6, -0.1), new THREE.Vector3(-0.6, -6.5, 0.2)]);
+  g.add(new THREE.Mesh(new THREE.TubeGeometry(tallo, 160, 0.05, 16), vidrio(new THREE.Color('#F08A45'), { thickness: 0.25, attenuationDistance: 3, emissive: new THREE.Color('#E0642A'), emissiveIntensity: 0.35 })));
+  const raiz = new THREE.Group(); raiz.add(g);
+  raiz.userData.giro = (t) => { petalos.rotation.z = t * 0.8; g.rotation.y = Math.sin(t * 0.9) * 0.35; g.rotation.z = Math.sin(t * 0.6) * 0.05; }; return raiz;
+}
+function ola(col) {
+  const geo = new THREE.BoxGeometry(4.6, 1.15, 0.16, 260, 30, 2), p = geo.attributes.position;
+  for (let i = 0; i < p.count; i++) {
+    const x = p.getX(i), y = p.getY(i), z = p.getZ(i), a = x * 1.35, tw = x * 0.75;
+    const yy = y * Math.cos(tw) - z * Math.sin(tw), zz = y * Math.sin(tw) + z * Math.cos(tw);
+    p.setXYZ(i, x, yy + Math.sin(a) * 0.55, zz + Math.cos(a * 0.8) * 0.5);
+  }
+  geo.computeVertexNormals();
+  const g = new THREE.Group(), m = new THREE.Mesh(geo, vidrio(new THREE.Color(col), { thickness: 0.6 })); g.add(m);
+  const m2 = new THREE.Mesh(geo, vidrio(new THREE.Color(col).lerp(new THREE.Color('#ffffff'), 0.4), { thickness: 0.5 }));
+  m2.scale.setScalar(0.72); m2.position.set(0.3, -0.75, -0.6); m2.rotation.z = 0.35; g.add(m2);
+  const r = new THREE.Group(); r.add(g); r.userData.giro = (t) => { g.rotation.y = t * 0.9; g.rotation.x = Math.sin(t * 0.7) * 0.25; }; return r;
+}
+function tarjetas3d(col) {
+  const g = new THREE.Group(), c0 = new THREE.Color(col);
+  [[-0.9, 0.35, -0.9, -0.22], [0, 0, 0, 0], [0.9, -0.35, 0.9, 0.22]].forEach(([x, y, z, r], i) => {
+    const m = new THREE.Mesh(new RoundedBoxGeometry(1.7, 2.2, 0.14, 8, 0.22), vidrio(c0.clone().lerp(new THREE.Color('#ffffff'), i * 0.22), { thickness: 0.35 }));
+    m.position.set(x, y, z); m.rotation.y = r; g.add(m);
+  });
+  const rr = new THREE.Group(); rr.add(g); rr.userData.giro = (t) => { g.rotation.y = Math.sin(t * 0.8) * 0.6; g.rotation.x = Math.sin(t * 0.5) * 0.15; }; return rr;
+}
+// --- logo extruido: lee los «d» de un SVG (o el rayo de Viegas)
+const RAYO = 'M13.6 1.5 3.4 14h7.3l-1.6 8.5L20.6 9.6h-7.4l.4-8.1z';
+function formas(d) {
+  const sp = new THREE.ShapePath(), tk = d.match(/[a-zA-Z]|-?\d*\.?\d+(?:e[-+]?\d+)?/g) || [];
+  let i = 0, c = 'M', x = 0, y = 0, x0 = 0, y0 = 0, cx = 0, cy = 0;
+  const n = () => parseFloat(tk[i++]);
+  while (i < tk.length) {
+    if (/[a-zA-Z]/.test(tk[i])) c = tk[i++];
+    const r = c === c.toLowerCase(), C2 = c.toUpperCase(), ox = r ? x : 0, oy = r ? y : 0;
+    if (C2 === 'M') { x = ox + n(); y = oy + n(); x0 = x; y0 = y; sp.moveTo(x, -y); c = r ? 'l' : 'L'; }
+    else if (C2 === 'L') { x = ox + n(); y = oy + n(); sp.lineTo(x, -y); }
+    else if (C2 === 'H') { x = (r ? x : 0) + n(); sp.lineTo(x, -y); }
+    else if (C2 === 'V') { y = (r ? y : 0) + n(); sp.lineTo(x, -y); }
+    else if (C2 === 'C') { const a = ox + n(), b = oy + n(), e = ox + n(), f = oy + n(); x = ox + n(); y = oy + n(); cx = e; cy = f; sp.bezierCurveTo(a, -b, e, -f, x, -y); }
+    else if (C2 === 'S') { const a = 2 * x - cx, b = 2 * y - cy, e = ox + n(), f = oy + n(); x = ox + n(); y = oy + n(); cx = e; cy = f; sp.bezierCurveTo(a, -b, e, -f, x, -y); }
+    else if (C2 === 'Q') { const a = ox + n(), b = oy + n(); x = ox + n(); y = oy + n(); sp.quadraticCurveTo(a, -b, x, -y); }
+    else if (C2 === 'Z') { sp.currentPath && sp.currentPath.closePath(); x = x0; y = y0; if (i < tk.length && !/[a-zA-Z]/.test(tk[i])) c = 'M'; }
+    else { i++; }
+  }
+  return sp.toShapes(false);
+}
+async function dLogo() {
+  if (P.logo && /\.svg$/i.test(P.logo)) { try { const s = await (await fetch(P.logo)).text(); const ds = [...s.matchAll(/\sd="([^"]+)"/g)].map((m) => m[1]); if (ds.length) return ds; } catch {} }
+  return [RAYO];
+}
+async function logo3d(col) {
+  const shapes = (await dLogo()).flatMap(formas);
+  const geo = new THREE.ExtrudeGeometry(shapes, { depth: 3.2, bevelEnabled: true, bevelThickness: 1.1, bevelSize: 0.8, bevelSegments: 8, curveSegments: 48 });
+  geo.center(); geo.computeBoundingBox(); const b = geo.boundingBox, s = 3.4 / Math.max(b.max.x - b.min.x, b.max.y - b.min.y); geo.scale(s, s, s);
+  const g = new THREE.Group(), m = new THREE.Mesh(geo, vidrio(new THREE.Color(col), { thickness: 1.0 })); g.add(m);
+  g.userData.giro = (t) => { m.rotation.y = t; m.rotation.x = Math.sin(t * 0.6) * 0.12; }; return g;
+}
+const COLOR_OBJ = { flor: '#FF7A3A', ola: '#5E9BFF', tarjetas: '#9EC2FF', logo: '#FF7A3D' };
+const tipoObj = COLOR_OBJ[P.objeto] ? P.objeto : 'flor', colObj = P.colorObjeto || COLOR_OBJ[tipoObj];
+const obj = tipoObj === 'ola' ? ola(colObj) : tipoObj === 'tarjetas' ? tarjetas3d(colObj) : tipoObj === 'logo' ? await logo3d(colObj) : flor(colObj);
+escena.add(obj);
+
+// ---------------------------------------------------------------- pasadas: desenfoque gaussiano (esmerilado) + cristal + acumulación
+const VS = 'varying vec2 vUv; void main(){ vUv = uv; gl_Position = vec4(position.xy, 0., 1.); }';
+const quad = new THREE.Mesh(new THREE.PlaneGeometry(2, 2)), escQ = new THREE.Scene(), camQ = new THREE.OrthographicCamera(-1, 1, 1, -1, 0, 1); escQ.add(quad);
+const pasa = (mat, destino) => { quad.material = mat; R.setRenderTarget(destino); R.render(escQ, camQ); };
+// gaussiana separable, 15 tomas con muestreo lineal (σ ≈ 7 px a media resolución → ≈ 14 px; dos vueltas ≈ 20 px)
+const desenfoque = new THREE.ShaderMaterial({ uniforms: { tex: { value: null }, dir: { value: new THREE.Vector2() } }, vertexShader: VS,
+  fragmentShader: `uniform sampler2D tex; uniform vec2 dir; varying vec2 vUv;
+    void main(){ vec4 s = vec4(0.); float tot = 0.;
+      for (int i = -7; i <= 7; i++) { float x = float(i) * 1.6; float w = exp(-x * x / (2. * 49.)); s += texture2D(tex, vUv + dir * x) * w; tot += w; }
+      gl_FragColor = s / tot; }` });
+const NS = 7;
+const cristal = new THREE.ShaderMaterial({
+  uniforms: { tS: { value: null }, tB: { value: null }, tO: { value: null }, res: { value: new THREE.Vector2(W, H) }, tt: { value: 0 }, peso: { value: 1 }, sombra: { value: 1 },
+    sC: { value: Array.from({ length: NS }, () => new THREE.Vector4()) }, sP: { value: Array.from({ length: NS }, () => new THREE.Vector4()) },
+    sQ: { value: Array.from({ length: NS }, () => new THREE.Vector4()) } },
+  vertexShader: VS, blending: THREE.CustomBlending, blendSrc: THREE.OneFactor, blendDst: THREE.OneFactor, blendEquation: THREE.AddEquation,
+  depthTest: false, depthWrite: false, transparent: true,
+  fragmentShader: `
+    uniform sampler2D tS, tB, tO; uniform vec2 res; uniform float tt, peso, sombra;
+    uniform vec4 sC[${NS}]; uniform vec4 sP[${NS}]; uniform vec4 sQ[${NS}];
+    varying vec2 vUv;
+    // sC: centro x, y, semiancho, semialto (px) · sP: radio, giro, opacidad, esmerilado · sQ: lente, tinte oscuro, aberración, -
+    float caja(vec2 p, vec2 b, float r){ vec2 q = abs(p) - b + r; return length(max(q, 0.)) + min(max(q.x, q.y), 0.) - r; }
+    vec2 aUv(vec2 p){ return vec2(p.x / res.x, 1. - p.y / res.y); }
+    vec3 fondo(vec2 p, float esm){ vec2 uv = clamp(aUv(p), vec2(.001), vec2(.999)); return mix(texture2D(tS, uv).rgb, texture2D(tB, uv).rgb, esm); }
+    mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c, -s, s, c); }
+    void main(){
+      vec2 p = vec2(vUv.x * res.x, (1. - vUv.y) * res.y);
+      vec3 col = texture2D(tS, vUv).rgb;
+      // sombras difusas de todas las piezas (fuera de ellas)
+      float som = 0.;
+      for (int i = 0; i < ${NS}; i++) {
+        if (sP[i].z <= 0.001) continue;
+        vec2 q = rot(sP[i].y) * (p - sC[i].xy); vec2 b = sC[i].zw;
+        float m = min(b.x, b.y), ds = caja(q - vec2(0., 10. + .1 * m), b, sP[i].x), sg = 18. + .22 * m;
+        som += sP[i].z * .30 * exp(-max(ds, 0.) * max(ds, 0.) / (2. * sg * sg)) * smoothstep(-2., 2., caja(q, b, sP[i].x));
+      }
+      col *= 1. - min(.35, som * sombra);
+      // el cristal (la pieza de encima manda)
+      for (int i = 0; i < ${NS}; i++) {
+        float op = sP[i].z; if (op <= 0.001) continue;
+        vec2 rel = p - sC[i].xy, q = rot(sP[i].y) * rel; vec2 b = sC[i].zw; float r = sP[i].x;
+        float d = caja(q, b, r); if (d > 1.5) continue;
+        vec2 g = vec2(caja(q + vec2(1, 0), b, r) - caja(q - vec2(1, 0), b, r), caja(q + vec2(0, 1), b, r) - caja(q - vec2(0, 1), b, r));
+        vec2 n = normalize(rot(-sP[i].y) * g + 1e-5);                  // normal del borde, hacia fuera (pantalla)
+        float bw = clamp(min(b.x, b.y) * .62, 16., 150.);
+        float x = clamp(1. + d / bw, 0., 1.);                          // 0 dentro → 1 en el borde
+        float lente = pow(x, 2.6) * bw * sQ[i].x;
+        vec2 base = sC[i].xy + rel * .955;                              // un pelo de aumento en el centro
+        float esm = sP[i].w, ab = sQ[i].z * (1. + 5. * pow(x, 3.));
+        vec3 v;
+        v.r = fondo(base + n * lente * 1.07 + n * ab, esm).r;
+        v.g = fondo(base + n * lente, esm).g;
+        v.b = fondo(base + n * lente * .93 - n * ab, esm).b;
+        // tinte: aclara un poco y, si detrás hay mucha luz, oscurece lo justo para que el blanco se lea
+        float lum = dot(v, vec3(.2126, .7152, .0722));
+        v = mix(v, vec3(.92, .95, 1.), .07);
+        v *= mix(1., .74, sQ[i].y * smoothstep(.18, .7, lum));
+        // luz: borde especular, brillo interior del bisel, iridiscencia
+        float l = dot(n, normalize(vec2(-.5, -.86)));
+        float aro = exp(-pow((d + 1.3) / 1.25, 2.));
+        v += vec3(1.) * aro * (.38 + .62 * max(l, 0.) + .32 * max(-l, 0.));
+        v += vec3(1.) * pow(x, 5.) * (.10 + .20 * max(l, 0.) + .10 * max(-l, 0.));
+        v += vec3(1.) * .06 * smoothstep(.0, 1., -q.y / b.y) * (1. - x);  // reflejo cenital suave
+        vec3 iri = .5 + .5 * cos(6.2832 * (atan(n.y, n.x) / 6.2832 + tt * .045 + vec3(0., .33, .67)));
+        v += iri * .085 * pow(x, 2.2);
+        float a = clamp(.5 - d, 0., 1.) * op;
+        col = mix(col, v, a);
+      }
+      vec4 o = texture2D(tO, vUv);
+      col = mix(col, pow(max(o.rgb, 0.), vec3(2.2)), o.a);
+      gl_FragColor = vec4(col * peso, peso);
+    }` });
+const salida = new THREE.ShaderMaterial({ uniforms: { tex: { value: rtAcum.texture }, res: { value: new THREE.Vector2(BW, BH) }, fr: { value: 0 } }, vertexShader: VS,
+  fragmentShader: `uniform sampler2D tex; uniform vec2 res; uniform float fr; varying vec2 vUv;
+    float h(vec2 p){ return fract(sin(dot(p, vec2(12.9898, 78.233)) + fr * 7.13) * 43758.5453); }
+    void main(){ vec3 c = texture2D(tex, vUv).rgb; c = pow(max(c, 0.), vec3(1. / 2.2));
+      c += (h(vUv * res) - .5) / 255. * 1.6;                              // tramado: degradados sin escalones
+      gl_FragColor = vec4(c, 1.); }` });
+
+// ---------------------------------------------------------------- capa 2D (textos y logo), se repinta en cada subfotograma
+const oc = document.createElement('canvas'); oc.width = BW; oc.height = BH; const g2 = oc.getContext('2d');
+const tO = new THREE.CanvasTexture(oc); tO.colorSpace = THREE.NoColorSpace; tO.minFilter = THREE.LinearFilter; tO.generateMipmaps = false;
+cristal.uniforms.tO.value = tO; cristal.uniforms.tS.value = rtEscena.texture; cristal.uniforms.tB.value = rtB.texture;
+const F = (w, s) => `${w} ${s}px "Inter Tight", "Inter", system-ui, sans-serif`;
+await document.fonts.load(F(600, 100)); await document.fonts.load(F(700, 100)); await document.fonts.load(F(500, 100)); await document.fonts.load('500 40px "Geist Mono"');
+let imgLogo = null;
+if (P.logo) { imgLogo = new Image(); imgLogo.src = P.logo; try { await imgLogo.decode(); } catch { imgLogo = null; } }
+
+// titular: medida y tamaño de la cápsula (el texto manda; si no cabe, se encoge)
+g2.font = F(600, M.fs);
+let fsT = M.fs, palT = String(P.titular).split(/\s+/).filter(Boolean);
+const anchoT = (fs) => { g2.font = F(600, fs); g2.letterSpacing = (-0.03 * fs) + 'px'; return g2.measureText(palT.join(' ')).width; };
+while (anchoT(fsT) + fsT * 1.25 > M.capMax && fsT > 40) fsT -= 2;
+const capW = anchoT(fsT) + fsT * 1.25, capH = fsT * 1.62;
+const posPal = (() => { g2.font = F(600, fsT); g2.letterSpacing = (-0.03 * fsT) + 'px'; const esp = g2.measureText(' ').width; let x = -anchoT(fsT) / 2; return palT.map((w) => { const a = x; x += g2.measureText(w).width + esp; return a; }); })();
+
+g2.font = F(500, M.sub); g2.letterSpacing = (-0.01 * M.sub) + 'px';
+const subW = g2.measureText(P.subtitulo || '').width + M.sub * 1.7, subH = M.sub * 2.05;
+function estado(t) {
+  // cámara 2D: deriva continua + zoom a través al salir (todo pasa por delante de la cámara)
+  const zt = C.entradaQuart(k(t, T.sal, T.sal + 0.6));
+  const G = { s: 1 + zt * 3.4 + 0.02 * Math.sin(t * 0.4), ox: Math.sin(t * 0.31) * 8, oy: Math.cos(t * 0.27) * 10, o: 1 - C.entradaCubica(k(t, T.sal + 0.2, T.sal + 0.55)) };
+  const cx = W / 2 + G.ox, fy = (y) => H / 2 + (y - H / 2) * G.s + G.oy, fx = (x) => cx + (x - W / 2) * G.s;
+  const formas = [], textos = [];
+  // cápsula: entra con muelle, se estira al subir y se aplasta al frenar
+  const eC = (u) => C.muelle(k(u, T.cap, T.cap + 1.15)), e = eC(t), vel = (e - eC(t - 1 / 60)) * 60;
+  const sc = lerp(0.42, 1, e), flot = Math.sin(t * 1.1) * 6;
+  const sx = sc * (1 - 0.05 * vel), sy = sc * (1 + 0.07 * vel);
+  const capY = M.capY + lerp(220, 0, e) + flot;
+  const opC = Math.min(1, k(t, T.cap, T.cap + 0.25) * 1) * G.o;
+  formas.push({ x: fx(W / 2), y: fy(capY), w: capW / 2 * sx * G.s, h: capH / 2 * sy * G.s, r: capH / 2 * Math.min(sx, sy) * G.s, giro: 0, op: opC, esm: 0.78, lente: 0.55, tinte: 0.9, ab: 1.2 });
+  palT.forEach((w, i) => {
+    const p = C.salidaQuint(k(t, T.tit + i * 0.1, T.tit + i * 0.1 + 0.8));
+    textos.push({ txt: w, x: fx(W / 2 + (posPal[i]) * sx), y: fy(capY + fsT * 0.35 * sy + (1 - p) * fsT * 0.45), fs: fsT * Math.min(sx, sy) * G.s, peso: 600, ls: -0.03,
+      o: Math.min(1, p * 1.6) * G.o, blur: (1 - p) * 16, alin: 'left', sombra: 0.3 });
+  });
+  // subtítulo, en su propia píldora de cristal esmerilado (se lee sobre cualquier fondo)
+  const ps = C.muelleSuave(k(t, T.sub, T.sub + 1.0)), pst = C.salidaCubica(k(t, T.sub + 0.12, T.sub + 0.9));
+  const subY = M.capY + capH / 2 + M.sub * 0.9 + subH / 2 + lerp(60, 0, ps) + flot * 0.6, ss = lerp(0.7, 1, ps);
+  if (P.subtitulo) formas.push({ x: fx(W / 2), y: fy(subY), w: subW / 2 * ss * G.s, h: subH / 2 * ss * G.s, r: subH / 2 * ss * G.s, giro: 0, op: Math.min(1, k(t, T.sub, T.sub + 0.2)) * G.o, esm: 0.96, lente: 0.45, tinte: 1.0, ab: 0.8 });
+  textos.push({ txt: P.subtitulo, x: fx(W / 2), y: fy(subY + M.sub * 0.36 * ss + (1 - pst) * 16), fs: M.sub * ss * G.s, peso: 500, ls: -0.01, o: pst * G.o, blur: (1 - pst) * 10, alin: 'center', sombra: 0.35 });
+  // tarjetas escalonadas: cada una con su curva
+  const curvas = [C.muelle, C.muelleSuave, C.salidaExpo], n = P.tarjetas.length, tot = n * M.cw + (n - 1) * M.gap;
+  P.tarjetas.forEach((c, i) => {
+    const cv = curvas[i % 3], p = cv(k(t, T.car + i * 0.24, T.car + i * 0.24 + (i === 2 ? 0.9 : 1.2)));
+    const h = M.ch[i % M.ch.length], x = W / 2 - tot / 2 + M.cw / 2 + i * (M.cw + M.gap);
+    const y = M.cardsY - h / 2 + lerp(H * 0.55, 0, p) + Math.sin(t * 0.9 + i * 1.3) * 7;
+    const giro = lerp(0.22 * (i - 1) + 0.1, 0, Math.min(1, p)) + Math.sin(t * 0.7 + i) * 0.006, s = lerp(0.82, 1, Math.min(1.05, p));
+    const op = Math.min(1, k(t, T.car + i * 0.24, T.car + i * 0.24 + 0.2)) * G.o;
+    formas.push({ x: fx(x), y: fy(y), w: M.cw / 2 * s * G.s, h: h / 2 * s * G.s, r: 46 * s * G.s, giro, op, esm: 0.92, lente: 0.5, tinte: 0.55, ab: 1.0 });
+    const pt = C.salidaQuint(k(t, T.car + i * 0.24 + 0.35, T.car + i * 0.24 + 1.1));
+    const izq = x - M.cw / 2 + 30, arr = y - h / 2, cos = Math.cos(giro), sin = Math.sin(giro);
+    const rotp = (px, py) => [x + (px - x) * cos - (py - y) * sin, y + (px - x) * sin + (py - y) * cos];
+    const [ax, ay] = rotp(izq, arr + 58), [bx, by] = rotp(izq, y + h / 2 - 34);
+    textos.push({ txt: c.n, x: fx(ax), y: fy(ay + (1 - pt) * 20), fs: 28 * G.s, peso: 500, mono: true, o: pt * 0.85 * G.o, blur: (1 - pt) * 10, alin: 'left', giro, sombra: 0.3 });
+    textos.push({ txt: c.t, x: fx(bx), y: fy(by + (1 - pt) * 26), fs: M.lab * G.s, peso: 600, ls: -0.02, o: pt * G.o, blur: (1 - pt) * 12, alin: 'left', giro, sombra: 0.35, max: M.cw - 56 });
+  });
+  // cierre: icono de cristal con el logo, marca y lema
+  const eL = (u) => C.muelleVivo(k(u, T.logo, T.logo + 1.1)), pl = eL(t), vl = (pl - eL(t - 1 / 60)) * 60;
+  const sl = lerp(0.3, 1, pl) * (1 + 0.012 * Math.sin(t * 1.3)), ly = M.logoY + lerp(-60, 0, pl) + Math.sin(t * 1.0) * 5;
+  const opL = Math.min(1, k(t, T.logo, T.logo + 0.18));
+  formas.push({ x: W / 2 + G.ox * 0.3, y: ly, w: M.logo / 2 * sl * (1 - 0.04 * vl), h: M.logo / 2 * sl * (1 + 0.05 * vl), r: M.logo * 0.27 * sl, giro: lerp(-0.35, 0, Math.min(1, pl)), op: opL, esm: 0.6, lente: 0.6, tinte: 0.8, ab: 1.3 });
+  const LG = { x: W / 2 + G.ox * 0.3, y: ly, s: M.logo * 0.5 * sl, o: Math.min(1, k(t, T.logo + 0.15, T.logo + 0.5)), giro: lerp(-0.35, 0, Math.min(1, pl)) };
+  const pm = C.salidaQuint(k(t, T.marca, T.marca + 0.9)), pz = C.salidaCubica(k(t, T.lema, T.lema + 0.9));
+  const yM = M.logoY + M.logo / 2 + (VERT ? 120 : 100);
+  textos.push({ txt: P.marca, x: W / 2, y: yM + (1 - pm) * 50, fs: VERT ? 76 : 70, peso: 700, ls: -0.035, o: Math.min(1, pm * 1.5), blur: (1 - pm) * 16, alin: 'center', sombra: 0.4 });
+  textos.push({ txt: P.lema.toUpperCase(), x: W / 2, y: yM + (VERT ? 76 : 70) + (1 - pz) * 30, fs: VERT ? 30 : 28, peso: 500, mono: true, ls: 0.14, o: pz * 0.9, blur: (1 - pz) * 10, alin: 'center', sombra: 0.4 });
+  return { formas, textos, LG, G, zt };
+}
+
+function pintaCapa(S) {
+  g2.setTransform(1, 0, 0, 1, 0, 0); g2.clearRect(0, 0, BW, BH); g2.setTransform(DPR, 0, 0, DPR, 0, 0);
+  for (const x of S.textos) {
+    if (x.o <= 0.003 || !x.txt) continue;
+    g2.save(); g2.globalAlpha = Math.min(1, x.o);
+    let fs = x.fs; g2.font = x.mono ? `${x.peso} ${fs}px "Geist Mono", monospace` : F(x.peso, fs); g2.letterSpacing = ((x.ls || 0) * fs) + 'px';
+    if (x.max && g2.measureText(x.txt).width > x.max) { fs *= x.max / g2.measureText(x.txt).width; g2.font = x.mono ? `${x.peso} ${fs}px "Geist Mono", monospace` : F(x.peso, fs); g2.letterSpacing = ((x.ls || 0) * fs) + 'px'; }
+    g2.textAlign = x.alin; g2.textBaseline = 'alphabetic';
+    g2.translate(x.x, x.y); if (x.giro) g2.rotate(x.giro);
+    if (x.blur > 0.25) g2.filter = `blur(${x.blur.toFixed(2)}px)`;
+    g2.shadowColor = `rgba(10,25,70,${x.sombra ?? 0.3})`; g2.shadowBlur = fs * 0.35 * DPR; g2.shadowOffsetY = fs * 0.06 * DPR;
+    g2.fillStyle = '#FFFFFF'; g2.fillText(x.txt, 0, 0);
+    g2.restore();
+  }
+  const L = S.LG;
+  if (L.o > 0.003) {
+    g2.save(); g2.globalAlpha = L.o; g2.translate(L.x, L.y); g2.rotate(L.giro);
+    g2.shadowColor = 'rgba(10,25,70,.35)'; g2.shadowBlur = 24 * DPR; g2.shadowOffsetY = 6 * DPR;
+    const s = L.s * 1.15;
+    if (imgLogo) g2.drawImage(imgLogo, -s / 2, -s / 2, s, s);
+    else { g2.scale(s / 24, s / 24); g2.translate(-12, -12); g2.fillStyle = '#FFFFFF'; g2.fill(new Path2D(RAYO)); }
+    g2.restore();
+  }
+  tO.needsUpdate = true;
+}
+function ponFormas(S) {
+  const u = cristal.uniforms;
+  for (let i = 0; i < NS; i++) {
+    const f = S.formas[i];
+    if (!f) { u.sP.value[i].set(0, 0, 0, 0); continue; }
+    u.sC.value[i].set(f.x, f.y, Math.max(1, f.w), Math.max(1, f.h)); u.sP.value[i].set(Math.min(f.r, Math.min(f.w, f.h)), f.giro, cl(f.op), f.esm); u.sQ.value[i].set(f.lente, f.tinte, f.ab, 0);
+  }
+}
+
+// ---------------------------------------------------------------- un fotograma
+const FPS = () => window.__fps || 30;
+function pinta3D(t) {
+  fondoMat.uniforms.t.value = t;
+  const ent = C.salidaQuint(k(t, T.obj, T.obj + 1.8)), zt = C.entradaQuart(k(t, T.sal, T.sal + 0.6)), cierre = C.salidaCubica(k(t, T.logo - 0.2, T.logo + 1.6));
+  // cámara que nunca se para: órbita lenta + respiración; empuja al salir y vuelve para el cierre
+  const dist = lerp(11.5, 9.2, ent) - zt * 2.6 * (1 - cierre) + cierre * 0.6 - t * 0.05;
+  const az = Math.sin(t * 0.21) * 0.16 + (t / D) * 0.12, el = 0.06 + Math.cos(t * 0.17) * 0.05;
+  cam.position.set(Math.sin(az) * dist, Math.sin(el) * dist, Math.cos(az) * dist); cam.lookAt(0, 0, 0);
+  const [ox, oy] = M.obj, esc = M.objEsc * lerp(0.55, 1, ent) * lerp(1, 0.62, cierre);
+  obj.position.set(ox, oy + lerp(-1.2, 0, ent) + Math.sin(t * 0.8) * 0.06 + cierre * 0.1, 0); obj.scale.setScalar(esc);
+  obj.userData.giro(t * 0.22 + 2.4 * (1 - ent));
+  R.setRenderTarget(rtEscena); R.setClearColor(0x000000, 1); R.clear(); R.render(escena, cam);
+  desenfoque.uniforms.tex.value = rtEscena.texture; desenfoque.uniforms.dir.value.set(2 / BW, 0); pasa(desenfoque, rtA);
+  desenfoque.uniforms.tex.value = rtA.texture; desenfoque.uniforms.dir.value.set(0, 2 / BH); pasa(desenfoque, rtB);
+  desenfoque.uniforms.tex.value = rtB.texture; desenfoque.uniforms.dir.value.set(2 / BW, 0); pasa(desenfoque, rtA);
+  desenfoque.uniforms.tex.value = rtA.texture; desenfoque.uniforms.dir.value.set(0, 2 / BH); pasa(desenfoque, rtB);
+}
+function mueve(a, b) {   // cuánto se mueve la capa 2D entre dos instantes (px) → nº de subfotogramas
+  let m = 0; a.formas.forEach((f, i) => { const g = b.formas[i]; if (!g || f.op < 0.01) return; m = Math.max(m, Math.abs(f.x - g.x) + Math.abs(f.y - g.y), Math.abs(f.w - g.w) * 2, Math.abs(f.h - g.h) * 2, Math.abs(f.giro - g.giro) * f.w); });
+  a.textos.forEach((x, i) => { const y = b.textos[i]; if (x.o > 0.01) m = Math.max(m, Math.abs(x.x - y.x) + Math.abs(x.y - y.y), Math.abs(x.fs - y.fs) * 4); });
+  return m * DPR;
+}
+window.seek = (t) => {
+  pinta3D(t);
+  const obt = 0.5 / FPS(), S0 = estado(t - obt / 2), S1 = estado(t + obt / 2);
+  const N = Math.max(1, Math.min(24, Math.ceil(mueve(S0, S1) / 1.6)));
+  R.setRenderTarget(rtAcum); R.setClearColor(0x000000, 0); R.clear();
+  cristal.uniforms.tt.value = t; cristal.uniforms.peso.value = 1 / N;
+  for (let i = 0; i < N; i++) {
+    const S = N === 1 ? estado(t) : estado(t + obt * ((i + 0.5) / N - 0.5));
+    ponFormas(S); cristal.uniforms.sombra.value = 1 - cl(S.zt * 3); pintaCapa(S); pasa(cristal, rtAcum);
+  }
+  salida.uniforms.fr.value = Math.round(t * 60) % 97; pasa(salida, null);
+};
+window.seek(0); window.__listo = true;
+if (location.search.includes('ver')) { const t0 = performance.now(); const b = () => { window.seek(((performance.now() - t0) / 1000) % D); requestAnimationFrame(b); }; b(); }
+</script>
+</body></html>

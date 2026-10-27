@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-flecha-mano» · Viegas IA · Motion Lab
+     Anotación a mano sobre una captura: la captura entra con rebote, se dibuja un subrayado ondulado, un círculo irregular
+     alrededor de lo importante y una flecha curva desde una nota manuscrita; la cámara se acerca a lo señalado (que late),
+     «zoom a través» y cierre con titular y logo.
+     Cambia "imagen" (ruta de tu captura; "" = panel de ejemplo hecho en HTML) y "proporcion" (ancho/alto de la captura),
+     "objetivo" ([x, y, ancho, alto] en % de la captura: lo que se rodea), "subrayado" ([x, y, ancho] en %), "nota",
+     "panel" (textos del panel de ejemplo), "etiqueta", "titular" (*palabra* = acento), "marca", "logo" (ruta o "" = inicial),
+     colores "fondo", "fondo2", "tinta", "acento", "trazo" (color del rotulador).
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Caveat:wght@600;700&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif; --mano:'Caveat',cursive;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; --trazo:#D97757; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.chip{ font:600 30px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:16px 30px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.08); }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+.cap{ border-radius:26px; overflow:hidden; background:#F7F3EE; box-shadow:0 60px 140px rgba(0,0,0,.6), 0 0 0 1.5px rgba(var(--tintaRgb),.12); }
+.cap > img{ width:100%; height:100%; object-fit:cover; display:block; }
+/* panel de ejemplo: diseñado a 1200×800 y escalado */
+.panel{ position:absolute; left:0; top:0; width:1200px; height:800px; transform-origin:0 0; color:#1E1A17; font-family:var(--fuente); }
+.panel .bar{ height:60px; background:#ECE6DF; display:flex; align-items:center; gap:10px; padding:0 22px; }
+.panel .bar i{ width:14px; height:14px; border-radius:50%; background:#CFC6BC; }
+.panel .url{ margin-left:24px; width:420px; height:34px; border-radius:17px; background:#fff; font:500 18px var(--fuente); color:#8A7F75; display:flex; align-items:center; padding-left:18px; }
+.panel .lat{ position:absolute; left:0; top:60px; bottom:0; width:96px; background:#F0EAE3; display:flex; flex-direction:column; align-items:center; gap:22px; padding-top:30px; }
+.panel .lat b{ width:44px; height:44px; border-radius:12px; background:#E0D7CD; }
+.panel .lat b:first-child{ background:var(--acento); }
+.panel h1{ position:absolute; left:140px; top:96px; font:700 50px var(--fuente); letter-spacing:-.03em; white-space:nowrap; }
+.panel .sub{ position:absolute; left:140px; top:166px; font:500 22px var(--fuente); color:#8A7F75; }
+.panel .kpi{ position:absolute; top:226px; width:300px; height:170px; border-radius:22px; background:#fff; box-shadow:0 8px 24px rgba(60,40,20,.08); padding:26px 28px; }
+.panel .kpi small{ font:600 21px var(--fuente); color:#8A7F75; letter-spacing:.02em; }
+.panel .kpi b{ display:block; margin-top:14px; font:700 56px var(--fuente); letter-spacing:-.03em; }
+.panel .kpi.top b{ color:var(--acento); }
+.panel .graf{ position:absolute; left:140px; top:430px; width:960px; height:330px; border-radius:22px; background:#fff; box-shadow:0 8px 24px rgba(60,40,20,.08); }
+.panel .graf span{ position:absolute; bottom:40px; width:52px; border-radius:10px 10px 4px 4px; background:#E7DDD2; }
+.panel .graf span.al{ background:var(--acento); }
+.nota{ font:700 86px/1 var(--mano); color:var(--tinta); white-space:nowrap; transform-origin:0 50%; }
+.nota span{ display:inline-block; }
+.dib{ overflow:visible; }
+.dib path{ fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.cierre{ position:absolute; left:0; top:0; width:var(--ancho); height:var(--alto); z-index:30; }
+.cierre > *{ position:absolute; left:0; top:0; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "trazo": "#D97757",
+  "etiqueta": "Fíjate en esto",
+  "imagen": "",
+  "proporcion": 1.5,
+  "objetivo": [66.7, 28.25, 25, 21.25],
+  "subrayado": [11.7, 18.2, 36],
+  "nota": "¡Esto es lo nuevo!",
+  "panel": { "url": "tuapp.com/panel", "titulo": "Panel de resultados", "sub": "Últimos 30 días",
+    "kpis": [["Visitas", "24.810"], ["Conversión", "4,2 %"], ["Ventas", "+38 %"]] },
+  "titular": "Lo que importa, *a la vista*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'acento2', 'trazo']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+const ruido = (i) => { const x = Math.sin(i * 12.9898 + 78.233) * 43758.5453; return x - Math.floor(x) - .5; };   // con semilla: render exacto
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  // captura
+  const pr = P.proporcion || 1.5;
+  const CW = VERT ? 900 : 1040, CH = Math.round(CW / pr);
+  const CX = VERT ? 90 : 110, CY = VERT ? 590 : (H - CH) / 2 + 20;
+  const pa = P.panel || {};
+  const panelHTML = `<div class="panel" style="transform:scale(${CW / 1200}, ${CH / 800})"><div class="bar"><i></i><i></i><i></i><div class="url">${esc(pa.url || '')}</div></div>
+    <div class="lat"><b></b><b></b><b></b><b></b></div><h1>${esc(pa.titulo || '')}</h1><div class="sub">${esc(pa.sub || '')}</div>
+    ${(pa.kpis || []).slice(0, 3).map((q, i) => `<div class="kpi ${i === 2 ? 'top' : ''}" style="left:${140 + i * 330}px"><small>${esc(q[0])}</small><b>${esc(q[1])}</b></div>`).join('')}
+    <div class="graf">${Array.from({ length: 12 }, (_, i) => `<span class="${i > 8 ? 'al' : ''}" style="left:${50 + i * 74}px;height:${60 + i * 16 + (i % 3) * 22}px"></span>`).join('')}</div></div>`;
+  const cap = MG.el(`<div class="cap" style="width:${CW}px;height:${CH}px">${P.imagen ? `<img src="${P.imagen}">` : panelHTML}</div>`);
+  const kpiTop = cap.querySelector('.kpi.top'), barras = [...cap.querySelectorAll('.graf span')];
+  const chip = MG.el(`<div class="chip">${esc(P.etiqueta)}</div>`);
+  const nota = MG.el(`<div class="nota">${[...P.nota].map((c) => `<span>${c === ' ' ? '&nbsp;' : esc(c)}</span>`).join('')}</div>`);
+  const letras = [...nota.querySelectorAll('span')];
+
+  // geometría de los trazos (en coordenadas de la captura, % → px)
+  const [ox, oy, ow, oh] = P.objetivo, [sx, sy, sw] = P.subrayado;
+  const T = { x: ox / 100 * CW, y: oy / 100 * CH, w: ow / 100 * CW, h: oh / 100 * CH };
+  const tcx = T.x + T.w / 2, tcy = T.y + T.h / 2;
+  const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('class', 'dib'); svg.setAttribute('width', CW); svg.setAttribute('height', CH); cap.after(svg);
+  const pts2d = (pts) => pts.map((p, i) => (i ? 'L' : 'M') + p[0].toFixed(1) + ' ' + p[1].toFixed(1)).join(' ');
+  const trazo = (d, w, op = 1) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.style.stroke = 'var(--trazo)'; p.setAttribute('stroke-width', w); p.style.opacity = op; svg.appendChild(p);
+    const L = p.getTotalLength(); p.style.strokeDasharray = L; p.dibuja = (x) => { p.style.strokeDashoffset = L * (1 - Math.max(0, Math.min(1, x))); p.style.visibility = x > 0 ? 'visible' : 'hidden'; }; p.dibuja(0); return p; };
+  const GR = VERT ? 9 : 10;
+  // subrayado ondulado (dos pasadas)
+  const sub = (o) => pts2d(Array.from({ length: 40 }, (_, i) => { const u = i / 39; return [sx / 100 * CW + u * sw / 100 * CW, sy / 100 * CH + 14 + Math.sin(u * 9 + o) * 4 + u * 6 + ruido(i + o * 9) * 2]; }));
+  const s1 = trazo(sub(0), GR), s2 = trazo(sub(2), GR * .55, .55);
+  // círculo irregular: más de una vuelta, radio que respira
+  const circ = (o) => { const rx = T.w / 2 + 34, ry = T.h / 2 + 30, a0 = -2.3 + o;
+    return pts2d(Array.from({ length: 90 }, (_, i) => { const u = i / 89, a = a0 + u * Math.PI * 2 * 1.13, j = 1 + ruido(i * .7 + o * 5) * .04 + u * .06;
+      return [tcx + Math.cos(a) * rx * j + ruido(i + 3) * 2, tcy + Math.sin(a) * ry * j * (1 - u * .05)]; })); };
+  const c1 = trazo(circ(0), GR), c2 = trazo(circ(.25), GR * .5, .5);
+  // flecha: desde la nota (fuera de la captura) hasta el borde del círculo
+  const NX = VERT ? CX + 60 : CX + CW + 80, NY = VERT ? CY + CH + 210 : CY + tcy + 230;
+  const A = VERT ? [NX - CX + 230, NY - CY - 34] : [NX - CX + 170, NY - CY - 34];
+  const B = VERT ? [tcx - 40, tcy + T.h / 2 + 52] : [tcx + T.w / 2 + 48, tcy + 30];
+  const c1p = VERT ? [A[0] + 200, A[1] - 40] : [A[0] + 10, A[1] - 150], c2p = VERT ? [B[0] - 150, B[1] + 150] : [B[0] + 170, B[1] + 40];
+  const flecha = trazo(`M${A[0]} ${A[1]} C${c1p[0]} ${c1p[1]} ${c2p[0]} ${c2p[1]} ${B[0]} ${B[1]}`, GR);
+  const ang = Math.atan2(B[1] - c2p[1], B[0] - c2p[0]), LP = 46;
+  const punta = trazo(`M${B[0] - Math.cos(ang - .5) * LP} ${B[1] - Math.sin(ang - .5) * LP} L${B[0]} ${B[1]} L${B[0] - Math.cos(ang + .5) * LP} ${B[1] - Math.sin(ang + .5) * LP}`, GR);
+  // nota: posición en el mundo
+
+  // cierre (fuera de la cámara)
+  const cie = MG.el(`<div class="cierre"></div>`, document.body);
+  const logo = MG.el(logoHTML(), cie), anchoTit = VERT ? W - 180 : 1500;
+  const tit = MG.texto(md(P.titular), 'tit'); cie.appendChild(tit); tit.style.width = anchoTit + 'px'; tit.style.fontSize = (VERT ? 116 : 128) + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`, cie);
+
+  const tS = 1.15, tCi = 2.0, tF = 3.0, tN = 3.35, tFo = 4.5, tZ = 7.2, tC = 7.75;
+  return (t) => {
+    // cámara: deriva, se acerca a lo señalado y luego entra a través de ello
+    const wx = VERT ? W / 2 + 40 : (CX + tcx + NX + nota.offsetWidth / 2) / 2, wy = (CY + tcy + NY + 45) / 2;
+    const foco = C.afterEffects75(k(t, tFo, tFo + 1.5));
+    const zt = C.entradaCubica(k(t, tZ, tC));
+    const ox2 = lerp(W / 2, wx, foco), oy2 = lerp(VERT ? CY + CH / 2 + 150 : H / 2, wy, foco);
+    const z = lerp(1, 1.06, t / D) * lerp(1, VERT ? 1.2 : 1.35, foco) * (1 + 18 * zt * zt);
+    MG.vista.style.transformOrigin = `${ox2}px ${oy2}px`;
+    MG.vista.style.transform = `translate(${(W / 2 - ox2) * foco * .6}px, ${((VERT ? H / 2 - 40 : H / 2) - oy2) * foco * .6}px) scale(${z}) rotate(${Math.sin(t * .4) * .7 * (1 - zt)}deg) translate(${Math.sin(t * .6) * 8}px, ${Math.cos(t * .45) * 7}px)`;
+    MG.vista.style.opacity = t > tC ? 0 : 1;
+    MG.desenfoca(MG.vista, zt * 9, zt * 9);
+
+    const ec = MG.entra(chip, t, .15, { d: .55, dy: -50, curva: 'salidaQuint', base: 6 });
+    MG.pon(chip, VERT ? (W - chip.offsetWidth) / 2 : CX, (VERT ? 400 : CY - 100) + ec.y); chip.style.opacity = Math.min(+chip.style.opacity, 1 - foco);
+    // captura: entra con rebote y un giro que se endereza
+    const e = MG.entra(cap, t, 0, { d: .8, dy: 260, escala0: .88, curva: 'reboteSuave', base: 9 });
+    const rot = lerp(-5, 0, C.salidaCubica(k(t, 0, 1.3)));
+    cap.style.transformOrigin = `${CW / 2}px ${CH / 2}px`; svg.style.transformOrigin = `${CW / 2}px ${CH / 2}px`;
+    MG.pon(cap, CX, CY + e.y, e.s, `rotate(${rot}deg)`);
+    MG.pon(svg, CX, CY + e.y, e.s, `rotate(${rot}deg)`); svg.style.opacity = cap.style.opacity;
+    barras.forEach((b, i) => { b.style.transform = `scaleY(${C.rebote(k(t, .5 + i * .04, 1.2 + i * .04))})`; b.style.transformOrigin = '50% 100%'; });
+    // trazos a mano: cada uno con su curva (rápido al empezar, frena al final)
+    s1.dibuja(C.salidaCubica(k(t, tS, tS + .55))); s2.dibuja(C.salidaCubica(k(t, tS + .1, tS + .6)));
+    c1.dibuja(C.afterEffects(k(t, tCi, tCi + .8))); c2.dibuja(C.afterEffects(k(t, tCi + .08, tCi + .9)));
+    flecha.dibuja(C.salidaQuint(k(t, tF, tF + .55))); punta.dibuja(C.salidaCubica(k(t, tF + .5, tF + .72)));
+    if (kpiTop) { const lat = k(t, tCi + .6, tCi + 1) * (.5 + .5 * Math.sin((t - tCi) * 5));
+      kpiTop.style.boxShadow = `0 0 0 ${4 * lat}px rgba(var(--halo),.5), 0 20px 50px rgba(var(--halo),${.35 * lat})`; kpiTop.style.transform = `scale(${1 + .04 * C.rebote(k(t, tCi + .6, tCi + 1.4)) - .04 * k(t, tCi + 1.4, tCi + 1.41)})`; }
+    // nota manuscrita letra a letra
+    MG.pon(nota, NX, NY + e.y, 1, `rotate(${VERT ? -4 : -6}deg)`);
+    letras.forEach((l, i) => { const p = C.salidaQuint(k(t, tN + i * .045, tN + i * .045 + .25)); l.style.opacity = p > 0 ? 1 : 0;
+      l.style.transform = `translateY(${(1 - p) * 18}px) scale(${lerp(.6, 1, p)})`; });
+
+    // cierre
+    cie.style.opacity = t > tC - .05 ? 1 : 0;
+    const zc = C.salidaQuint(k(t, tC - .05, tC + 1.2));
+    cie.style.transformOrigin = `${W / 2}px ${H / 2}px`; cie.style.transform = `scale(${lerp(1.3, 1, zc) * lerp(1, 1.05, k(t, tC, D))})`;
+    const bloque = 150 + 60 + tit.offsetHeight + 60 + 50, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(tit, (W - anchoTit) / 2, y0 + 210);
+    tit.trozos.forEach((sp, i) => { const q = MG.entra(sp, t, tC + .2 + i * .07, { d: .6, dy: 90, escala0: 1, curva: 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${q.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + tit.trozos.length * .07, { d: .6, dy: 40, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 210 + tit.offsetHeight + 60 + em.y);
+  };
+});
+</script>
+</body></html>

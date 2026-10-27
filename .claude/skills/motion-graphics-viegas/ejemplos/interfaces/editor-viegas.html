@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Interfaz de ejemplo «editor-viegas» para la pantalla en 3D: un editor de vídeo con Claude dentro, animado fotograma a
+     fotograma (window.seek). Claude recibe el pedido, quita los silencios (los clips se juntan), pone subtítulos, zooms y deja
+     la voz a −14 LUFS; al final el cursor pulsa «Exportar 4K». Se convierte en fotogramas con
+     `node scripts/render.mjs pantalla editor-viegas` y se pone en 3D con obj.pantalla('../pantallas/editor-viegas').
+     Cualquier HTML sirve igual: tu panel, una web, una maqueta. Esta es solo la de muestra. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+  .ui { position: absolute; inset: 0; background: #0B0A0D; font-size: 16px; }
+  .caja { position: absolute; background: #141217; border: 1px solid rgba(255,255,255,.07); border-radius: 16px; overflow: hidden; }
+  .tit { position: absolute; left: 20px; top: 16px; font-weight: 700; font-size: 19px; }
+  .mute { color: var(--mute); font-weight: 600; }
+  .pildora { display: inline-block; padding: 6px 14px; border-radius: 999px; background: rgba(255,255,255,.06); color: var(--mute); font-weight: 600; font-size: 15px; white-space: nowrap; }
+  .boton { position: absolute; padding: 11px 22px; border-radius: 11px; background: var(--acento); color: #160c08; font-weight: 800; font-size: 17px; white-space: nowrap; overflow: hidden; }
+  .pista { position: absolute; left: 0; height: 50px; }
+  .etq { position: absolute; left: 18px; top: 14px; font-weight: 700; font-size: 15px; color: var(--mute); }
+  .clip { position: absolute; top: 5px; height: 40px; border-radius: 8px; font-size: 13px; font-weight: 700; padding: 11px 10px; white-space: nowrap; overflow: hidden; }
+  .cam { background: #3A2520; border: 1px solid rgba(217,119,87,.55); color: #F2C3B2; }
+  .pan { background: #1E2433; border: 1px solid rgba(140,160,220,.40); color: #B9C6EE; }
+  .sub { background: #F4F2EE; color: #141217; border-radius: 999px; padding: 11px 12px; }
+  .mensaje { position: absolute; left: 20px; right: 20px; font-size: 17px; line-height: 1.38; font-weight: 600; }
+  .item { position: absolute; left: 20px; display: flex; align-items: center; gap: 12px; font-size: 17px; font-weight: 600; white-space: nowrap; }
+  .ok { width: 26px; height: 26px; border-radius: 50%; background: var(--acento); color: #160c08; font-size: 15px; font-weight: 900; display: flex; align-items: center; justify-content: center; }
+</style>
+</head><body>
+<script>
+escena({ duracion: 9, ancho: 1920, alto: 1080 }, (MG) => {
+  const ui = MG.el('<div class="ui"></div>');
+  const caja = (x, y, w, h, html = '') => MG.el(`<div class="caja" style="left:${x}px;top:${y}px;width:${w}px;height:${h}px">${html}</div>`, ui);
+
+  // ---------------- barra de arriba
+  MG.el(`<div style="position:absolute;left:0;top:0;width:1920px;height:64px;background:#121015;border-bottom:1px solid rgba(255,255,255,.06)">
+    <div style="position:absolute;left:24px;top:20px;width:24px;height:24px;border-radius:50%;background:var(--acento)"></div>
+    <div style="position:absolute;left:60px;top:19px;font-weight:800;font-size:21px">Viegas Editor</div>
+    <div class="pildora" style="position:absolute;left:220px;top:16px">Reel · Claude Code · 9:16</div>
+    <div style="position:absolute;left:760px;top:21px;display:flex;gap:34px;font-weight:700;font-size:17px;color:var(--mute)">
+      <span style="color:var(--acento2);border-bottom:2px solid var(--acento);padding-bottom:16px">Editar</span><span>Color</span><span>Audio</span><span>Gráficos</span><span>Exportar</span></div>
+    <div class="pildora" style="position:absolute;left:1450px;top:16px"><span style="color:#6FD39A">●</span> Claude conectado</div></div>`, ui);
+  const exportar = MG.el(`<div class="boton" style="left:1734px;top:11px;width:170px;text-align:center"><span>Exportar 4K</span><div style="position:absolute;left:0;bottom:0;height:4px;width:0;background:#160c08"></div></div>`, ui);
+
+  // ---------------- medios (miniaturas con vídeo de verdad)
+  const medios = caja(12, 76, 380, 560, `<div class="tit">Medios <span class="mute" style="font-size:16px">· 9</span></div>`);
+  ['01-1', '03-1', '05-1', '06-1', '09-1', '10-1', '02-1', '04-1', 'mc-1'].forEach((v, i) => {
+    const m = MG.tarjeta(`../escenas/vid/${v}.mp4`, 108, 135, 0, { padre: medios, desde: 0.4 + i * 0.35 });
+    m.style.left = 20 + (i % 3) * 116 + 'px'; m.style.top = 58 + Math.floor(i / 3) * 143 + 'px'; m.style.borderRadius = '10px';
+  });
+  MG.el(`<div style="position:absolute;left:20px;top:500px;display:flex;gap:10px">
+    <span class="pildora"><span style="color:#D97757">■</span> cámara</span><span class="pildora"><span style="color:#8CA0DC">■</span> pantalla</span><span class="pildora"><span style="color:#9FD3B4">■</span> música</span></div>`, medios);
+
+  // ---------------- visor con el reel en 9:16
+  const visor = caja(404, 76, 1100, 560, `<div class="tit">Visor</div><div class="mute" style="position:absolute;right:22px;top:18px;font-size:15px">1080 × 1920 · 30 fps</div>`);
+  visor.style.background = '#0E0D10';
+  const reel = MG.el(`<div style="position:absolute;left:404px;top:52px;width:292px;height:470px;border-radius:12px;overflow:hidden;
+    background:radial-gradient(70% 50% at 50% 100%, rgba(217,119,87,.55), transparent 70%), linear-gradient(160deg,#2a1d3a,#120f16)"></div>`, visor);
+  const r1 = MG.el(`<div class="mg-abs mg-titulo" style="left:0;top:130px;width:292px;text-align:center;font-size:44px">EDITA</div>`, reel);
+  const r2 = MG.el(`<div class="mg-abs mg-titulo" style="left:0;top:182px;width:292px;text-align:center;font-size:44px"><em>CON CLAUDE</em></div>`, reel);
+  const palabras = ['quita', 'los', 'silencios'];
+  const subt = MG.el(`<div class="mg-abs" style="left:0;top:360px;width:292px;display:flex;justify-content:center;gap:7px">${palabras.map((p) => `<span class="pildora" style="background:#F4F2EE;color:#141217;font-size:18px;font-weight:800;padding:6px 10px">${p}</span>`).join('')}</div>`, reel);
+  const subPal = [...subt.children];
+  const tc = MG.el(`<div style="position:absolute;left:470px;top:530px;font-family:var(--mono);font-size:17px;color:var(--mute)"></div>`, visor);
+
+  // ---------------- Claude (el chat que manda la edición)
+  const chat = caja(1516, 76, 392, 560, `<img src="../escenas/claude.svg" style="position:absolute;left:20px;top:16px;width:26px;height:26px">
+    <div class="tit" style="left:56px">Claude</div><span class="pildora" style="position:absolute;left:140px;top:14px;font-size:13px">Opus</span>`);
+  const pedido = 'Quita los silencios, pon subtítulos y deja la voz a −14 LUFS';
+  const burbuja = MG.el(`<div class="mensaje" style="top:64px;left:60px;background:rgba(255,255,255,.07);border-radius:14px 14px 4px 14px;padding:14px 16px"></div>`, chat);
+  const respuesta = MG.el(`<div class="mensaje" style="top:200px;color:var(--texto)">Hecho. Esto es lo que he cambiado:</div>`, chat);
+  const tareas = [['42 silencios quitados', 3.0], ['Subtítulos palabra a palabra', 3.8], ['6 zooms a la acción', 4.6], ['Voz a −14 LUFS', 5.4]];
+  const items = tareas.map(([txt], i) => MG.el(`<div class="item" style="top:${256 + i * 50}px"><div class="ok">✓</div><span>${txt}</span></div>`, chat));
+  const entrada = MG.el(`<div style="position:absolute;left:20px;right:20px;bottom:18px;height:52px;border-radius:14px;border:1px solid rgba(255,255,255,.12);background:#0F0E12">
+    <span class="mute" style="position:absolute;left:16px;top:15px;font-size:16px">Pídele a Claude…</span>
+    <div style="position:absolute;right:8px;top:8px;width:36px;height:36px;border-radius:10px;background:var(--acento)"></div></div>`, chat);
+
+  // ---------------- línea de tiempo
+  const tl = caja(12, 648, 1896, 420);
+  MG.el(`<div style="position:absolute;left:20px;top:12px;display:flex;gap:10px">${['Cortar', 'Dividir', 'Zoom', 'Subtítulos', 'Marcador', 'Velocidad'].map((x) => `<span class="pildora">${x}</span>`).join('')}</div>`, tl);
+  const X0 = 170, PX = 190;                                 // 190 px por segundo de vídeo
+  let regla = ''; for (let s = 0; s <= 9; s++) regla += `<div style="position:absolute;left:${X0 + s * PX}px;top:58px;width:1px;height:12px;background:rgba(255,255,255,.25)"></div>
+    <div class="mute" style="position:absolute;left:${X0 + s * PX + 6}px;top:54px;font-size:13px;font-family:var(--mono)">00:0${s}</div>`;
+  MG.el(`<div>${regla}</div>`, tl);
+  const pistas = ['Gráficos', 'Subtítulos', 'Cámara', 'Pantalla', 'Voz', 'Música'];
+  pistas.forEach((n, i) => MG.el(`<div class="pista" style="top:${84 + i * 54}px;width:1896px;border-top:1px solid rgba(255,255,255,.04)"><div class="etq">${n}</div></div>`, tl));
+  const Y = (i) => 84 + i * 54;
+  // cámara y pantalla: trozos con silencios entre medias que se juntan cuando Claude los quita
+  const trozos = [[0, 0.9], [1.25, 2.1], [2.5, 3.1], [3.55, 4.6], [5.0, 5.7], [6.1, 7.3], [7.7, 8.6]];
+  let acum = 0; const juntos = trozos.map(([a, b]) => { const x = acum; acum += b - a; return x; });
+  const clipsCam = trozos.map(([a, b], i) => MG.el(`<div class="clip cam" style="width:${(b - a) * PX - 4}px;left:0">cam ${i + 1}</div>`, MG.el(`<div class="pista" style="top:${Y(2)}px"></div>`, tl)));
+  const clipsPan = trozos.map(([a, b], i) => MG.el(`<div class="clip pan" style="width:${(b - a) * PX - 4}px;left:0">pantalla ${i + 1}</div>`, MG.el(`<div class="pista" style="top:${Y(3)}px"></div>`, tl)));
+  // subtítulos (pastillas de palabra) y zooms (rombos coral)
+  const subs = 'quita los silencios pon subtítulos y deja la voz a −14 LUFS'.split(' ').map((w, i) =>
+    MG.el(`<div class="clip sub" style="left:${X0 + 20 + i * 102}px;width:94px;text-align:center">${w}</div>`, MG.el(`<div class="pista" style="top:${Y(1)}px"></div>`, tl)));
+  const zooms = [0.6, 1.7, 2.6, 3.4, 4.3, 5.2].map((s) => MG.el(`<div style="position:absolute;left:${X0 + s * PX}px;top:${Y(0) + 13}px;width:22px;height:22px;background:var(--acento);transform:rotate(45deg);border-radius:4px"></div>`, tl));
+  // ondas de voz y música (deterministas)
+  const onda = (amp, semilla) => { let d = ''; for (let x = 0; x < 1700; x += 6) { const h = amp * (0.25 + 0.75 * Math.abs(Math.sin(x * 0.031 + semilla) * Math.sin(x * 0.0071 + semilla * 3))); d += `M${x} ${25 - h}V${25 + h}`; } return d; };
+  const voz = MG.el(`<svg style="position:absolute;left:${X0}px;top:${Y(4)}px;overflow:visible" width="1700" height="50"><g style="transform-origin:0 25px"><path d="${onda(14, 1)}" stroke="#E78F72" stroke-width="3" stroke-linecap="round"/></g></svg>`, tl);
+  MG.el(`<svg style="position:absolute;left:${X0}px;top:${Y(5)}px" width="1700" height="50"><path d="${onda(9, 4)}" stroke="#6F9E86" stroke-width="3" stroke-linecap="round"/></svg>`, tl);
+  const lufs = MG.el(`<div class="pildora" style="position:absolute;left:1700px;top:${Y(4) + 8}px;background:var(--acento);color:#160c08;font-weight:800">−14 LUFS</div>`, tl);
+  const cabezal = MG.el(`<div style="position:absolute;top:50px;width:2px;height:362px;background:var(--acento)"><div style="position:absolute;left:-8px;top:-2px;width:18px;height:18px;border-radius:4px;background:var(--acento)"></div></div>`, tl);
+  // cursor
+  const cursor = MG.el(`<svg class="mg-abs" width="34" height="40" viewBox="0 0 24 28" style="filter:drop-shadow(0 4px 8px rgba(0,0,0,.6))"><path d="M2 2 L2 22 L7.5 17 L11 25 L14.5 23.5 L11 15.5 L18.5 15.5 Z" fill="#fff" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg>`, ui);
+
+  const cv = MG.curvas, k = MG.k, L = MG.lerp;
+  return (t) => {
+    // barra: exportar (clic a los 7,9 s y barra de progreso)
+    const clic = cv.rebote(k(t, 7.9, 8.5)), pulsa = 1 - 0.08 * Math.sin(Math.PI * k(t, 7.9, 8.1));
+    exportar.style.transform = `scale(${pulsa})`; exportar.firstChild.textContent = t < 7.95 ? 'Exportar 4K' : `Exportando… ${Math.round(100 * k(t, 7.95, 9))} %`;
+    exportar.lastChild.style.width = `${170 * k(t, 7.95, 9)}px`;
+    // chat: el pedido se escribe letra a letra, luego la respuesta y cada tarea con su ✓
+    const n = Math.round(pedido.length * cv.suave(k(t, 0.5, 2.0)));
+    burbuja.textContent = pedido.slice(0, n) + (t > 0.5 && t < 2.1 && Math.floor(t * 4) % 2 ? '|' : '');
+    burbuja.style.opacity = t > 0.45 ? 1 : 0;
+    const er = MG.entra(respuesta, t, 2.4, { dy: 24, d: 0.5 }); MG.pon(respuesta, 0, er.y);
+    items.forEach((el, i) => { const e = MG.entra(el, t, tareas[i][1], { dy: 26, d: 0.5 }); MG.pon(el, 0, e.y); });
+    entrada.firstElementChild.style.opacity = t < 0.45 || t > 2.2 ? 1 : 0;
+    // línea de tiempo: los silencios se cierran a los 3 s (de izquierda a derecha)
+    trozos.forEach(([a], i) => { const p = cv.salidaQuint(k(t, 3.0 + i * 0.05, 3.6 + i * 0.05)), x = X0 + L(a, juntos[i], p) * PX;
+      clipsCam[i].style.left = x + 'px'; clipsPan[i].style.left = x + 'px'; });
+    subs.forEach((s, i) => { const e = MG.entra(s, t, 3.8 + i * 0.05, { dy: 22, d: 0.45 }); MG.pon(s, 0, e.y, e.s); });
+    zooms.forEach((z, i) => { const p = cv.rebote(k(t, 4.6 + i * 0.07, 5.3 + i * 0.07)); z.style.transform = `rotate(45deg) scale(${p})`; z.style.opacity = Math.min(1, p * 2); });
+    voz.firstChild.style.transform = `scaleY(${L(0.55, 1.15, cv.salidaQuint(k(t, 5.4, 6.0)))})`;
+    const el = MG.entra(lufs, t, 5.5, { dy: 20, d: 0.5 }); MG.pon(lufs, 0, el.y, el.s);
+    cabezal.style.left = X0 + t * PX * 0.92 + 'px';
+    // visor: timecode y el reel que se va editando
+    const fr = Math.floor(t * 30); tc.textContent = `00:00:${String(Math.floor(t)).padStart(2, '0')}:${String(fr % 30).padStart(2, '0')}  ·  00:00:09:00`;
+    const z = 1 + 0.06 * Math.sin(t * 0.9); r1.style.transform = `scale(${z})`; r2.style.transform = `scale(${z})`;
+    subPal.forEach((s, i) => { const e = MG.entra(s, t, 3.9 + i * 0.12, { dy: 30, d: 0.5 }); MG.pon(s, 0, e.y, e.s); });
+    // cursor: va al chat, escribe, espera y al final pulsa «Exportar 4K»
+    const p1 = cv.afterEffects75(k(t, 0.0, 0.45)), p2 = cv.afterEffects75(k(t, 7.0, 7.85));
+    const cx = L(L(1240, 1700, p1), 1815, p2), cy = L(L(980, 590, p1), 30, p2);
+    MG.pon(cursor, cx, cy, 1 - 0.12 * Math.sin(Math.PI * k(t, 7.88, 8.05)));
+  };
+});
+</script>
+</body></html>

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «edu-testimonio» · Educación / servicios · Viegas IA · Motion Lab
+     Testimonios en carrusel: tres tarjetas de alumnos pasan de derecha a izquierda (la que sale acelera con desenfoque de
+     movimiento, la que entra frena con rebote suave), cada una con su resultado en una píldora y sus estrellas. Puntos de página abajo.
+     Usa solo testimonios reales y con permiso. Cambia "titulo", "testimonios" ([nombre, profesión, texto, resultado]), "marca".
+     Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.tes{ padding:54px 50px; }
+.tes .q{ font:400 160px/.6 var(--serif); color:var(--acento); height:80px; }
+.tes p{ font:500 50px/1.28 var(--fuente); letter-spacing:-.02em; color:var(--texto); margin-top:20px; }
+.tes .res{ display:inline-block; margin-top:30px; font:600 32px var(--fuente); color:#fff; background:var(--acento); padding:12px 24px; border-radius:99px; }
+.tes .pie{ display:flex; align-items:center; gap:22px; margin-top:40px; }
+.tes .pie b{ display:block; font:600 38px var(--fuente); color:var(--texto); }
+.tes .pie small{ display:block; font:500 28px var(--fuente); color:var(--mute); margin-top:2px; }
+.tes .n-estrellas{ margin-left:auto; gap:4px; }
+.tes .n-estrellas svg{ width:36px; height:36px; }
+.puntos{ display:flex; gap:14px; justify-content:center; }
+.puntos i{ width:16px; height:16px; border-radius:99px; background:rgba(var(--claro),.25); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "paleta": "noche",
+  "acento": "",
+  "titulo": "Lo que dicen *mis alumnos*",
+  "testimonios": [["Paula G.", "Nutricionista", "En tres semanas tenía mi primer cliente desde Instagram. Sin anuncios.", "1.er cliente en 3 semanas"], ["Marcos L.", "Fotógrafo de bodas", "Ahora grabo y edito un reel en una tarde. Antes me costaba una semana.", "4 reels por semana"], ["Elena S.", "Abogada laboralista", "Mis vídeos explican lo que antes repetía veinte veces al día en el despacho.", "+2.300 seguidores"]],
+  "marca": "Academia Norte",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp, DT } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 360), n = P.testimonios.length;
+  const tit = N.frase(P.titulo, 'n-tit', W - 140); tit.style.fontSize = '92px';
+  const tarj = P.testimonios.map(([nm, pr, tx, rs], i) => MG.el(`<div class="n-card tes" style="width:${cw}px"><div class="q">“</div><p>${tx}</p><span class="res">${rs}</span>
+    <div class="pie"><span class="n-av">${nm[0]}</span><div><b>${nm}</b><small>${pr}</small></div><span class="n-estrellas">${[0, 1, 2, 3, 4].map((j) => N.estrella(1, `t${i}${j}`)).join('')}</span></div></div>`));
+  const puntos = MG.el(`<div class="puntos" style="width:${W}px">${tarj.map(() => '<i></i>').join('')}</div>`), pts = [...puntos.children];
+  const marca = MG.el(N.marca(.8));
+  const tc = (i) => 1.0 + i * 2.5;   // cada tarjeta entra en tc(i) y sale en tc(i+1)
+  let L;
+  return (t) => {
+    if (!L) { const hm = Math.max(...tarj.map((x) => x.offsetHeight)); L = { hm, y: (H - (tit.offsetHeight + 70 + hm + 60 + 20)) / 2 }; }
+    N.vivo(t);
+    MG.pon(tit, 70, L.y);
+    if (t < fin) MG.animaTexto(tit, t, .1, { paso: .08 }); else N.es(tit, t, 0, fin, { x: 70, y: L.y, oy: -100 });
+    const yT = L.y + tit.offsetHeight + 70, x0 = (W - cw) / 2;
+    let activo = 0;
+    tarj.forEach((c, i) => {
+      const t0 = tc(i), t1 = i < n - 1 ? tc(i + 1) : fin + .1;
+      if (i < n - 1) N.es(c, t, t0, t1, { x: x0, y: yT, dx: i ? 1000 : 0, dy: i ? 0 : 300, s0: .9, curva: 'reboteSuave', d: .8, ox: -1200, oy: 0, dOut: .55, s1: .9 });
+      else N.es(c, t, t0, t1, { x: x0, y: yT, dx: 1000, dy: 0, s0: .9, curva: 'reboteSuave', d: .8, oy: -140 });
+      if (t >= t0) activo = i;
+      c.querySelectorAll('.n-estrellas span, .n-estrellas svg').forEach((s, j) => { const p = N.pop(t, t0 + .5 + j * .07, .4); s.style.transform = `scale(${p})`; });
+      c.querySelector('.res').style.scale = N.pop(t, t0 + .4, .5);
+    });
+    pts.forEach((p, i) => { const on = i === activo; p.style.width = (on ? 46 : 16) + 'px'; p.style.background = on ? 'var(--acento)' : ''; });
+    N.es(puntos, t, .8, fin + .2, { y: yT + L.hm + 60, dy: 40, curva: 'salidaQuint', oy: -60 });
+    N.es(marca, t, 1.4, fin + .3, { x: N.cx(marca), y: H - (VERT ? 200 : 70), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

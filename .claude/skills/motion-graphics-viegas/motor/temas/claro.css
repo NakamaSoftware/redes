@@ -1,0 +1,3 @@
+/* Tema «claro»: fondo papel, tarjetas blancas, acento azul. Úsalo con: node scripts/render.mjs video todas --tema claro */
+:root { --fondo:#F3F1EC; --fondo-rgb:243,241,236; --rejilla:#E6E3DC; --halo:47,91,255; --acento:#2F5BFF; --acento2:#2F5BFF; --texto:#16151A; --mute:#6B6872;
+  --tarjeta:#FFFFFF; --tarjeta2:#F7F6F3; --superficie:#E9E7E2; --tinta:#FFFFFF; --claro:22,21,26; --sombra:40,40,70; }

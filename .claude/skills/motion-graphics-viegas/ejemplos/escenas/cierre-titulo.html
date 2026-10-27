@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «cierre-titulo» · Motion Graphics Viegas. Arco de tarjetas + logo + título que avanza hacia la cámara (cierre de intro).
+     Sacado del vídeo de YouTube «Carruseles animados con Claude Code» (Viegas Estudio, 22-10-2026).
+     Cambia textos, tarjetas (vid/…) y tiempos; la curva, el desenfoque y la cámara ya siguen la guía de estilo. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="ejemplos.css">
+<script src="../motor/motor.js"></script>
+</head><body>
+<script>
+escena({ duracion: 3.9, ancho: 1920, alto: 1080, fondo: 'marca' }, (MG) => {
+  // --- compatibilidad con las funciones del vídeo original (mismos nombres, sobre el motor) ---
+  const M = MG.mundo, V = MG.vista, DT = MG.DT, MB = MG.MB, SVGNS = 'http://www.w3.org/2000/svg';
+  const { k, lerp, cl, desenfoca, pon, camara: camara0 } = MG;
+  const C = MG.curvas, quint = C.salidaQuint, inOut = C.entradaSalidaQuint, suave = C.suave, back = (x) => C.atras(x), rebote = C.rebote, reboteSuave = C.reboteSuave;
+  const $ = (h) => { const d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstChild; };
+  const entra = (el, t, t0, d = .7, dx = 0, dy = 220, s0 = .94, base = 3, extra = 0) => MG.entra(el, t, t0, { d, dx, dy, escala0: s0, base, extra });
+  const camara = (t, z0, z1, ox = 960, oy = 540) => camara0(t, z0, z1, ox, oy);
+  const VID = (e, n) => `vid/${String(e).padStart(2, '0')}-${n}.mp4`;
+  const VIDS = { push: (o) => MG.registrar(o.v, o) };
+  function tarjeta(src, w, h, t0, off = .8, bucle = false) { return MG.tarjeta(src, w, h, t0, { desde: off, bucle: true }); }
+  function logoClaude(tam) {
+    const w = $(`<div class="abs" style="width:${tam}px;height:${tam}px"><div class="logo abs" style="width:100%;height:100%;filter:drop-shadow(0 0 40px rgba(var(--halo),.55))"></div><div class="barrido abs" style="width:100%;height:100%"></div></div>`);
+    w.barre = (x) => { w.children[1].style.backgroundPosition = `${lerp(110, -10, x)}% 0`; w.children[1].style.opacity = x > 0 && x < 1 ? 1 : 0; };
+    return w;
+  }
+  
+  let pinta = () => {}; let DUR = 3.9;
+  DUR = 3.9;
+  const port = [2, 4, 6, 8, 1, 10, 9, 7, 5, 3, 6];
+  const n = port.length, T0 = (i) => .05 + Math.abs(i - (n - 1) / 2) * .06;
+  const cards = port.map((e, i) => tarjeta(VID(e, i === 10 ? 2 : 1), 270, 338, T0(i), 2.4));
+  const logo = logoClaude(150); M.appendChild(logo);
+  const tit = $(`<div class="tit abs" style="width:1200px"><b>Carruseles animados</b><em>con Claude Code</em></div>`); M.appendChild(tit);
+  pinta = (t) => {
+    cards.forEach((c, i) => {
+      const ang = (i - (n - 1) / 2) * 17 - 8 + t * 7;
+      const e = entra(c, t, T0(i), .8, 0, 220, .7, 6, Math.max(0, Math.abs(ang) - 30) / 30 * 2.5);
+      const r = 1500, x = 960 + Math.sin(ang * Math.PI / 180) * r, z = (Math.cos(ang * Math.PI / 180) - 1) * r * .9 - (1 - e.p) * 700;
+      c.style.transform = `translate(${x - 135}px, ${650 - 169 + e.y}px) translateZ(${z}px) rotateY(${ang * .85}deg) scale(${e.s})`;
+      c.style.zIndex = Math.round(2000 + z);
+    });
+    const a = quint(k(t, .45, 1.1)); logo.style.opacity = a; logo.style.filter = `blur(${(1 - a) * 16}px)`;
+    pon(logo, 960 - 75, 70 + (1 - rebote(k(t, .45, 1.4))) * 70, 1); logo.barre(k(t, .7, 1.6)); logo.style.zIndex = 5000;
+    const e = entra(tit, t, .85, .7, 0, 90); pon(tit, 360 + e.x, 245 + e.y, e.s); tit.style.zIndex = 5000;
+    // zoom in constante que se acelera al «vamos a comenzar» (lo remata el logo que abre la cámara)
+    V.style.transformOrigin = '960px 500px';
+    V.style.transform = `scale(${lerp(1, 1.1, t / DUR) * lerp(1, 1.22, inOut(k(t, 2.2, 3.9)))})`;
+  };
+  return pinta;
+});
+</script>
+</body></html>

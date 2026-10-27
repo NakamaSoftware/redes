@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-buscador» · Viegas IA · Motion Lab
+     Una barra de búsqueda enorme entra estirándose desde una píldora, escribe la consulta con cursor, se pulsa (lupa que late)
+     y los resultados caen en cascada (cada uno con su curva); el último se resalta en el color de acento, la cámara se mete
+     en él con «zoom a través» y aparece el cierre con logo.
+     Cambia "consulta", "resultados" ([{titulo, url, texto}], 3–5; el resaltado es "destacado" = índice), colores "fondo",
+     "tarjeta", "tinta", "acento", y el cierre "titular" (*palabra* = acento), "marca", "logo".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif',serif;
+  --fondo:#141210; --tarjeta:#1F1C19; --tinta:#F4EDE4; --mute:#9A9088; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(90% 60% at 50% 0%, rgba(var(--halo),.22), transparent 65%), var(--fondo); }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; color:var(--acento); }
+.lineas{ position:absolute; left:-600px; top:-600px; width:3400px; height:3400px; background-image:linear-gradient(rgba(244,237,228,.045) 1.5px, transparent 1.5px); background-size:100% 64px; }
+.barra{ height:132px; border-radius:66px; background:var(--tarjeta); border:2px solid rgba(244,237,228,.1); overflow:hidden;
+  box-shadow:0 40px 100px rgba(0,0,0,.5), 0 0 0 0 rgba(var(--halo),0); display:flex; align-items:center; padding:0 40px; gap:28px; }
+.barra svg{ width:58px; height:58px; flex:none; color:var(--acento); }
+.q{ font:500 52px var(--fuente); color:var(--tinta); letter-spacing:-.02em; white-space:nowrap; overflow:hidden; }
+.cur{ display:inline-block; width:4px; height:1.05em; background:var(--acento); vertical-align:-.15em; margin-left:3px; }
+.res{ border-radius:34px; background:var(--tarjeta); border:1.5px solid rgba(244,237,228,.07); padding:30px 38px; box-shadow:0 24px 60px rgba(0,0,0,.4); }
+.res .u{ font:500 28px var(--fuente); color:var(--mute); white-space:nowrap; display:flex; align-items:center; gap:14px; }
+.res .u i{ width:40px; height:40px; border-radius:12px; background:rgba(244,237,228,.08); display:grid; place-items:center; font:700 22px var(--fuente); font-style:normal; color:var(--tinta); }
+.res h3{ margin-top:12px; font:600 42px/1.15 var(--fuente); color:var(--tinta); letter-spacing:-.02em; }
+.res p{ margin-top:8px; font:400 32px/1.3 var(--fuente); color:var(--mute); }
+.res.dest{ background:var(--acento); border-color:transparent; box-shadow:0 40px 110px rgba(var(--halo),.45); }
+.res.dest h3, .res.dest p, .res.dest .u{ color:#fff; }
+.res.dest .u i{ background:rgba(255,255,255,.25); color:#fff; }
+.logo{ width:190px; height:190px; border-radius:54px; display:grid; place-items:center; overflow:hidden; font:700 104px var(--fuente); color:var(--acento); background:var(--tinta); box-shadow:0 40px 100px rgba(0,0,0,.4); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.tit{ font:700 118px/1.02 var(--fuente); letter-spacing:-.05em; color:#fff; text-align:center; }
+.tit em{ color:var(--fondo) !important; }
+.marca{ font:600 42px var(--fuente); color:rgba(255,255,255,.85); white-space:nowrap; letter-spacing:-.01em; }
+.fondoCierre{ background:var(--acento); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "fondo": "#141210",
+  "tarjeta": "#1F1C19",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "consulta": "cómo editar reels con IA",
+  "resultados": [
+    { "titulo": "10 apps para editar vídeo", "url": "blog.ejemplo.com", "texto": "Comparativa de editores con plantillas." },
+    { "titulo": "Tutorial de Premiere para principiantes", "url": "cursos.ejemplo.com", "texto": "Tres horas de vídeo paso a paso." },
+    { "titulo": "Plantillas de reels gratis", "url": "recursos.ejemplo.com", "texto": "Descarga y adapta a mano." },
+    { "titulo": "Edita reels hablando con Claude Code", "url": "viegasestudio.com", "texto": "Cortes, subtítulos y motion en minutos." }
+  ],
+  "destacado": 3,
+  "titular": "La respuesta *eres tú*",
+  "marca": "Viegas IA",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+['fondo', 'tarjeta', 'tinta', 'acento'].forEach((c) => P[c] && raiz.setProperty('--' + c, P[c]));
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const LUPA = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="10.5" cy="10.5" r="6.5"/><path d="M15.5 15.5L21 21"/></svg>';
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  MG.mundo.prepend(MG.el('<div class="lineas"></div>'));
+  const BW = VERT ? 960 : 1240, BX = (W - BW) / 2;
+  const barra = MG.el(`<div class="barra">${LUPA}<div class="q"></div></div>`);
+  const q = barra.querySelector('.q'), lupa = barra.querySelector('svg');
+  const lista = (P.resultados || []).slice(0, 5), di = Math.min(lista.length - 1, Math.max(0, P.destacado | 0));
+  const res = lista.map((r, i) => MG.el(`<div class="res${i === di ? '' : ''}" style="width:${BW}px"><div class="u"><i>${esc((r.url || '·')[0].toUpperCase())}</i>${esc(r.url)}</div><h3>${esc(r.titulo)}</h3>${VERT || true ? `<p>${esc(r.texto)}</p>` : ''}</div>`));
+  const fondoC = MG.el(`<div class="fondoCierre" style="width:${W}px;height:${H}px"></div>`);
+  const logo = MG.el(`<div class="logo">${P.logo ? `<img src="${P.logo}">` : esc((P.marca || '·').trim()[0])}</div>`);
+  const anchoT = VERT ? W - 140 : 1500;
+  const tit = MG.texto(md(P.titular), 'tit'); tit.style.width = anchoT + 'px'; tit.style.fontSize = (VERT ? 118 : 128) + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+
+  const cons = String(P.consulta), tB = .1, tQ = .85, vel = 22, tQF = tQ + cons.length / vel, tEnter = tQF + .2;
+  const tRes = tEnter + .25, paso = .16, tDest = tRes + lista.length * paso + .45, tZoom = tDest + .7, tCie = tZoom + .6;
+  let L = null;
+  return (t) => {
+    if (!L) {
+      const hs = res.map((e) => e.offsetHeight), gap = VERT ? 22 : 16;
+      const tot = 132 + 40 + hs.reduce((a, b) => a + b + gap, 0) - gap;
+      const top = VERT ? Math.max(280, (H - tot) / 2 - 40) : Math.max(60, (H - tot) / 2);
+      const ys = []; let y = top + 132 + 40; hs.forEach((h) => { ys.push(y); y += h + gap; });
+      L = { hs, top, ys, tot };
+    }
+    // si en horizontal no cabe, la columna sube con la cámara (se ve el destacado)
+    const vivo = t < tCie;
+    const zi = C.entradaCubica(k(t, tZoom, tCie)), zo = C.salidaQuint(k(t, tCie - .05, tCie + 1.1));
+    const fx = W / 2, fy = L.ys[di] + L.hs[di] / 2;
+    const pd = C.afterEffects75(k(t, tDest - .2, tDest + .7));
+    [barra, ...res].forEach((e) => { e.style.visibility = vivo ? 'visible' : 'hidden'; });
+    [fondoC, logo, tit, marca].forEach((e) => { e.style.visibility = vivo ? 'hidden' : 'visible'; });
+    if (vivo) {
+      const z = lerp(1, 1.07, C.suave(t / D)) * (1 + .025 * pd) * (1 + 9 * zi);
+      const oy = lerp(H / 2, fy, Math.max(pd, zi));
+      MG.vista.style.transformOrigin = `${fx}px ${oy}px`;
+      MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .45) * 9}px, ${Math.cos(t * .33) * 11 + (H / 2 - oy) * pd * .2}px)`;
+      MG.mundo.style.filter = zi > .03 ? `blur(${zi * 10}px)` : 'none';
+      // barra: píldora que se estira (ancho con salidaExpo, entrada con salidaQuint)
+      const pw = C.salidaExpo(k(t, tB + .2, tB + 1.0)), e0 = MG.entra(barra, t, tB, { d: .6, dy: -140, escala0: .9, curva: 'salidaQuint', base: 8 });
+      barra.style.width = lerp(132, BW, pw) + 'px';
+      const golpe = C.reboteFuerte(k(t, tEnter, tEnter + .5));
+      const sB = t > tEnter ? 1 - .04 * Math.sin(Math.PI * k(t, tEnter, tEnter + .3)) : 1;
+      const yb = lerp((H - 132) / 2, L.top, C.salidaQuint(k(t, tEnter, tEnter + .7))); MG.pon(barra, BX + (BW - lerp(132, BW, pw)) / 2, yb + e0.y, e0.s * sB);
+      barra.style.boxShadow = `0 40px 100px rgba(0,0,0,.5), 0 0 0 ${6 * k(t, tEnter, tEnter + .2) * (1 - k(t, tEnter + .3, tEnter + .9))}px rgba(var(--halo),.55)`;
+      lupa.style.transform = `scale(${1 + .3 * Math.sin(Math.PI * k(t, tEnter, tEnter + .35))}) rotate(${-12 * (1 - golpe)}deg)`;
+      const n = Math.max(0, Math.min(cons.length, Math.floor((t - tQ) * vel)));
+      const parp = t > tQ - .4 && t < tEnter + .6 && (t < tQF || Math.floor(t * 2.6) % 2 === 0);
+      q.innerHTML = esc(cons.slice(0, n)) + (parp ? '<span class="cur"></span>' : '');
+      q.style.opacity = pw;
+      // resultados en cascada: curvas distintas alternadas
+      const curv = ['salidaQuint', 'rebote', 'salidaExpo', 'reboteSuave', 'salidaCubica'];
+      res.forEach((el, i) => {
+        const a = tRes + i * paso, e = MG.entra(el, t, a, { d: .7, dy: 120 + i * 30, escala0: .94, curva: curv[i % 5], base: 9 });
+        const es = i === di, pe = es ? pd : 0;
+        el.classList.toggle('dest', es && pd > .35);
+        const otros = !es ? 1 - .55 * pd : 1;
+        MG.pon(el, BX + e.x, L.ys[i] + e.y, e.s * (1 + .05 * pe), es ? `rotate(${-1.2 * pe}deg)` : '');
+        el.style.opacity = Math.min(1, Math.max(0, e.p) * 1.6) * otros;
+        el.style.zIndex = es ? 20 : 10;
+      });
+    } else {
+      MG.mundo.style.filter = 'none';
+      MG.vista.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+      MG.vista.style.transform = `scale(${lerp(1.5, 1, zo) * (1 + .04 * k(t, tCie, D))}) rotate(${(1 - zo) * 2.5}deg)`;
+      MG.pon(fondoC, 0, 0); fondoC.style.width = W * 1.4 + 'px'; fondoC.style.height = H * 1.4 + 'px'; MG.pon(fondoC, -W * .2, -H * .2);
+      const bl = (1 - zo) * 14;
+      const blk = 190 + 60 + tit.offsetHeight + 40 + 50, y0 = (H - blk) / 2;
+      const e1 = MG.entra(logo, t, tCie + .1, { d: .7, dy: 140, escala0: .4, curva: 'reboteFuerte', base: 8 });
+      MG.pon(logo, (W - 190) / 2, y0 + e1.y, e1.s, `rotate(${-14 * (1 - C.salidaQuint(k(t, tCie + .1, tCie + 1)))}deg)`);
+      MG.pon(tit, (W - anchoT) / 2, y0 + 250);
+      tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tCie + .25 + i * .07, { d: .6, dy: 70, curva: 'salidaQuint', base: 7 });
+        sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+      const e3 = MG.entra(marca, t, tCie + .5 + tit.trozos.length * .07, { d: .6, dy: 40, curva: 'salidaCubica', base: 5 });
+      MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 250 + tit.offsetHeight + 40 + e3.y);
+      [logo, tit, marca].forEach((e) => { if (bl > .3 && e !== logo) {} });
+    }
+  };
+});
+</script>
+</body></html>

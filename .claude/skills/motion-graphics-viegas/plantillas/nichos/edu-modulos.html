@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «edu-modulos» · Educación / infoproducto · Viegas IA · Motion Lab
+     Módulos del curso: una línea vertical se dibuja de arriba abajo y en cada nodo se enciende un punto (rebote fuerte) y entra
+     la tarjeta del módulo desde la derecha (rebote, cada una con su retardo). Al final, el resumen «5 módulos · 24 lecciones».
+     Cambia "titulo", "modulos" ([título, lecciones]), "resumen", "marca". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.mod{ display:flex; align-items:center; gap:26px; padding:26px 32px; }
+.mod .n{ font:500 24px var(--mono); letter-spacing:.14em; color:var(--brillo, var(--acento)); }
+.mod b{ display:block; font:600 42px/1.15 var(--fuente); color:var(--texto); letter-spacing:-.02em; margin-top:4px; }
+.mod small{ margin-left:auto; flex:none; font:500 26px var(--mono); color:var(--mute); }
+.nodo{ width:34px; height:34px; border-radius:50%; background:var(--acento); box-shadow:0 0 0 8px rgba(var(--halo),.2), 0 0 26px var(--acento); }
+.eje{ width:6px; border-radius:6px; background:linear-gradient(180deg, var(--brillo, var(--acento2)), var(--acento)); transform-origin:50% 0; }
+.res{ font:500 38px var(--fuente); color:var(--mute); text-align:center; }
+.res b{ color:var(--texto); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "titulo": "Lo que vas a *aprender*",
+  "modulos": [["Encuentra tu nicho y tu mensaje", 4], ["Tu marca visual con IA", 5], ["Guiones que enganchan", 5], ["Edita tus vídeos con Claude", 6], ["Vende sin perseguir a nadie", 4]],
+  "resumen": "<b>5 módulos</b> · 24 lecciones · acceso de por vida",
+  "marca": "Academia Norte",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C } = N, fin = P.duracion - 1.1, n = P.modulos.length, m = VERT ? 60 : 160, xEje = m + 17, cw = W - m * 2 - 80;
+  const tit = N.frase(P.titulo, 'n-tit', W - 2 * m); tit.style.fontSize = '96px';
+  const mods = P.modulos.map(([tx, l], i) => MG.el(`<div class="n-card mod" style="width:${cw}px"><div><span class="n">MÓDULO ${String(i + 1).padStart(2, '0')}</span><b>${tx}</b></div><small>${l} lecc.</small></div>`));
+  const nodos = mods.map(() => MG.el(`<div class="nodo"></div>`));
+  const eje = MG.el(`<div class="eje"></div>`); MG.mundo.insertBefore(eje, nodos[0]);
+  const res = MG.el(`<div class="res" style="width:${W}px">${P.resumen}</div>`);
+  const marca = MG.el(N.marca(.8));
+  let L;
+  return (t) => {
+    if (!L) { const hm = Math.max(...mods.map((x) => x.offsetHeight)), g = 22, tot = tit.offsetHeight + 60 + n * (hm + g) + 40 + res.offsetHeight; L = { y: (H - tot) / 2, hm, g }; }
+    N.vivo(t);
+    MG.pon(tit, m, L.y);
+    if (t < fin) MG.animaTexto(tit, t, .1, { paso: .08 }); else N.es(tit, t, 0, fin, { x: m, y: L.y, oy: -100 });
+    const y0 = L.y + tit.offsetHeight + 60, paso = L.hm + L.g, tl = (i) => 1.0 + i * .55;
+    const pe = C.entradaSalidaQuint(k(t, .9, tl(n - 1) + .2));
+    eje.style.height = (n - 1) * paso + 'px'; eje.style.transform = `translate(${xEje - 3}px,${y0 + L.hm / 2}px) scaleY(${pe})`;
+    eje.style.opacity = 1 - C.entradaCubica(k(t, fin, fin + .4));
+    mods.forEach((md, i) => {
+      const yy = y0 + i * paso;
+      const pn = N.pop(t, tl(i), .45); nodos[i].style.opacity = 1 - C.entradaCubica(k(t, fin + i * .05, fin + i * .05 + .4));
+      MG.pon(nodos[i], xEje - 17, yy + (L.hm - 34) / 2, pn);
+      N.es(md, t, tl(i) + .05, fin + i * .06, { x: m + 80, y: yy + (L.hm - md.offsetHeight) / 2, dx: 400, dy: 0, d: .6, oy: -90, s0: .96 });
+    });
+    N.es(res, t, tl(n - 1) + .6, fin + .3, { y: y0 + n * paso + 30, dy: 60, curva: 'reboteSuave', oy: -60 });
+    N.es(marca, t, tl(n - 1) + .8, fin + .35, { x: N.cx(marca), y: H - (VERT ? 200 : 70), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

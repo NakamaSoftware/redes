@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «grafica-3d» · 3D real (three.js): gráfica de barras en 3D que crecen escalonadas con rebote; la barra destacada en
+     coral y las demás de cristal oscuro; cifras que cuentan hacia arriba; la cámara orbita y baja despacio. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+</head><body>
+<script type="module">
+import { escena3d } from '../motor/motor3d.js';
+escena3d({ duracion: 6, ancho: 1920, alto: 1080, fondo: 'marca' }, ({ THREE, MG, scene, obj, mat, rig, camara }) => {
+  const datos = [[38, 'Ene'], [52, 'Feb'], [47, 'Mar'], [71, 'Abr'], [96, 'May']];
+  const suelo = obj.suelo(); suelo.position.y = 0; scene.add(suelo);
+  const barras = datos.map(([v], i) => { const b = obj.cajaRedonda(0.9, 1, 0.9, i === 4 ? mat.coral() : mat.oscuro({ roughness: 0.3, metalness: 0.3 }), 0.1);
+    b.position.x = (i - 2) * 1.5; scene.add(b); return b; });
+  const etiquetas = datos.map(([v, m]) => MG.el(`<div class="mg-abs" style="text-align:center;width:160px"><div class="mg-titulo cifra" style="font-size:46px">0</div><div class="mg-sub" style="font-size:24px">${m}</div></div>`));
+  const tit = MG.el(`<div class="mg-abs mg-titulo" style="font-size:72px;left:140px">Crecimiento <em>+152 %</em></div>`);
+  const proy = new THREE.Vector3();
+  return (t) => {
+    rig.orbita(t, { radio: 11, desde: -22, hasta: 12, altura: MG.lerp(5, 3.2, t / 6), centro: [0, 1.6, 0] });
+    barras.forEach((b, i) => { const p = MG.curvas.rebote(MG.k(t, 0.4 + i * 0.16, 1.6 + i * 0.16)), h = datos[i][0] / 25 * Math.max(0.001, p);
+      b.scale.y = h; b.position.y = h / 2;
+      proy.set(b.position.x, h + 0.45, 0).project(camara);                // la etiqueta sigue a la barra en pantalla
+      const el = etiquetas[i]; el.style.transform = `translate(${(proy.x * 0.5 + 0.5) * 1920 - 80}px, ${(-proy.y * 0.5 + 0.5) * 1080 - 70}px)`;
+      el.style.opacity = MG.k(t, 0.6 + i * 0.16, 1.0 + i * 0.16); MG.contador(el.querySelector('.cifra'), t, 0.5 + i * 0.16, 1.7 + i * 0.16, 0, datos[i][0], { sufijo: 'k' }); });
+    const e = MG.entra(tit, t, 0.2, { dy: 60 }); MG.pon(tit, e.x, 110 + e.y, e.s);
+  };
+});
+</script>
+</body></html>

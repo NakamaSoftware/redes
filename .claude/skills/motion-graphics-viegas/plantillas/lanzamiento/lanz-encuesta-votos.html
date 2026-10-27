@@ -1,0 +1,178 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-encuesta-votos» · Viegas IA · Motion Lab
+     Encuesta tipo «sticker» de historias (genérica, sin marcas): la tarjeta cae girando y se posa con rebote, la pregunta entra
+     por palabras, las opciones aparecen escalonadas, un dedo toca la opción elegida (onda + pulsación) y las barras de votos se
+     llenan cada una con su curva mientras los porcentajes cuentan; la ganadora se enciende en el acento, sube el total de votos
+     con avatares, y la tarjeta sale hacia la cámara («zoom a través») para el cierre con titular y logo.
+     Cambia "pregunta" (*palabra* = acento), "opciones" ([{texto, votos}], 2–4), "elegida" (índice que toca el dedo),
+     "total" (texto de votos; {n} = suma de votos), "etiqueta" (chip), "cierre", "marca", "logo" (ruta o "" = inicial),
+     colores "fondo", "fondo2", "tinta", "acento".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.chip{ font:600 30px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:16px 30px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.08); }
+.cierre{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.cierre .mg-trozo{ padding:0 .03em; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.tarjeta{ border-radius:48px; background:linear-gradient(180deg, rgba(var(--tintaRgb),.11), rgba(var(--tintaRgb),.05)); border:1.5px solid rgba(var(--tintaRgb),.14);
+  box-shadow:0 50px 120px rgba(0,0,0,.5), inset 0 1px 0 rgba(var(--tintaRgb),.18); backdrop-filter:blur(20px); }
+.preg{ font:600 70px/1.06 var(--fuente); letter-spacing:-.035em; color:var(--tinta); text-align:center; }
+.preg .mg-trozo{ padding:0 .03em; }
+.op{ border-radius:30px; background:rgba(var(--tintaRgb),.07); border:1.5px solid rgba(var(--tintaRgb),.1); overflow:hidden; }
+.op .relleno{ position:absolute; inset:0; transform-origin:0 50%; background:rgba(var(--tintaRgb),.14); }
+.op .txt{ position:absolute; left:34px; top:50%; transform:translateY(-50%); font:600 46px var(--fuente); color:var(--tinta); white-space:nowrap; }
+.op .pc{ position:absolute; right:34px; top:50%; transform:translateY(-50%); font:700 46px var(--fuente); color:var(--tinta); font-variant-numeric:tabular-nums; }
+.op .ok{ display:inline-grid; place-items:center; width:46px; height:46px; margin-left:16px; border-radius:50%; background:var(--fondo); color:var(--acento); font:800 28px var(--fuente); vertical-align:middle; }
+.op.gana .relleno{ background:var(--acento); }
+.dedo{ width:130px; height:130px; border-radius:50%; background:rgba(var(--tintaRgb),.9); box-shadow:0 20px 50px rgba(0,0,0,.45), inset 0 -6px 14px rgba(0,0,0,.15); }
+.onda{ width:200px; height:200px; border-radius:50%; border:4px solid var(--acento); }
+.votos{ display:flex; align-items:center; gap:18px; font:500 38px var(--fuente); color:rgba(var(--tintaRgb),.7); white-space:nowrap; }
+.votos .avs{ display:flex; }
+.votos .avs i{ width:58px; height:58px; border-radius:50%; margin-left:-16px; border:4px solid var(--fondo); }
+.votos .avs i:first-child{ margin-left:0; }
+.votos b{ color:var(--tinta); font-weight:700; font-variant-numeric:tabular-nums; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "etiqueta": "Tú decides",
+  "pregunta": "¿Qué *estrenamos* primero?",
+  "opciones": [
+    { "texto": "Versión móvil", "votos": 6240 },
+    { "texto": "Modo oscuro", "votos": 2810 },
+    { "texto": "Plantillas nuevas", "votos": 1430 }
+  ],
+  "elegida": 0,
+  "total": "{n} votos",
+  "cierre": "Gracias por *votar*",
+  "marca": "Tu marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const ops = (P.opciones || []).slice(0, 4), N = ops.length, votos = ops.map((o) => Number(o.votos)), suma = votos.reduce((a, b) => a + b, 0) || 1;
+  const pct = votos.map((v) => v / suma * 100), gana = votos.indexOf(Math.max(...votos)), eleg = Math.min(N - 1, Math.max(0, P.elegida | 0));
+
+  const TW = VERT ? 900 : 1080, OH = VERT ? 124 : 112, OG = 22, PAD = 56;
+  const tarjeta = MG.el(`<div class="tarjeta"></div>`);
+  const chip = MG.el(`<div class="chip">${esc(P.etiqueta)}</div>`);
+  const preg = MG.texto(md(P.pregunta), 'preg'); preg.style.width = (TW - 2 * PAD) + 'px';
+  const opsEl = ops.map((o, i) => MG.el(`<div class="op ${i === gana ? 'gana' : ''}" style="width:${TW - 2 * PAD}px;height:${OH}px"><div class="relleno"></div><div class="txt">${esc(o.texto)}${i === eleg ? '<span class="ok">✓</span>' : ''}</div><div class="pc">0%</div></div>`));
+  const onda = MG.el(`<div class="onda"></div>`), dedo = MG.el(`<div class="dedo"></div>`);
+  const tonos = ['var(--acento)', 'rgba(var(--tintaRgb),.75)', 'rgba(var(--tintaRgb),.45)', 'rgba(var(--halo),.6)'];
+  const votosEl = MG.el(`<div class="votos"><div class="avs">${tonos.map((c) => `<i style="background:${c}"></i>`).join('')}</div><span>${esc(P.total).replace('{n}', '<b>0</b>')}</span></div>`), vb = votosEl.querySelector('b');
+  const logo = MG.el(logoHTML());
+  const cierre = MG.texto(md(P.cierre), 'cierre'); const anchoC = VERT ? W - 160 : 1500; cierre.style.width = anchoC + 'px'; cierre.style.fontSize = (VERT ? 116 : 132) + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+
+  let L = null;
+  const tToque = 2.9, tVotos = tToque + .25, tT = D - 2.9, tC = tT + .5;
+  return (t) => {
+    if (!L) { const ph = preg.offsetHeight, TH = PAD + ph + 50 + N * OH + (N - 1) * OG + 44 + 60 + PAD;
+      const tx = (W - TW) / 2, ty = VERT ? Math.max(390, (H - TH) / 2 - 20) : (H - TH) / 2 + 40; L = { ph, TH, tx, ty }; tarjeta.style.width = TW + 'px'; tarjeta.style.height = TH + 'px'; }
+    const { ph, TH, tx, ty } = L;
+    const oyE = ty + PAD + ph + 50 + eleg * (OH + OG) + OH / 2;
+    // cámara: deriva continua, se acerca un poco a la opción al tocar y entra a través de la tarjeta al final
+    const zt = C.entradaCubica(k(t, tT, tT + .6)), zc = C.salidaQuint(k(t, tC - .1, tC + 1.4));
+    const acerca = C.afterEffects75(k(t, tToque - .6, tToque + .3)) * (1 - C.afterEffects(k(t, tVotos + 1.2, tT)));
+    const z = t < tC - .1 ? lerp(1, 1.05, t / tC) * (1 + .08 * acerca) * (1 + 6 * zt) : lerp(1.25, 1, zc) * lerp(1, 1.05, k(t, tC, D));
+    MG.vista.style.transformOrigin = t < tC - .1 ? `${W / 2}px ${lerp(H / 2, oyE, Math.max(acerca, k(t, tT - .3, tT)))}px` : `${W / 2}px ${H / 2}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .44) * 12}px, ${Math.cos(t * .32) * 9}px) rotate(${Math.sin(t * .26) * .6}deg)`;
+    const vis = 1 - C.salidaCubica(k(t, tT + .1, tT + .5));
+
+    // la tarjeta cae girando y se posa con rebote
+    const et = MG.entra(tarjeta, t, .15, { d: .75, dy: -260, escala0: .8, curva: 'rebote', base: 10 });
+    const rot = lerp(-9, 0, C.rebote(k(t, .15, 1.3))) + Math.sin(t * .6) * .6;
+    const tr = (el, x, y, s = 1) => MG.pon(el, tx + x + (el === tarjeta ? 0 : 0), ty + y + et.y, s * et.s, '');
+    MG.pon(tarjeta, tx, ty + et.y, et.s, `rotate(${rot}deg)`); tarjeta.style.opacity = Math.min(1, et.p * 1.8) * vis;
+    tarjeta.style.transformOrigin = '50% 50%';
+    const grupo = (el, x, y, s = 1, extra = '') => { el.style.transformOrigin = `${TW / 2 - x}px ${TH / 2 - y}px`; MG.pon(el, tx + x, ty + y + et.y, s * et.s, `rotate(${rot}deg) ${extra}`); };
+
+    const ec = MG.entra(chip, t, .7, { d: .5, dy: 0, escala0: .3, curva: 'reboteFuerte', base: 5 });
+    grupo(chip, (TW - chip.offsetWidth) / 2, -chip.offsetHeight / 2, ec.s); chip.style.opacity = Math.min(1, ec.p * 1.8) * vis;
+    grupo(preg, PAD, PAD); preg.style.opacity = vis;
+    preg.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, .55 + i * .07, { d: .55, dy: 60, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 6 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+
+    const pulsa = Math.sin(Math.PI * k(t, tToque - .05, tToque + .25));
+    const curvasB = ['afterEffects75', 'salidaExpo', 'salidaCubica', 'afterEffects'];
+    opsEl.forEach((o, i) => {
+      const e = MG.entra(o, t, 1.1 + i * .13, { d: .55, dx: 0, dy: 90, escala0: .9, curva: i % 2 ? 'salidaQuint' : 'rebote', base: 6 });
+      grupo(o, PAD, PAD + ph + 50 + i * (OH + OG) + e.y, e.s * (i === eleg ? 1 - .04 * pulsa : 1)); o.style.opacity = Math.min(1, e.p * 1.8) * vis;
+      const a = tVotos + i * .12, p = C[curvasB[i % 4]](k(t, a, a + 1.3));
+      o.querySelector('.relleno').style.transform = `scaleX(${pct[i] / 100 * p})`;
+      MG.contador(o.querySelector('.pc'), t, a, a + 1.3, 0, pct[i], { sufijo: '%', curva: curvasB[i % 4] });
+      o.querySelector('.pc').style.opacity = k(t, a - .05, a + .2);
+      if (i === gana) { const g = C.salidaQuint(k(t, a + 1.1, a + 1.6)); o.style.boxShadow = `0 0 ${60 * g}px rgba(var(--halo),${.55 * g})`; o.style.borderColor = `rgba(var(--halo),${.1 + .6 * g})`;
+        o.querySelectorAll('.txt').forEach((x) => x.style.color = g > .5 ? 'var(--fondo)' : 'var(--tinta)'); }
+    });
+
+    // dedo: llega en curva, toca y se va
+    const lx = tx + TW * .62, ly = oyE - 30;
+    const ll = C.salidaQuint(k(t, tToque - .9, tToque - .1)), va = C.entradaCubica(k(t, tToque + .35, tToque + .9));
+    const dx = lerp(W * .9 - lx + 220, 0, ll) + va * 320, dy = lerp(500, 0, ll) + va * 420;
+    const vdx = Math.abs(dx - (lerp(W * .9 - lx + 220, 0, C.salidaQuint(k(t - DT, tToque - .9, tToque - .1))) + C.entradaCubica(k(t - DT, tToque + .35, tToque + .9)) * 320)) / DT;
+    MG.pon(dedo, lx - 65 + dx, ly - 65 + dy + et.y, 1 - .16 * pulsa); MG.desenfoca(dedo, vdx * MB * .7, vdx * MB * .7);
+    dedo.style.opacity = k(t, tToque - .9, tToque - .6) * (1 - k(t, tToque + .6, tToque + .9)) * vis;
+    const po = C.salidaCubica(k(t, tToque, tToque + .7)); MG.pon(onda, lx - 100, ly - 100 + et.y, lerp(.3, 1.6, po)); onda.style.opacity = (1 - po) * (t > tToque ? 1 : 0);
+
+    // total de votos
+    const ev = MG.entra(votosEl, t, tVotos + .5, { d: .6, dy: 50, curva: 'salidaQuint', base: 5 });
+    grupo(votosEl, (TW - votosEl.offsetWidth) / 2, TH - PAD - 60 + ev.y); votosEl.style.opacity = Math.min(1, ev.p * 1.8) * vis;
+    MG.contador(vb, t, tVotos + .5, tVotos + 2.2, 0, suma, { curva: 'salidaExpo' });
+
+    // cierre
+    const bloque = 150 + 60 + cierre.offsetHeight + 50 + 50, y0 = (H - bloque) / 2 - (VERT ? 40 : 0);
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-20 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cierre, (W - anchoC) / 2, y0 + 210);
+    cierre.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + cierre.trozos.length * .08, { d: .6, dy: 40, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 210 + cierre.offsetHeight + 50 + em.y);
+  };
+});
+</script>
+</body></html>

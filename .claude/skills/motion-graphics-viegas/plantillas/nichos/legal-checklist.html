@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «legal-checklist» · Abogado / gestoría / inmobiliaria · Viegas IA · Motion Lab
+     Checklist de documentos: una hoja (tarjeta) sube con rebote suave y se inclina un poco, cada documento entra desde la
+     izquierda y su casilla se marca con un trazo que se dibuja (salidaCubica) y un pequeño golpe de escala. Contador «4/5».
+     Cambia "titulo", "documentos" (3–6), "nota", "marca". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.hoja{ padding:56px 54px 40px; }
+.hoja .cabe{ display:flex; justify-content:space-between; align-items:center; font:500 26px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute); }
+.hoja .cabe b{ color:var(--brillo, var(--acento)); font-weight:600; font-size:30px; }
+.item{ display:flex; align-items:center; gap:28px; padding:26px 0; border-top:1px solid rgba(var(--claro),.1); font:500 46px var(--fuente); color:var(--texto); letter-spacing:-.015em; }
+.item:first-of-type{ border-top:0; }
+.caja{ width:64px; height:64px; border-radius:18px; border:3px solid rgba(var(--claro),.25); flex:none; display:grid; place-items:center; }
+.caja svg{ width:40px; height:40px; overflow:visible; }
+.nota{ font:500 34px/1.35 var(--fuente); color:var(--mute); text-align:center; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Checklist",
+  "titulo": "Documentos para *comprar tu casa*",
+  "documentos": ["DNI o NIE en vigor", "Nota simple del Registro", "Certificado energético", "Último recibo del IBI", "Certificado de deudas de la comunidad"],
+  "nota": "Guárdalo para tu próxima firma en notaría",
+  "marca": "Ortega Abogados",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 220), n = P.documentos.length;
+  const tit = N.frase(P.titulo, 'n-tit', cw); tit.style.fontSize = '88px';
+  const hoja = MG.el(`<div class="n-card hoja" style="width:${cw}px"><div class="cabe"><span>${P.etiqueta}</span><b>0/${n}</b></div>
+    ${P.documentos.map((d) => `<div class="item"><span class="caja"><svg viewBox="0 0 40 40"><path d="M8 21 L17 29 L33 11" fill="none" stroke="var(--acento)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1"/></svg></span><span>${d}</span></div>`).join('')}</div>`);
+  const items = [...hoja.querySelectorAll('.item')], cuenta = hoja.querySelector('.cabe b');
+  const nota = MG.el(`<div class="nota" style="width:${cw}px">🔖 ${P.nota}</div>`);
+  const marca = MG.el(N.marca(.85));
+  let L;
+  return (t) => {
+    if (!L) { const hT = tit.offsetHeight, hH = hoja.offsetHeight, tot = hT + 60 + hH + 50 + nota.offsetHeight; L = { y: (H - tot) / 2 + (VERT ? 20 : 10), hT, hH }; }
+    N.vivo(t);
+    MG.pon(tit, (W - cw) / 2, L.y);
+    if (t < fin) MG.animaTexto(tit, t, .1, { paso: .07 }); else N.es(tit, t, 0, fin, { x: (W - cw) / 2, y: L.y, oy: -110 });
+    const yh = L.y + L.hT + 60;
+    N.es(hoja, t, .5, fin + .1, { x: (W - cw) / 2, y: yh, dy: 500, s0: .9, curva: 'reboteSuave', d: .8, oy: -140, rot: 4 });
+    let hechos = 0;
+    items.forEach((it, i) => {
+      const t0 = 1.1 + i * .22, tc = 2.2 + i * .5;
+      const e = MG.entra(it, t, t0, { dx: -120, dy: 0, d: .5, curva: 'salidaQuint' }); it.style.transform = `translateX(${e.x}px)`;
+      const p = C.salidaCubica(k(t, tc, tc + .35)); it.querySelector('path').style.strokeDashoffset = 1 - p;
+      const cj = it.querySelector('.caja'); cj.style.scale = 1 + .22 * Math.sin(Math.PI * k(t, tc, tc + .4));
+      cj.style.borderColor = p > .05 ? 'var(--acento)' : ''; cj.style.background = p > .05 ? `rgba(var(--halo),${.18 * p})` : '';
+      it.lastChild.style.opacity = 1 - .35 * p; if (p > .5) hechos++;
+    });
+    cuenta.textContent = `${hechos}/${n}`;
+    N.es(nota, t, 2.2 + n * .5 + .2, fin + .3, { x: (W - cw) / 2, y: yh + L.hH + 50, dy: 60, curva: 'reboteSuave', oy: -60 });
+    N.es(marca, t, 2.2 + n * .5 + .4, fin + .38, { x: N.cx(marca), y: H - (VERT ? 300 : 110), dy: 60, oy: -50 });
+  };
+});
+</script>
+</body></html>

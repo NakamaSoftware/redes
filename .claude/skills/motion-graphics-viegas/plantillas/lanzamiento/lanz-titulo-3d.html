@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-titulo-3d» · Viegas IA · Motion Lab
+     Título 3D extruido: cada línea es un bloque de letras con profundidad real (capas apiladas en CSS 3D), que llega desde el
+     fondo con su propia curva y desenfoque de movimiento; una luz barre la cara frontal, la cámara orbita sin pararse, un halo
+     respira detrás y una sombra se proyecta en el suelo. Al final las letras atraviesan la cámara («zoom a través») y cierra
+     con el logo, la marca y el lema.
+     Cambia "lineas" (2–3 palabras o líneas cortas; *palabra* = línea en acento), "etiqueta", "sub", "profundidad" (capas),
+     "giro" (grados de la órbita), "fuente", "marca", "lema", "logo" y los colores ("lado" = color de la extrusión).
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.chip{ font:600 30px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:16px 30px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.08); }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+:root{ --lado:#D97757; }
+.persp{ perspective:1700px; }
+.linea{ position:relative; transform-style:preserve-3d; }
+.capa{ position:absolute; left:0; top:0; white-space:nowrap; font-weight:900; letter-spacing:-.05em; line-height:.9; }
+.frente{ position:relative; white-space:nowrap; font-weight:900; letter-spacing:-.05em; line-height:.9; color:transparent;
+  -webkit-background-clip:text; background-clip:text; background-size:300% 100%; }
+.sombra{ border-radius:50%; background:radial-gradient(closest-side, rgba(0,0,0,.65), rgba(0,0,0,0)); }
+.halo{ border-radius:50%; background:radial-gradient(closest-side, rgba(var(--halo),.38), rgba(var(--halo),0)); }
+.sub{ font:500 40px/1.3 var(--fuente); color:rgba(var(--tintaRgb),.7); text-align:center; letter-spacing:-.01em; }
+.lema{ font:400 56px var(--serif); font-style:italic; color:var(--acento); white-space:nowrap; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "lado": "#D97757",
+  "fuente": "Inter Tight",
+  "etiqueta": "Nuevo · 2026",
+  "lineas": ["VIEGAS", "*STUDIO*"],
+  "sub": "Edita tus vídeos con IA, sin salir de casa.",
+  "profundidad": 26,
+  "giro": 24,
+  "marca": "Viegas Estudio",
+  "lema": "Ya disponible",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+if (P.lado) raiz.setProperty('--lado', P.lado);
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const N = Math.max(6, Math.min(40, P.profundidad || 26)), PASO = 3.6;
+  const halo = MG.el(`<div class="halo"></div>`), sombra = MG.el(`<div class="sombra"></div>`);
+  const lineas = (P.lineas || []).slice(0, 3).map((txt) => {
+    const ac = /^\*.*\*$/.test(txt), s = esc(txt.replace(/\*/g, ''));
+    const cara = ac ? 'var(--acento)' : 'var(--tinta)', lado = ac ? 'color-mix(in srgb, var(--lado) 70%, #000)' : 'color-mix(in srgb, var(--lado) 45%, #1a1210)';
+    const capas = Array.from({ length: N }, (_, j) => { const i = N - j, osc = Math.round(55 * i / N);
+      return `<div class="capa" style="transform:translateZ(${-i * PASO}px);color:color-mix(in srgb, ${lado}, #000 ${osc}%)">${s}</div>`; }).join('');
+    const p = MG.el(`<div class="persp"><div class="linea">${capas}<div class="frente" style="background-image:linear-gradient(100deg, ${cara} 0%, ${cara} 42%, #fff 49%, ${cara} 56%, ${cara} 100%)">${s}</div></div></div>`);
+    p._lin = p.firstChild; p._fr = p.querySelector('.frente'); p._capas = [...p.querySelectorAll('.capa')]; return p;
+  });
+  const chip = MG.el(`<div class="chip">${esc(P.etiqueta)}</div>`);
+  const sub = MG.el(`<div class="sub">${esc(P.sub)}</div>`);
+  const logo = MG.el(logoHTML());
+  const marca = MG.el(`<div class="marca" style="font-size:64px">${esc(P.marca)}</div>`), lema = MG.el(`<div class="lema">${esc(P.lema)}</div>`);
+  const tZ = 5.7, tC = 6.45, giro = P.giro ?? 24;
+
+  let L = null;
+  return (t) => {
+    if (!L) {
+      const maxW = VERT ? 900 : 1500, base = VERT ? 250 : 260;
+      lineas.forEach((p) => { [p._fr, ...p._capas].forEach((e) => e.style.fontSize = base + 'px');
+        const w = p._fr.offsetWidth, fs = Math.min(base, base * maxW / w); [p._fr, ...p._capas].forEach((e) => e.style.fontSize = fs + 'px'); });
+      const hs = lineas.map((p) => p._fr.offsetHeight), ws = lineas.map((p) => p._fr.offsetWidth), gap = 6, tot = hs.reduce((a, b) => a + b, 0) + gap * (hs.length - 1);
+      const cy = VERT ? 900 : 480; let y = cy - tot / 2;
+      const pos = lineas.map((p, i) => { const r = { x: (W - ws[i]) / 2, y }; y += hs[i] + gap; return r; });
+      lineas.forEach((p, i) => { p.style.width = ws[i] + 'px'; p.style.height = hs[i] + 'px'; p.style.perspectiveOrigin = `${W / 2 - pos[i].x}px ${cy - pos[i].y}px`; });
+      L = { pos, cy, tot, maxW };
+    }
+    // cámara: deriva lenta continua y órbita de las letras
+    const z = lerp(1, 1.08, t / D);
+    MG.vista.style.transformOrigin = `${W / 2}px ${L.cy}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .4) * 12}px, ${Math.cos(t * .31) * 8}px)`;
+    const ry = Math.sin(t * .55 + .6) * giro * .55 - lerp(giro * .5, -giro * .3, C.suave(t / tZ)), rx = 10 + Math.sin(t * .42) * 6;
+    const vis = 1 - C.salidaCubica(k(t, tZ + .2, tZ + .6));
+
+    // halo y sombra
+    const eh = C.salidaCubica(k(t, .1, 1.6)), hw = L.maxW * 1.5;
+    halo.style.width = hw + 'px'; halo.style.height = hw * .8 + 'px'; MG.pon(halo, W / 2 - hw / 2, L.cy - hw * .4, (.7 + .3 * eh) * (1 + .04 * Math.sin(t * 2.1)));
+    halo.style.opacity = eh * vis;
+    const sw = L.maxW * .95; sombra.style.width = sw + 'px'; sombra.style.height = '90px';
+    MG.pon(sombra, W / 2 - sw / 2 - ry * 4, L.cy + L.tot / 2 + 50, 1); sombra.style.opacity = eh * vis * .9;
+
+    // líneas 3D: llegan desde el fondo, cada una con su curva; zoom a través al final
+    const curvasL = ['salidaExpo', 'salidaQuint', 'salidaCubica'];
+    lineas.forEach((p, i) => {
+      const t0 = .35 + i * .22, cv = C[curvasL[i % 3]], u = cv(k(t, t0, t0 + 1.1)), uq = cv(k(t - DT, t0, t0 + 1.1));
+      const zIn = lerp(-2400, 0, u), vz = Math.abs(2400 * (u - uq) / DT);
+      const a = tZ + i * .07, w = C.entradaCubica(k(t, a, a + .55)), wq = C.entradaCubica(k(t - DT, a, a + .55));
+      const zOut = 1650 * w, vo = Math.abs(1650 * (w - wq) / DT);
+      const rxi = rx + (1 - u) * 55, ryi = ry + (1 - u) * (i % 2 ? -30 : 30);
+      p._lin.style.transform = `translateZ(${zIn + zOut}px) rotateX(${rxi}deg) rotateY(${ryi}deg)`;
+      p._lin.style.transformOrigin = '50% 50%';
+      MG.pon(p, L.pos[i].x, L.pos[i].y);
+      p.style.opacity = Math.min(1, u * 2.2) * (1 - C.entradaCubica(k(t, a + .3, a + .55)));
+      MG.desenfoca(p, vo * MB * .02, (vz * MB * .012) + vo * MB * .03);
+      // luz que barre la cara frontal (y vuelve)
+      const sw2 = (t * .32 + i * .12) % 1.4; p._fr.style.backgroundPosition = `${lerp(110, -40, sw2 / 1.4 * 1.0) }% 0`;
+    });
+
+    // etiqueta y subtítulo
+    const yTop = L.cy - L.tot / 2;
+    const ec = MG.entra(chip, t, .2, { d: .55, dy: -60, curva: 'salidaQuint', base: 6 });
+    MG.pon(chip, (W - chip.offsetWidth) / 2, yTop - (VERT ? 150 : 110) + ec.y); chip.style.opacity = Math.min(1, ec.p * 1.8) * vis;
+    sub.style.width = (VERT ? 820 : 1100) + 'px';
+    const es = MG.entra(sub, t, 1.5, { d: .7, dy: 60, curva: 'rebote', base: 6 });
+    MG.pon(sub, (W - (VERT ? 820 : 1100)) / 2, L.cy + L.tot / 2 + (VERT ? 170 : 120) + es.y); sub.style.opacity = Math.min(1, es.p * 1.8) * vis;
+
+    // cierre
+    const bloque = 150 + 60 + 80 + 30 + 70, y0 = (H - bloque) / 2, zc = C.salidaQuint(k(t, tC - .1, tC + 1.3));
+    const sc = lerp(1.4, 1, zc);
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s * sc, `rotate(${-24 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    const em = MG.entra(marca, t, tC + .25, { d: .6, dy: 60, curva: 'salidaExpo', base: 6 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 205 + em.y);
+    const el2 = MG.entra(lema, t, tC + .42, { d: .6, dx: 90, dy: 0, curva: 'salidaQuint', base: 6 });
+    MG.pon(lema, (W - lema.offsetWidth) / 2 + el2.x, y0 + 300);
+  };
+});
+</script>
+</body></html>

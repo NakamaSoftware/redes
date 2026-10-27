@@ -1,0 +1,237 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-revista-portada» · Viegas IA · Motion Lab
+     Portada de revista que sube con un giro suave: la cabecera serif gigante se ENFOCA (de desenfocada y espaciada a nítida),
+     la imagen de portada se descubre con un zoom lento, los titulares de portada entran escalonados (cada uno con su curva),
+     número y fecha caen desde arriba y un sello gira en la esquina. La portada pasa como una página real (giro 3D sobre el lomo)
+     y aparece la doble página: a la izquierda una cita en serif enorme y a la derecha el reportaje, que se compone línea a línea.
+     La cámara se aleja para ver la doble página y entra con «zoom a través» en la palabra clave; cierre con logo.
+     Cambia "cabecera" (nombre de la revista), "numero", "fecha", "imagen" (ruta; vacío = degradado), "titulares" (3 líneas;
+     *palabra* = acento; la primera es la grande), "sello" ("|" = salto), "cita" (página izquierda), "firma", "seccion",
+     "reportaje" (titular de la derecha; *palabra* = clave del «zoom a través»), "entradilla", "cierre", "marca",
+     "logo" (ruta o "" = inicial), colores "fondo", "fondo2", "tinta", "acento", "papel", "tintaPapel".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?cabecera=MODO en la dirección. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Serif+Display:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif; --display:'DM Serif Display','Instrument Serif',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; --papel:#F1EADF; --tintaPapel:#1A1614; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.07; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.mg-mundo .abs, .abs{ position:absolute; left:0; top:0; }
+.libro{ width:var(--W); height:var(--H); perspective:2600px; }
+.libro > *{ position:absolute; left:0; top:0; }
+.hoja{ transform-style:preserve-3d; transform-origin:0 50%; }
+.cara{ position:absolute; inset:0; backface-visibility:hidden; overflow:hidden; border-radius:6px; }
+.cara > *{ position:absolute; left:0; top:0; }
+.dorso{ transform:rotateY(180deg); }
+.pag{ background:var(--papel); color:var(--tintaPapel); box-shadow:0 40px 120px rgba(0,0,0,.55); border-radius:6px; overflow:hidden; }
+.pag > *{ position:absolute; left:0; top:0; }
+.portada{ background:var(--fondo2); box-shadow:0 40px 120px rgba(0,0,0,.55); }
+.cara .foto{ left:-8%; top:-8%; width:116%; height:116%; background:
+   radial-gradient(60% 45% at 62% 46%, rgba(var(--halo),.95), rgba(var(--halo),0) 70%),
+   radial-gradient(40% 30% at 30% 70%, rgba(255,214,190,.45), transparent 70%),
+   linear-gradient(160deg, #3A2219 0%, #1B1210 55%, #0E0B0A 100%); background-size:cover; background-position:center; }
+.disco{ border-radius:50%; background:radial-gradient(circle at 35% 30%, #FFD9C4, var(--acento) 45%, #6E2C18 100%); box-shadow:0 60px 140px rgba(0,0,0,.5); }
+.cabecera{ font:400 200px/0.82 var(--display); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; transform-origin:50% 0; }
+.franja{ font:600 22px var(--fuente); letter-spacing:.22em; text-transform:uppercase; color:var(--tinta); white-space:nowrap; opacity:.9; }
+.tp{ color:var(--tinta); white-space:nowrap; }
+.tp.g{ font:400 92px/0.95 var(--display); letter-spacing:-.02em; }
+.tp.p{ font:600 30px/1.2 var(--fuente); letter-spacing:-.01em; opacity:.92; }
+.tp.p b{ color:var(--acento); font-weight:700; }
+.sello{ width:150px; height:150px; border-radius:50%; background:var(--acento); color:var(--fondo); display:grid; place-items:center;
+  font:700 24px/1.05 var(--fuente); text-align:center; letter-spacing:.04em; text-transform:uppercase; box-shadow:0 20px 50px rgba(0,0,0,.4); }
+.cod{ width:96px; height:52px; background:repeating-linear-gradient(90deg, var(--tinta) 0 3px, transparent 3px 5px, var(--tinta) 5px 6px, transparent 6px 9px); opacity:.85; }
+.comilla{ font:400 300px/1 var(--display); color:var(--acento); transform-origin:20% 30%; }
+.cita{ font:400 66px/1.04 var(--serif); letter-spacing:-.015em; color:var(--tintaPapel); }
+.mg-mundo .cita em, .mg-mundo .rep em{ color:var(--acento); }
+.firma{ font:600 22px var(--fuente); letter-spacing:.18em; text-transform:uppercase; color:var(--tintaPapel); opacity:.6; white-space:nowrap; }
+.secc{ font:700 20px var(--fuente); letter-spacing:.24em; text-transform:uppercase; color:var(--acento); white-space:nowrap; }
+.pag .rep{ font:400 80px/0.98 var(--display); letter-spacing:-.02em; color:var(--tintaPapel); }
+.rep .mg-trozo{ display:inline-block; }
+.entr{ font:500 25px/1.35 var(--fuente); color:var(--tintaPapel); opacity:.75; }
+.lin{ height:9px; border-radius:5px; background:var(--tintaPapel); opacity:.18; transform-origin:0 50%; }
+.folio{ font:600 18px var(--fuente); letter-spacing:.14em; color:var(--tintaPapel); opacity:.45; white-space:nowrap; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "papel": "#F1EADF",
+  "tintaPapel": "#1A1614",
+  "cabecera": "AVANCE",
+  "numero": "Nº 07",
+  "fecha": "Octubre 2026",
+  "imagen": "",
+  "titulares": ["La nueva *forma* de crear", "Lo que cambia este año, explicado", "Guía: *10 ideas* para empezar hoy"],
+  "sello": "Edición|especial",
+  "cita": "Las buenas ideas no gritan: se *quedan*.",
+  "firma": "Editorial · Tu Marca",
+  "seccion": "Reportaje",
+  "reportaje": "Así se hace algo *nuevo*",
+  "entradilla": "Un recorrido por el proceso, las decisiones y lo que aprendimos por el camino.",
+  "cierre": "Léelo *ahora*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'papel', 'tintaPapel']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+const azar = (s) => () => { s = (s * 16807) % 2147483647; return s / 2147483647; };   // pseudoaleatorio con semilla (render exacto)
+const offA = (el, anc) => { let x = 0, y = 0; while (el && el !== anc) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x, y }; };
+// cámara libre: el punto del mundo (fx, fy) queda en el centro de la pantalla, con zoom z
+const camaraEn = (MG, fx, fy, z, rot = 0) => { MG.vista.style.transformOrigin = '0 0';
+  MG.vista.style.transform = `translate(${W / 2 - z * fx}px,${H / 2 - z * fy}px) scale(${z}) rotate(${rot}deg)`; };
+// cierre común: logo + frase + marca (entra tras el «zoom a través»)
+function cierre(MG, ancho) {
+  const logo = MG.el(logoHTML()), cie = MG.texto(md(P.cierre), 'tit'), marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+  cie.style.width = ancho + 'px'; cie.style.fontSize = (VERT ? 124 : 134) + 'px';
+  return (t, tC) => {
+    const { k, curvas: C } = MG, vis = t >= tC - .05 ? 1 : 0;
+    [logo, cie, marca].forEach((e) => e.style.visibility = vis ? 'visible' : 'hidden');
+    const bloque = 150 + 60 + cie.offsetHeight + 50 + 60, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - ancho) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + cie.trozos.length * .08, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+}
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'lineas', tamano: 90, intensidad: .25 }, halo: { fuerza: .22, x: 50, y: 70 } }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const pW = VERT ? 800 : 720, pH = Math.round(pW * 1.32), spX = VERT ? W / 2 - pW / 2 : W / 2 - pW / 2, top = VERT ? 880 - pH / 2 : (H - pH) / 2;
+  // el lomo queda en spX; antes de pasar la página la cámara centra la portada (spX..spX+pW); después, la doble página
+  const libro = MG.el(`<div class="libro"></div>`); libro.style.setProperty('--W', W + 'px'); libro.style.setProperty('--H', H + 'px');
+  libro.style.perspectiveOrigin = `${spX}px ${top + pH / 2}px`;
+  const der = MG.el(`<div class="pag"></div>`, libro), hoja = MG.el(`<div class="hoja"></div>`, libro);
+  for (const e of [der, hoja]) { e.style.width = pW + 'px'; e.style.height = pH + 'px'; e.style.left = spX + 'px'; e.style.top = top + 'px'; }
+  const fr = MG.el(`<div class="cara portada"></div>`, hoja), dor = MG.el(`<div class="cara dorso pag"></div>`, hoja);
+  // --- portada
+  const foto = MG.el(`<div class="foto"></div>`, fr); if (P.imagen) foto.style.background = `url("${P.imagen}") center/cover`;
+  const disco = MG.el(`<div class="disco"></div>`, fr); const dR = pW * .52; disco.style.width = disco.style.height = dR + 'px'; if (P.imagen) disco.style.display = 'none';
+  const cab = MG.el(`<div class="cabecera">${esc(P.cabecera)}</div>`, fr);
+  const num = MG.el(`<div class="franja">${esc(P.numero)}</div>`, fr), fec = MG.el(`<div class="franja">${esc(P.fecha)}</div>`, fr);
+  const tps = P.titulares.map((s, i) => MG.el(`<div class="tp ${i ? 'p' : 'g'}">${i ? esc(s).replace(/\*([^*]+)\*/g, '<b>$1</b>') : md(s)}</div>`, fr));
+  const sel = MG.el(`<div class="sello">${String(P.sello).split('|').map(esc).join('<br>')}</div>`, fr), cod = MG.el(`<div class="cod"></div>`, fr);
+  // --- dorso (página izquierda): cita
+  const com = MG.el(`<div class="comilla">“</div>`, dor), cit = MG.el(`<div class="cita">${md(P.cita)}</div>`, dor), fir = MG.el(`<div class="firma">— ${esc(P.firma)}</div>`, dor);
+  const fol1 = MG.el(`<div class="folio">${esc(P.numero)} · 24</div>`, dor);
+  // --- página derecha: reportaje
+  const sec = MG.el(`<div class="secc">${esc(P.seccion)}</div>`, der), rep = MG.texto(md(P.reportaje), 'rep'); der.appendChild(rep);
+  const ent = MG.el(`<div class="entr">${esc(P.entradilla)}</div>`, der), fol2 = MG.el(`<div class="folio">25</div>`, der);
+  const rnd = azar(7), lins = [];
+  const M = 52, colW = (pW - M * 2 - 36) / 2;
+  const cierreF = cierre(MG, VERT ? W - 180 : 1500);
+  let Lay = null;
+  const tE = .1, tF = 3.9, dF = 1.35, tK = 6.3, tZ = Math.max(7.3, D - 2.7), tC = tZ + .7;
+  return (t) => {
+    if (!Lay) {
+      const fs = 200 * (pW - 60) / cab.offsetWidth; cab.style.fontSize = fs + 'px';
+      rep.style.width = (pW - M * 2) + 'px'; rep.style.left = M + 'px'; rep.style.top = (M + 60) + 'px';
+      const yR = M + 60 + rep.offsetHeight + 34; ent.style.width = (pW - M * 2) + 'px'; ent.style.left = M + 'px'; ent.style.top = yR + 'px';
+      const y = yR + ent.offsetHeight + 44;
+      for (let c = 0; c < 2; c++) for (let yy = y, i = 0; yy < pH - 80; yy += 26, i++) {
+        const l = MG.el(`<div class="lin"></div>`, der); l.style.left = (M + c * (colW + 36)) + 'px'; l.style.top = yy + 'px';
+        l.style.width = (colW * (i % 7 === 6 ? .55 : .82 + rnd() * .18)) + 'px'; lins.push({ l, i: c * 40 + i }); }
+      sec.style.left = M + 'px'; sec.style.top = M + 'px'; fol2.style.left = (pW - M - 30) + 'px'; fol2.style.top = (pH - 44) + 'px';
+      com.style.left = (M - 10) + 'px'; com.style.top = (M - 50) + 'px';
+      cit.style.width = (pW - M * 2) + 'px'; cit.style.left = M + 'px'; cit.style.fontSize = (VERT ? 84 : 68) + 'px'; cit.style.top = (pH * .3) + 'px';
+      fir.style.left = M + 'px'; fir.style.top = (pH * .3 + cit.offsetHeight + 40) + 'px'; fol1.style.left = M + 'px'; fol1.style.top = (pH - 44) + 'px';
+      tps[0].style.width = (pW - 80) + 'px'; tps[0].style.whiteSpace = 'normal';
+      const kw = rep.querySelector('em') || rep, o = offA(kw, der);
+      Lay = { fs, kx: spX + o.x + kw.offsetWidth / 2, ky: top + o.y + kw.offsetHeight / 2 };
+    }
+    // --- página que pasa (giro 3D sobre el lomo): arranca rápida y frena suave al tumbarse
+    const f = C.afterEffects75(k(t, tF, tF + dF));
+    hoja.style.transform = `rotateY(${-180 * f}deg)`;
+    // --- entrada del libro: sube girando, llega rápido y se posa
+    const ee = C.salidaQuint(k(t, tE, tE + 1.1)), eq = C.salidaQuint(k(t - DT, tE, tE + 1.1)), vy = (ee - eq) * H * .8 / DT;
+    libro.style.transform = `translateY(${(1 - ee) * H * .8}px) rotate(${(1 - ee) * -6}deg)`;
+    MG.desenfoca(libro, 0, Math.min(40, Math.abs(vy) * MB * .6));
+    // --- portada: imagen con zoom lento, cabecera que se enfoca
+    const ef = C.salidaQuint(k(t, .4, 1.8));
+    foto.style.transform = `scale(${lerp(1.3, 1.02, ef) * lerp(1, 1.06, k(t, 1.8, tF))})`;
+    disco.style.transform = `translate(${pW * .4}px,${pH * .3}px) scale(${lerp(.3, 1, C.rebote(k(t, .6, 1.6)))}) translateY(${Math.sin(t * 1.3) * 10}px)`;
+    const ec = C.salidaCubica(k(t, .7, 2.0));
+    cab.style.letterSpacing = lerp(.35, -.02, ec) + 'em'; cab.style.opacity = Math.min(1, ec * 2.2);
+    cab.style.transform = `translate(${(pW - cab.offsetWidth) / 2}px, 40px) scale(${lerp(1.18, 1, ec)})`;
+    MG.desenfoca(cab, (1 - ec) * 28, (1 - ec) * 28);
+    const yC = 40 + Lay.fs * .82 + 16;
+    const en = MG.entra(num, t, 1.9, { d: .5, dy: -40, curva: 'salidaQuint', base: 4 }); MG.pon(num, 34 + en.x, yC + en.y);
+    const ef2 = MG.entra(fec, t, 2.0, { d: .5, dy: -40, curva: 'salidaExpo', base: 4 }); MG.pon(fec, pW - 34 - fec.offsetWidth + ef2.x, yC + ef2.y);
+    const curvasT = ['rebote', 'salidaExpo', 'salidaQuint'];
+    let yy = pH - 70; for (let i = tps.length - 1; i >= 1; i--) yy -= tps[i].offsetHeight + 10;
+    yy -= tps[0].offsetHeight + 14;
+    tps.forEach((e, i) => { const r = MG.entra(e, t, 1.45 + i * .22, { d: .6, dx: -140 + i * 30, dy: 0, curva: curvasT[i % 3], base: 5 });
+      MG.pon(e, 40 + r.x, yy); yy += e.offsetHeight + (i ? 10 : 24); });
+    const es = MG.entra(sel, t, 2.4, { d: .6, dy: 0, escala0: .1, curva: 'reboteFuerte', base: 6 });
+    MG.pon(sel, pW - 190, yC + 70, es.s, `rotate(${-14 + t * 9}deg)`);
+    const eb = MG.entra(cod, t, 2.7, { d: .5, dy: 30, curva: 'salidaCubica' }); MG.pon(cod, pW - 136, pH - 88 + eb.y);
+    // --- dorso: comilla y cita (aparecen al pasar)
+    const ec2 = MG.entra(com, t, tF + .9, { d: .5, dy: 0, escala0: .3, curva: 'rebote', base: 4 }); MG.pon(com, M - 10, M - 50, ec2.s);
+    cit.style.opacity = .2 + .8 * C.salidaCubica(k(t, tF + .6, tF + 1.6));
+    const efi = MG.entra(fir, t, tF + 1.4, { d: .5, dx: -60, dy: 0, curva: 'salidaQuint' }); fir.style.translate = `${efi.x}px 0`;
+    // --- página derecha: el reportaje se compone
+    const t0R = tF + .8;
+    const es2 = MG.entra(sec, t, t0R, { d: .5, dx: 50, dy: 0, curva: 'salidaExpo' }); sec.style.translate = `${es2.x}px 0`;
+    rep.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, t0R + .15 + i * .09, { d: .55, dy: 70, escala0: 1, curva: i % 2 ? 'salidaQuint' : 'rebote', base: 5 });
+      sp.style.transform = `translateY(${e.y}px)`; });
+    const ee2 = MG.entra(ent, t, t0R + .5, { d: .6, dy: 30, curva: 'salidaCubica' }); ent.style.translate = `0 ${ee2.y}px`;
+    lins.forEach(({ l, i }) => { const p = C.salidaExpo(k(t, t0R + .55 + i * .02, t0R + 1.05 + i * .02)); l.style.transform = `scaleX(${p})`; });
+    // palabra clave: subrayado de acento que se dibuja
+    const kw = rep.querySelector('em'); if (kw) { const u = C.salidaQuint(k(t, tK, tK + .5));
+      kw.style.background = `linear-gradient(var(--acento),var(--acento)) no-repeat 0 96% / ${u * 100}% 7px`; }
+    // --- cámara: centra la portada, sigue el giro hasta la doble página (se aleja) y entra en la palabra clave
+    const fit = VERT ? (W - 90) / (2 * pW) : Math.min(1, 1500 / (2 * pW)), fc = C.entradaSalidaQuint(k(t, tF - .1, tF + dF + .2));
+    let fx = lerp(spX + pW / 2, spX, fc), fy = top + pH / 2;
+    const zt = C.entradaCubica(k(t, tZ, tC)), zg = C.salidaCubica(k(t, tK - .3, tZ));
+    fx = lerp(fx, Lay.kx, zg); fy = lerp(fy, Lay.ky, zg);
+    const dip = 1 - .06 * Math.sin(Math.PI * k(t, tF, tF + dF));
+    const z = lerp(1, fit, fc) * dip * lerp(1, 1.06, k(t, 0, tZ)) * lerp(1, 1.3, zg);
+    if (t < tC) camaraEn(MG, fx + Math.sin(t * .5) * 8, fy + Math.cos(t * .4) * 6, z * (1 + 10 * zt), Math.sin(t * .3) * .5);
+    else { const zc = C.salidaQuint(k(t, tC - .05, tC + 1.3)); camaraEn(MG, W / 2 + Math.sin(t * .5) * 6, H / 2, lerp(1.25, 1, zc) * lerp(1, 1.04, k(t, tC, D))); }
+    libro.style.visibility = t < tC ? 'visible' : 'hidden';
+    libro.style.opacity = Math.min(1, ee * 3) * (1 - C.salidaCubica(k(t, tZ + .35, tC)));
+    MG.halo(50 + Math.sin(t * .4) * 12, 70 + Math.cos(t * .3) * 10);
+    cierreF(t, tC);
+  };
+});
+
+</script>
+</body></html>

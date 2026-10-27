@@ -1,0 +1,2194 @@
+{
+ "version": 1,
+ "sectores": {
+  "lanz": "Lanzamiento de producto"
+ },
+ "plantillas": [
+  {
+   "id": "lanz-poster-editorial",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Póster editorial al compás",
+   "descripcion": "Tipografía enorme y condensada que llena el encuadre palabra a palabra, bloques de color que barren, imagen entre las letras, sellos en las esquinas y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fuente",
+    "fondo",
+    "tinta",
+    "acento",
+    "pantallas",
+    "imagen",
+    "textoSello",
+    "sellos",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-poster-editorial.html",
+   "muestra": {
+    "mp4": "lanz-poster-editorial-9x16-previa.mp4",
+    "poster": "lanz-poster-editorial-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-poster-editorial para lanzar … (pósters: «…», «…», «…»), con mi foto … entre las letras, mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-codigo-digital",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Código digital con terminal",
+   "descripcion": "Rejilla de caracteres que se encienden como lluvia y ondas, terminal retro que escribe tus comandos, frase que emerge de la rejilla con glitch sutil y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "acento",
+    "caracteres",
+    "titulo",
+    "lineas",
+    "frase",
+    "sub",
+    "glitch",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-codigo-digital.html",
+   "muestra": {
+    "mp4": "lanz-codigo-digital-9x16-previa.mp4",
+    "poster": "lanz-codigo-digital-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-codigo-digital para lanzar … con la frase «…», los comandos …, mi color … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "id": "lanz-dispositivo-color",
+   "nombre": "Dispositivo sobre color",
+   "descripcion": "Ventana de ordenador y teléfono en 3D ligera sobre un color saturado, con tu captura o vídeo dentro; titular al lado/encima, la cámara se acerca a un detalle, «zoom a través» y cierre con logo.",
+   "parametros": [
+    "duracion",
+    "titulares",
+    "subtitulo",
+    "detalle",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "media",
+    "mediaMovil",
+    "foco",
+    "dispositivos",
+    "marca",
+    "logo",
+    "lema"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-dispositivo-color.html",
+   "muestra": {
+    "mp4": "lanz-dispositivo-color-9x16-previa.mp4",
+    "poster": "lanz-dispositivo-color-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-dispositivo-color para lanzar mi app … (con mi captura …), fondo de color …, titulares «…» y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "id": "lanz-cine-oscuro",
+   "nombre": "Tipografía de cine oscura",
+   "descripcion": "Negro con grano fino, 2-3 frases centradas que pasan de desenfocadas a nítidas mientras el tracking se cierra, un halo de color que asoma por abajo y cierre «Ya disponible» + logo.",
+   "parametros": [
+    "duracion",
+    "frases",
+    "cierre",
+    "subtitulo",
+    "fuente",
+    "halo",
+    "acento",
+    "marca",
+    "logo",
+    "grano"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-cine-oscuro.html",
+   "muestra": {
+    "mp4": "lanz-cine-oscuro-9x16-previa.mp4",
+    "poster": "lanz-cine-oscuro-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-cine-oscuro para anunciar … con las frases «…», «…», fuente serif (o sans), halo arcoíris (o mi color …) y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-interfaz-flotante",
+   "nombre": "Interfaz flotante con prompt",
+   "descripcion": "Fondo claro con grano, titular + subtítulo; una ventana blanca entra con rebote, el cursor hace clic, el prompt se escribe letra a letra, la lista se genera (esqueleto → check) con aviso flotante; cierre con logo y URL.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 11,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "titular",
+    "subtitulo",
+    "ventana",
+    "prompt",
+    "items",
+    "aviso",
+    "marca",
+    "logo",
+    "url"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-interfaz-flotante.html",
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-interfaz-flotante para lanzar mi producto …: titular «…», prompt «…», items […], logo … y URL …. Formato 9:16 (y 16:9), paleta clara (o noche) y mi color …"
+  },
+  {
+   "id": "lanz-notificaciones",
+   "nombre": "Notificaciones de cristal",
+   "descripcion": "Pantalla de bloqueo con degradado lavanda/azul desenfocado; notificaciones de cristal tipo iOS caen y se apilan con muelle, la última se expande con detalle y botones y las demás se recogen en pila; cierre con icono y titular.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "acento",
+    "degradado",
+    "hora",
+    "fecha",
+    "app",
+    "notificaciones",
+    "detalle",
+    "boton",
+    "titular"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-notificaciones.html",
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-notificaciones para mi app … (icono …): notificaciones […], la última se expande con «…», titular final «…». Formato 9:16 (y 16:9), acento … y degradado …"
+  },
+  {
+   "id": "lanz-chat-ia",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Chat con IA en streaming",
+   "descripcion": "Interfaz tipo ChatGPT/Claude (oscura o clara): la pregunta se escribe en la barra y sube como burbuja con muelle, «Pensando…» con brillo, y la respuesta sale palabra a palabra con el degradado de ChatGPT (opacidad y desenfoque), con viñetas, negritas, bloque de código y claves con rotulador; zoom lento hacia la respuesta.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 12,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "tema",
+    "modelo",
+    "icono",
+    "acento",
+    "velocidad",
+    "saludo",
+    "placeholder",
+    "pregunta",
+    "respuesta",
+    "claves"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-chat-ia.html",
+   "muestra": {
+    "mp4": "lanz-chat-ia-9x16-previa.mp4",
+    "poster": "lanz-chat-ia-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-chat-ia con … (modelo «ChatGPT» o «Claude»), tema oscuro/claro, pregunta «…», respuesta «…» (con viñetas, negritas y código si quieres) y claves […]. Formato 9:16 y 16:9."
+  },
+  {
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "id": "lanz-cargador-palabras",
+   "nombre": "Cargador con frases que cambian",
+   "descripcion": "Fondo blanco puro (o negro): cargador de 8 segmentos que giran y se estiran con ritmo orgánico junto a un texto grande que cambia de frase con morph (letras que salen hacia arriba con desenfoque, ancho con muelle, todo recentrado); el cargador se convierte en el logo y aparece «Próximamente · Coming soon» + «Síguenos en X».",
+   "parametros": [
+    "duracion",
+    "tema",
+    "acento",
+    "fuente",
+    "frases",
+    "producto",
+    "logo",
+    "proximamente",
+    "cta",
+    "red"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-cargador-palabras.html",
+   "muestra": {
+    "mp4": "lanz-cargador-palabras-9x16-previa.mp4",
+    "poster": "lanz-cargador-palabras-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-cargador-palabras para anunciar … (frases: «…», «…», «…»; producto «…»), con mi logo …, tema claro (u oscuro) y mi color …. Formato 9:16 y 16:9."
+  },
+  {
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "id": "lanz-carrusel-3d",
+   "nombre": "Carrusel 3D en el navegador",
+   "descripcion": "Ventana de navegador oscura con titular serif centrado y un carrusel 3D tipo coverflow que gira sin parar con perspectiva, reflejo y profundidad de campo; botón «Empieza gratis»; la cámara entra a la ventana con zoom suave y sale al final.",
+   "parametros": [
+    "duracion",
+    "acento",
+    "etiqueta",
+    "url",
+    "titular",
+    "boton",
+    "secundario",
+    "imagenes",
+    "tarjetas"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-carrusel-3d.html",
+   "muestra": {
+    "mp4": "lanz-carrusel-3d-9x16-previa.mp4",
+    "poster": "lanz-carrusel-3d-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-carrusel-3d para lanzar … con el titular «…», mis imágenes […] en el carrusel, la URL … y mi color …. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-manifiesto",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Manifiesto tipográfico con iconos",
+   "descripcion": "Manifiesto narrado línea a línea sobre casi negro: la línea actual en blanco y las anteriores suben y se apagan a gris, palabras que entran una a una con desenfoque, iconos de app dentro de la frase sobre bandas de luz, botón de cristal líquido que pulsa un cursor y cierre con el icono del producto.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 13,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "frases",
+    "boton",
+    "producto",
+    "logo",
+    "acento",
+    "tema",
+    "velocidad"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-manifiesto.html",
+   "muestra": {
+    "mp4": "lanz-manifiesto-9x16-previa.mp4",
+    "poster": "lanz-manifiesto-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-manifiesto para lanzar … (frases: «…», «Hemos acabado con {icono:…}», «…»; botón «…»; producto «…»), con mi logo …, mi color … y tema oscuro (o claro). Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-carpeta-fotos",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Carpeta con fotos en abanico",
+   "descripcion": "Carpeta gris que entra y se abre con muelle; tres fotos con marco blanco salen en abanico tras un frontal de cristal esmerilado con borde especular, botón ↗ que late, titular grande y chip; variante icono de app azul con halo y anillo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "estilo",
+    "fotos",
+    "titular",
+    "chip",
+    "fondo",
+    "carpeta",
+    "icono",
+    "etiqueta"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-carpeta-fotos.html",
+   "muestra": {
+    "mp4": "lanz-carpeta-fotos-9x16-previa.mp4",
+    "poster": "lanz-carpeta-fotos-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-carpeta-fotos con mis fotos …, titular «…» y chip «…», estilo carpeta / icono / ambos (icono «…», «… fotos»). Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-tarjeta-app",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Tarjeta de app con pestaña",
+   "descripcion": "Tarjeta con cabecera de imagen desenfocada (o degradado vivo) y panel con muesca en pestaña; entra y respira, las cifras cuentan, pasa a modo oscuro con interruptor y se baraja en pila con otras tarjetas.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "tarjetas",
+    "fondo",
+    "oscuro",
+    "tOscuro"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-tarjeta-app.html",
+   "muestra": {
+    "mp4": "lanz-tarjeta-app-9x16-previa.mp4",
+    "poster": "lanz-tarjeta-app-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-tarjeta-app con mis tarjetas: «…» / «…» con cifras …, imagen … y color …; cambio a oscuro sí/no. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-mapa-notificaciones",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Mapa de puntos con notificaciones",
+   "descripcion": "Mapamundi de puntos que se enciende; focos azules que laten en cada ciudad y notificaciones oscuras con avatar, tiempo y chip de color (compra, visitante, carrito, lead); la cámara viaja entre focos y un contador total sube.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 12,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "ciudades",
+    "tipos",
+    "contador",
+    "acento",
+    "fondo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-mapa-notificaciones.html",
+   "muestra": {
+    "mp4": "lanz-mapa-notificaciones-9x16-previa.mp4",
+    "poster": "lanz-mapa-notificaciones-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-mapa-notificaciones con estas ciudades y eventos: … (nombre, tipo compra/visitante/carrito/lead, importe), contador «…» de … a …. Formato 9:16 y 16:9."
+  },
+  {
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "fps": 30,
+   "id": "lanz-cristal-foto",
+   "nombre": "Cuestionario de cristal sobre foto",
+   "descripcion": "Panel de cristal esmerilado cálido (desenfoque real de la foto, borde especular, grano) que entra con muelle sobre tu foto o un atardecer con silueta; barra de progreso con chip, pregunta que se escribe, pastilla de cristal que cae sobre una palabra, opciones escalonadas, un dedo elige con check y pulsa «Continuar», y barrido lateral a la segunda pregunta.",
+   "duracion": 11,
+   "parametros": [
+    "duracion",
+    "foto",
+    "preguntas",
+    "paso",
+    "total",
+    "acento",
+    "boton"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-cristal-foto.html",
+   "muestra": {
+    "mp4": "lanz-cristal-foto-9x16-previa.mp4",
+    "poster": "lanz-cristal-foto-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-cristal-foto con mi foto … y las preguntas «…» (pastilla en «…», opciones …, elegida …) y «…», paso …/…, botón «…» y mi color …. Formato 9:16 y 16:9."
+  },
+  {
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "fps": 30,
+   "id": "lanz-telefono-tarjetas",
+   "nombre": "Teléfono con anillo y tarjetas de cristal",
+   "descripcion": "Teléfono en 3D ligera sobre gris cálido (o tu foto de la mano): la app con un anillo de puntos que se encienden mientras la cifra cuenta, deslizador y frase; después, tarjetas de cristal con dato y chip salen del teléfono hacia el espectador y se apilan con profundidad y desenfoque mientras la cámara se acerca.",
+   "duracion": 10,
+   "parametros": [
+    "duracion",
+    "cifra",
+    "etiqueta",
+    "escala",
+    "frase",
+    "tarjetas",
+    "color_app",
+    "acento_app",
+    "fondo",
+    "mano",
+    "hora"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-telefono-tarjetas.html",
+   "muestra": {
+    "mp4": "lanz-telefono-tarjetas-9x16-previa.mp4",
+    "poster": "lanz-telefono-tarjetas-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-telefono-tarjetas con la cifra …, la etiqueta «…», la frase «…», las tarjetas (…: valor …, chip «…») y los colores de mi app …. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-panel-visionos",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Panel espacial visionOS",
+   "descripcion": "Panel de cristal esmerilado (visionOS) que llega desde lejos con perspectiva 3D y parallax sobre tu salón; tarjetas escalonadas que hacen algo (interruptores con muelle, temperatura que baja, música que avanza, recordatorio que se marca, iconos que rebotan, cifra que cuenta), cursor-mirada que las resalta y cambio de pestaña con la píldora deslizándose.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 13,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "desenfoqueFondo",
+    "saludo",
+    "nombre",
+    "avatar",
+    "asistente",
+    "pestanas",
+    "pestanaFinal",
+    "tarjetas",
+    "tema",
+    "acento"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-panel-visionos.html",
+   "muestra": {
+    "mp4": "visionos/lanz-panel-visionos-9x16-previa.mp4",
+    "poster": "visionos/lanz-panel-visionos-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-panel-visionos para presentar … (saludo «Hola, …», pestañas «…», tarjetas: interruptor «…», temperatura 22→16, música «…», lista «…», apps «…», cifra «…»), sobre mi foto/vídeo …, tema claro u oscuro y mi color …. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-widgets-cristal",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Widgets de cristal líquido",
+   "descripcion": "3-4 widgets Liquid Glass (reproductor, tiempo, barra de pestañas, perfil o cifra) uno tras otro sobre fondos distintos con revelado circular suave; el cristal refracta de verdad el fondo (bordes que lo doblan, aberración cromática sutil, brillo especular que se mueve) y cada widget tiene su microanimación.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 12,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "widgets",
+    "fondos",
+    "acento"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-widgets-cristal.html",
+   "muestra": {
+    "mp4": "visionos/lanz-widgets-cristal-9x16-previa.mp4",
+    "poster": "visionos/lanz-widgets-cristal-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-widgets-cristal con estos widgets: reproductor «…», tiempo «… °C», pestañas «…», perfil «…» (o cifra «…»), sobre mis fotos …. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-liquid-glass",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Liquid Glass (cristal líquido 3D)",
+   "descripcion": "Fondo degradado azul/crema con ola de luz; objeto 3D de cristal real (flor, ola, tarjetas o tu logo extruido) que gira despacio; cápsula de cristal líquido que entra con muelle y refracta lo de detrás (lente en los bordes, esmerilado, aberración cromática, borde especular, iridiscencia) con el titular dentro; tarjetas de cristal escalonadas; zoom a través y cierre con logo en icono de cristal.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "titular",
+    "subtitulo",
+    "objeto",
+    "colorObjeto",
+    "fondo",
+    "tarjetas",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-liquid-glass.html",
+   "muestra": {
+    "mp4": "lanz-liquid-glass-9x16-previa.mp4",
+    "poster": "lanz-liquid-glass-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-liquid-glass para lanzar … con el titular «…», el objeto de cristal … (flor, ola, tarjetas o mi logo), las tarjetas …, mi marca y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-estadistica-gigante",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Estadística gigante con gráfico",
+   "descripcion": "Cifra enorme que cuenta con frenada suave, con etiqueta y comparativa; barras que crecen escalonadas y una línea que se dibuja, chip «Récord», «zoom a través» de la barra y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "valor",
+    "decimales",
+    "prefijo",
+    "sufijo",
+    "comparativa",
+    "grafico",
+    "datos",
+    "etiquetasDatos",
+    "chip",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-estadistica-gigante.html",
+   "muestra": {
+    "mp4": "lanz-estadistica-gigante-9x16-previa.mp4",
+    "poster": "lanz-estadistica-gigante-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-estadistica-gigante con la cifra … (sufijo …), la etiqueta «…», la comparativa «…», los datos …, mi color … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-lower-third",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Lower third elegante",
+   "descripcion": "Una línea fina se traza, se abre una placa de cristal con barra de acento; nombre letra a letra, cargo, «En directo» y usuario; sale a la inversa y se recoge en un sello de marca en la esquina, lejos de la cara.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "acento",
+    "placa",
+    "toma",
+    "nombre",
+    "cargo",
+    "usuario",
+    "etiqueta",
+    "tSalida",
+    "sello",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-lower-third.html",
+   "muestra": {
+    "mp4": "lanz-lower-third-9x16-previa.mp4",
+    "poster": "lanz-lower-third-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-lower-third con mi nombre «…», cargo «…», usuario «…», mi color … y mi logo (sobre mi toma … o transparente). Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-cita-testimonio",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Cita / testimonio con comillas",
+   "descripcion": "Comillas serif gigantes que caen girando con rebote, la cita palabra a palabra con claves en acento, estrellas que se encienden y autor con avatar; «zoom a través» de las comillas y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "acento",
+    "cita",
+    "autor",
+    "cargo",
+    "avatar",
+    "estrellas",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-cita-testimonio.html",
+   "muestra": {
+    "mp4": "lanz-cita-testimonio-9x16-previa.mp4",
+    "poster": "lanz-cita-testimonio-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-cita-testimonio con la cita «…» de … (cargo …, foto …), … estrellas, mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-antes-despues",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Antes / después con cortinilla",
+   "descripcion": "Tarjeta comparativa con cortinilla y tirador que barre de lado a lado con frenadas y rebote; etiquetas que se encienden, dato de resultado que cuenta y «zoom a través» del tirador al cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "acento",
+    "titulo",
+    "etiquetas",
+    "imagenAntes",
+    "imagenDespues",
+    "dato",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-antes-despues.html",
+   "muestra": {
+    "mp4": "lanz-antes-despues-9x16-previa.mp4",
+    "poster": "lanz-antes-despues-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-antes-despues con mis imágenes de antes … y después …, el titular «…», el dato «… → …», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-lista-checks",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Checklist con checks animados",
+   "descripcion": "Lista numerada en cascada: cada círculo se dibuja, el check se traza con un golpe y el texto se tacha o se enciende; contador y barra de progreso; «zoom a través» del último check al cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "titulo",
+    "items",
+    "modo",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-lista-checks.html",
+   "muestra": {
+    "mp4": "lanz-lista-checks-9x16-previa.mp4",
+    "poster": "lanz-lista-checks-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-lista-checks con el titular «…» y los pasos «…», «…», «…» (modo tachar o encender), mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-linea-tiempo",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Roadmap / línea de tiempo",
+   "descripcion": "Una línea brillante se traza y la cámara sigue la punta; cada hito estalla con un anillo y entra su tarjeta con fecha y texto; el último («Hoy») en acento y «zoom a través» de su punto al cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "acento",
+    "titulo",
+    "hitos",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-linea-tiempo.html",
+   "muestra": {
+    "mp4": "lanz-linea-tiempo-9x16-previa.mp4",
+    "poster": "lanz-linea-tiempo-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-linea-tiempo con el titular «…» y los hitos …: «…», …: «…», Hoy: «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-post-social",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Post social que se arma",
+   "descripcion": "Un post estilo X/Threads se monta pieza a pieza: avatar, verificado que se dibuja, texto que se escribe, imagen que se despliega y contadores que suben; «zoom a través» de la imagen al cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tarjeta",
+    "tinta",
+    "acento",
+    "autor",
+    "texto",
+    "imagen",
+    "contadores",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-post-social.html",
+   "muestra": {
+    "mp4": "lanz-post-social-9x16-previa.mp4",
+    "poster": "lanz-post-social-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-post-social con el post de … (@…) que dice «…», mi imagen …, contadores …, mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-buscador",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Buscador con resultados",
+   "descripcion": "Una barra de búsqueda se estira, escribe la consulta y despliega resultados en cascada; tu resultado se enciende en el acento y la cámara entra en él con «zoom a través» hasta el cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tarjeta",
+    "tinta",
+    "acento",
+    "consulta",
+    "resultados",
+    "destacado",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-buscador.html",
+   "muestra": {
+    "mp4": "lanz-buscador-9x16-previa.mp4",
+    "poster": "lanz-buscador-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-buscador con la búsqueda «…», los resultados …, el destacado «…», el titular «…» y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-terminal-claude",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Terminal de Claude Code",
+   "descripcion": "Ventana de terminal estilo Claude Code inclinada en 3D: el prompt escribe tu petición, spinner con verbo, pasos con ✓ y diffs en verde y rojo, resumen y «zoom a través» del asterisco al cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "ventana",
+    "tinta",
+    "acento",
+    "verde",
+    "rojo",
+    "titulo",
+    "peticion",
+    "pensando",
+    "pasos",
+    "resumen",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-terminal-claude.html",
+   "muestra": {
+    "mp4": "lanz-terminal-claude-9x16-previa.mp4",
+    "poster": "lanz-terminal-claude-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-terminal-claude con la petición «…», los pasos …, el resumen «…», el titular «…» y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-cuenta-atras",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Cuenta atrás de lanzamiento",
+   "descripcion": "Días, horas, minutos y segundos en celdas flip que ruedan con desenfoque dentro de un anillo de progreso; acelera hasta cero, «zoom a través» y cierre con fecha, titular y logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "desde",
+    "velocidad",
+    "unidades",
+    "fecha",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-cuenta-atras.html",
+   "muestra": {
+    "mp4": "lanz-cuenta-atras-9x16-previa.mp4",
+    "poster": "lanz-cuenta-atras-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-cuenta-atras para lanzar … con la cuenta atrás desde … días, … horas, … min, la fecha «…», el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-tarjetas-precio",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Tarjetas de precio",
+   "descripcion": "Dos o tres planes entran escalonados; el destacado sube con borde de luz que gira e insignia, el precio cuenta y las características se marcan con checks; botón que se pulsa, «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "titular",
+    "moneda",
+    "insignia",
+    "planes",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-tarjetas-precio.html",
+   "muestra": {
+    "mp4": "lanz-tarjetas-precio-9x16-previa.mp4",
+    "poster": "lanz-tarjetas-precio-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-tarjetas-precio con mis planes … (nombre, precio, características y botón), el destacado …, el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-titulo-3d",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Título 3D extruido",
+   "descripcion": "Titular con profundidad real que llega desde el fondo línea a línea, luz que barre la cara, cámara orbitando, halo y sombra; las letras atraviesan la cámara y cierra con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "lado",
+    "fuente",
+    "etiqueta",
+    "lineas",
+    "sub",
+    "profundidad",
+    "giro",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-titulo-3d.html",
+   "muestra": {
+    "mp4": "lanz-titulo-3d-9x16-previa.mp4",
+    "poster": "lanz-titulo-3d-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-titulo-3d con el título «…» / «*…*», el subtítulo «…», la extrusión en mi color …, mi marca y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-particulas-logo",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Partículas que forman el logo",
+   "descripcion": "Miles de partículas con semilla salen de una nube que gira y forman tu logo y marca, una luz lo recorre y entra el lema; estallan hacia la cámara con estelas y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "texto",
+    "logo",
+    "marca",
+    "etiqueta",
+    "lema",
+    "cierre",
+    "semilla",
+    "densidad",
+    "tamano"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-particulas-logo.html",
+   "muestra": {
+    "mp4": "lanz-particulas-logo-9x16-previa.mp4",
+    "poster": "lanz-particulas-logo-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-particulas-logo para que las partículas formen mi logo … y el texto «…», con el lema «…», mis colores … y cierre «…». Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-donut-grafico",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Gráfico donut animado",
+   "descripcion": "Cada segmento del donut se dibuja con su curva, el % del centro cuenta, la leyenda entra fila a fila y el destacado se separa con un halo; zoom a través y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "titulo",
+    "datos",
+    "destacado",
+    "centro",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-donut-grafico.html",
+   "muestra": {
+    "mp4": "lanz-donut-grafico-9x16-previa.mp4",
+    "poster": "lanz-donut-grafico-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-donut-grafico con el título «…», los datos … (etiqueta y valor), el destacado …, el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-ranking-top",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Ranking top 5 que sube",
+   "descripcion": "Filas con barra y contador que crecen y se adelantan reordenándose con desenfoque; el nº1 se enciende en el acento con su sello, zoom a través y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "titulo",
+    "items",
+    "prefijo",
+    "sufijo",
+    "sello",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-ranking-top.html",
+   "muestra": {
+    "mp4": "lanz-ranking-top-9x16-previa.mp4",
+    "poster": "lanz-ranking-top-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-ranking-top con el título «…», el top … (nombre, valor inicial y final), el sufijo …, el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-encuesta-votos",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Encuesta con votos",
+   "descripcion": "Tarjeta de encuesta tipo historias: un dedo toca una opción, las barras de votos se llenan con porcentajes que cuentan, la ganadora se enciende y cierra con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "pregunta",
+    "opciones",
+    "elegida",
+    "total",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-encuesta-votos.html",
+   "muestra": {
+    "mp4": "lanz-encuesta-votos-9x16-previa.mp4",
+    "poster": "lanz-encuesta-votos-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-encuesta-votos con la pregunta «…», las opciones … y sus votos, la opción elegida …, el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-mensaje-llega",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Mensaje que llega",
+   "descripcion": "Conversación de mensajería genérica: «escribiendo…», burbujas que llegan con rebote y desenfoque, doble check, reacción con emoji y «zoom a través» hasta el cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "contacto",
+    "estado",
+    "inicial",
+    "hora",
+    "mensajes",
+    "reaccion",
+    "titular",
+    "subtitulo",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-mensaje-llega.html",
+   "muestra": {
+    "mp4": "lanz-mensaje-llega-9x16-previa.mp4",
+    "poster": "lanz-mensaje-llega-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-mensaje-llega con la conversación … (contacto «…», mensajes «…», «…»), la reacción …, el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-isla-dinamica",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Isla dinámica en vivo",
+   "descripcion": "La píldora del teléfono se transforma en una actividad en vivo con progreso y porcentaje, se contrae con check y la cámara la atraviesa hasta el cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "hora",
+    "fechaPantalla",
+    "app",
+    "icono",
+    "actividad",
+    "detalle",
+    "estado_final",
+    "lateral",
+    "titular",
+    "subtitulo",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-isla-dinamica.html",
+   "muestra": {
+    "mp4": "lanz-isla-dinamica-9x16-previa.mp4",
+    "poster": "lanz-isla-dinamica-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-isla-dinamica con la actividad «…», el detalle «…», el icono …, el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-calendario",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Calendario con fechas marcadas",
+   "descripcion": "Hoja del mes en 3D ligero, fechas rodeadas a mano y el día del evento que sale hacia la cámara como tarjeta; «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "mes",
+    "anio",
+    "primerDia",
+    "diasMes",
+    "semana",
+    "marcados",
+    "evento",
+    "titular",
+    "subtitulo",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-calendario.html",
+   "muestra": {
+    "mp4": "lanz-calendario-9x16-previa.mp4",
+    "poster": "lanz-calendario-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-calendario con el mes …, los días marcados …, el evento del día … («…», hora …), el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-ruta-mundo",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Ruta por el mapa del mundo",
+   "descripcion": "Mapa de puntos que se enciende, ruta en arco con avión, pines que caen con rebote y kilómetros que cuentan; la cámara sigue al avión, se aleja a la ruta entera y cierra con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "ciudades",
+    "etiqueta",
+    "unidad",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-ruta-mundo.html",
+   "muestra": {
+    "mp4": "lanz-ruta-mundo-9x16-previa.mp4",
+    "poster": "lanz-ruta-mundo-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-ruta-mundo con la ruta … → … → … (ciudades), el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-pizarra-mano",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Pizarra dibujada a mano",
+   "descripcion": "Un rotulador escribe el título, lo subraya, rodea cada paso y los une con flechas; la cámara sigue la punta, se aleja al esquema completo y entra con «zoom a través» hasta el logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10.5,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "pizarra",
+    "rotulador",
+    "titulo",
+    "pasos",
+    "nota",
+    "titular",
+    "semilla",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-pizarra-mano.html",
+   "muestra": {
+    "mp4": "lanz-pizarra-mano-9x16-previa.mp4",
+    "poster": "lanz-pizarra-mano-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-pizarra-mano con el título «…», los pasos «…», «…», «…», la nota «…», el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-ticket-recibo",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Ticket que se imprime",
+   "descripcion": "Impresora térmica que imprime a tirones un recibo dentado, el total cuenta, un sello golpea con sacudida de cámara y «zoom a través» hasta el cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "papel",
+    "tintaPapel",
+    "comercio",
+    "subtitulo",
+    "lineas",
+    "moneda",
+    "impuesto",
+    "etiquetaTotal",
+    "sello",
+    "pie",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-ticket-recibo.html",
+   "muestra": {
+    "mp4": "lanz-ticket-recibo-9x16-previa.mp4",
+    "poster": "lanz-ticket-recibo-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-ticket-recibo con el comercio «…», las líneas … (concepto e importe), el sello «…», el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-logos-marcas",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Carrusel de logos de marcas",
+   "descripcion": "Filas infinitas de tarjetas de cristal con logos que se cruzan en perspectiva y frenan suave con desenfoque; titular «con la confianza de…», la marca destacada se enciende, «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "titular",
+    "logos",
+    "destacado",
+    "filas",
+    "inclinacion",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-logos-marcas.html",
+   "muestra": {
+    "mp4": "lanz-logos-marcas-9x16-previa.mp4",
+    "poster": "lanz-logos-marcas-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-logos-marcas con los logos de … (nombres o imágenes), destacando …, el titular «…», el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-versus",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Comparación VS en pantalla partida",
+   "descripcion": "Dos mitades entran desde lados opuestos, el «VS» golpea con sacudida de cámara, las filas se rellenan con ✗ y ✓, el ganador se expande y se come la pantalla, y cierre con titular y logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "a",
+    "b",
+    "vs",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-versus.html",
+   "muestra": {
+    "mp4": "lanz-versus-9x16-previa.mp4",
+    "poster": "lanz-versus-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-versus comparando «…» (…, …, …) contra «…» (…, …, …), con el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-frase-cinetica",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Frase cinética que choca",
+   "descripcion": "Palabras enormes entran desde direcciones distintas y chocan con rebote y sacudida de cámara; la palabra clave se enciende con una barra de acento, «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "frase",
+    "ritmo",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-frase-cinetica.html",
+   "muestra": {
+    "mp4": "lanz-frase-cinetica-9x16-previa.mp4",
+    "poster": "lanz-frase-cinetica-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-frase-cinetica con la frase «…» (la palabra clave «…» en acento), el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-codigo-interfaz",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Del código a la interfaz",
+   "descripcion": "Un editor escribe el código con resaltado y cada línea se transforma en su pieza de la interfaz (tarjeta, imagen, título, texto, botón); un cursor pulsa el botón, «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "archivo",
+    "codigo",
+    "piezas",
+    "app",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-codigo-interfaz.html",
+   "muestra": {
+    "mp4": "lanz-codigo-interfaz-9x16-previa.mp4",
+    "poster": "lanz-codigo-interfaz-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-codigo-interfaz con el código …, la app (título «…», texto «…», botón «…»), el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-perfil-cristal",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Perfil de creador en cristal",
+   "descripcion": "Tarjeta de perfil de vidrio esmerilado sobre orbes de color: avatar con anillo, verificado, contadores que cuentan y «Seguir» → «Siguiendo» con estallido; «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "orbe2",
+    "orbe3",
+    "etiqueta",
+    "nombre",
+    "usuario",
+    "bio",
+    "foto",
+    "datos",
+    "boton",
+    "botonHecho",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-perfil-cristal.html",
+   "muestra": {
+    "mp4": "lanz-perfil-cristal-9x16-previa.mp4",
+    "poster": "lanz-perfil-cristal-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-perfil-cristal con el perfil (nombre «…», @…, bio «…», foto …), las cifras …, el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-flecha-mano",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Flecha y círculo a mano sobre captura",
+   "descripcion": "Sobre tu captura se dibujan a mano un subrayado, un círculo irregular y una flecha desde una nota manuscrita; la cámara se acerca a lo señalado, «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "trazo",
+    "etiqueta",
+    "imagen",
+    "proporcion",
+    "objetivo",
+    "subrayado",
+    "nota",
+    "panel",
+    "titular",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-flecha-mano.html",
+   "muestra": {
+    "mp4": "lanz-flecha-mano-9x16-previa.mp4",
+    "poster": "lanz-flecha-mano-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-flecha-mano sobre mi captura … rodeando … (x, y, ancho, alto en %), con la nota «…», el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-changelog-producto",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Changelog animado de producto",
+   "descripcion": "Chip de versión, entradas Nuevo/Mejorado/Arreglado que llegan escalonadas y despliegan su mini-interfaz (interruptor, progreso, error resuelto); «zoom a través» de la última etiqueta y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "version",
+    "fecha",
+    "titulo",
+    "entradas",
+    "colores",
+    "nombres",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-changelog-producto.html",
+   "muestra": {
+    "mp4": "lanz-changelog-producto-9x16-previa.mp4",
+    "poster": "lanz-changelog-producto-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-changelog-producto para la versión … de … con las novedades «…» (nuevo), «…» (mejorado) y «…» (arreglado), mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-bento-funciones",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Bento de funciones",
+   "descripcion": "Seis tarjetas bento se montan con microanimaciones (interruptores, gráfica, avatares, progreso, cifra, chispa IA); la cámara las recorre una a una y hace «zoom a través» hasta el cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "titular",
+    "tarjetas",
+    "recorrido",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-bento-funciones.html",
+   "muestra": {
+    "mp4": "lanz-bento-funciones-9x16-previa.mp4",
+    "poster": "lanz-bento-funciones-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-bento-funciones para … con el titular «…» y las funciones «…», «…», «…» (interruptores, gráfica, avatares, progreso, cifra, IA), mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-cursor-demo",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Demo de producto con cursor",
+   "descripcion": "UI flotante en capas: el cursor activa un ajuste, aparece un tooltip, pulsa «Publicar», el botón carga y pasa a «Publicado ✓», con notificación y confeti; «zoom a través» del botón y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "app",
+    "documento",
+    "lineas",
+    "ajuste",
+    "boton",
+    "boton2",
+    "tooltip",
+    "aviso",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-cursor-demo.html",
+   "muestra": {
+    "mp4": "lanz-cursor-demo-9x16-previa.mp4",
+    "poster": "lanz-cursor-demo-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-cursor-demo para enseñar … (app «…», documento «…», botón «…» → «…», aviso «…»), el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-agente-herramientas",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Agente ejecutando herramientas",
+   "descripcion": "La petición se escribe y sube; el agente ejecuta herramientas como tarjetas (spinner que pasa a ✓ con rebote, salida plegable en streaming) y termina en la tarjeta de resultado con «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "agente",
+    "peticion",
+    "herramientas",
+    "resultado",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-agente-herramientas.html",
+   "muestra": {
+    "mp4": "lanz-agente-herramientas-9x16-previa.mp4",
+    "poster": "lanz-agente-herramientas-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-agente-herramientas con la petición «…», las herramientas … (nombre, argumento y salida), el resultado «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-multiagente",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Orquestador y subagentes",
+   "descripcion": "Un orquestador reparte la tarea: líneas que se dibujan con pulsos de luz hacia 3–4 subagentes que trabajan en paralelo con su streaming y su barra de progreso, y convergen en un resultado que se enciende; «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "orquestador",
+    "tarea",
+    "agentes",
+    "resultado",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-multiagente.html",
+   "muestra": {
+    "mp4": "lanz-multiagente-9x16-previa.mp4",
+    "poster": "lanz-multiagente-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-multiagente con la tarea «…», los agentes … (nombre, rol y 3 líneas), el resultado «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-artefacto-ia",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Chat que construye un artefacto",
+   "descripcion": "La respuesta se escribe en streaming, aparece la ficha del artefacto y el panel se abre deslizándose: el código se escribe con colores, salta a «Vista previa» y la web se monta pieza a pieza; el cursor pulsa el botón, «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "peticion",
+    "respuesta",
+    "artefacto",
+    "codigo",
+    "web",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-artefacto-ia.html",
+   "muestra": {
+    "mp4": "lanz-artefacto-ia-9x16-previa.mp4",
+    "poster": "lanz-artefacto-ia-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-artefacto-ia con la petición «…», la respuesta «…», el código …, la web (titular «…», botón «…», tarjetas …), mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-revista-portada",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Portada de revista que pasa página",
+   "descripcion": "Portada de revista con cabecera serif gigante que se enfoca, titulares de portada escalonados y sello; la página pasa en 3D a una doble página con cita y reportaje, «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "papel",
+    "tintaPapel",
+    "cabecera",
+    "numero",
+    "fecha",
+    "imagen",
+    "titulares",
+    "sello",
+    "cita",
+    "firma",
+    "seccion",
+    "reportaje",
+    "entradilla",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-revista-portada.html",
+   "muestra": {
+    "mp4": "lanz-revista-portada-9x16-previa.mp4",
+    "poster": "lanz-revista-portada-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-revista-portada con la cabecera «…», los titulares «…», «…», «…», mi foto … en portada, la cita «…», el reportaje «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-articulo-editorial",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Artículo con capitular y cita destacada",
+   "descripcion": "Artículo a columnas con capitular enorme y texto que se compone; una frase se subraya y sale como cita en serif cursiva gigante, «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "papel",
+    "tintaPapel",
+    "antetitulo",
+    "titular",
+    "autor",
+    "texto",
+    "frase",
+    "fraseEn",
+    "cita",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-articulo-editorial.html",
+   "muestra": {
+    "mp4": "lanz-articulo-editorial-9x16-previa.mp4",
+    "poster": "lanz-articulo-editorial-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-articulo-editorial con el titular «…», mi texto …, la frase subrayada «…», la cita destacada «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-indice-editorial",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Sumario editorial que abre un capítulo",
+   "descripcion": "Índice con números serif gigantes, páginas que cuentan y líneas que se dibujan; la cámara baja, elige un capítulo y entra por su número hasta la portadilla con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "titulo",
+    "subtitulo",
+    "capitulos",
+    "elegido",
+    "etiqueta",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-indice-editorial.html",
+   "muestra": {
+    "mp4": "lanz-indice-editorial-9x16-previa.mp4",
+    "poster": "lanz-indice-editorial-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-indice-editorial con los capítulos «…», «…», «…» (con sus páginas), que abra el capítulo …, mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-keynote-titular",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Titular de keynote que se enfoca",
+   "descripcion": "Escenario negro con foco cenital: el titular pasa de desenfocado a nítido palabra a palabra, la palabra clave con degradado de acento y subtítulo gris; dolly lento, «Una cosa más.» y «zoom a través» hasta el logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 9.5,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "gris",
+    "acento",
+    "acento2",
+    "etiqueta",
+    "titular",
+    "subtitulo",
+    "unaCosaMas",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-keynote-titular.html",
+   "muestra": {
+    "mp4": "lanz-keynote-titular-9x16-previa.mp4",
+    "poster": "lanz-keynote-titular-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-keynote-titular con el titular «…|*…*», el subtítulo «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-dispositivos-keynote",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Dispositivos revelados con luz",
+   "descripcion": "Portátil, tableta y teléfono suben a oscuras y un barrido de luz los enciende uno a uno, con reflejo en el suelo; la cámara recorre cada dispositivo, se aleja y entra en la pantalla del teléfono con «zoom a través» hasta el logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "gris",
+    "acento",
+    "acento2",
+    "titular",
+    "dispositivos",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-dispositivos-keynote.html",
+   "muestra": {
+    "mp4": "lanz-dispositivos-keynote-9x16-previa.mp4",
+    "poster": "lanz-dispositivos-keynote-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-dispositivos-keynote con mis capturas … en el portátil, la tableta y el móvil, el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-keynote-cifras",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Cifras de keynote con chip",
+   "descripcion": "Un chip con brillo entra con muelle y de él salen trazos de circuito con pulsos de luz; cifras gigantes con degradado cuentan y cambian con transiciones de enfoque, y «zoom a través» del chip hasta el logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "tinta",
+    "gris",
+    "acento",
+    "acento2",
+    "chip",
+    "chipSub",
+    "cifras",
+    "marca",
+    "lema",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-keynote-cifras.html",
+   "muestra": {
+    "mp4": "lanz-keynote-cifras-9x16-previa.mp4",
+    "poster": "lanz-keynote-cifras-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-keynote-cifras con el chip «…» y las cifras …× …, …% …, … h …, mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-tarjetas-apiladas",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Tarjetas apiladas tipo Wallet",
+   "descripcion": "Pila de tarjetas que llegan con muelle, se abren en abanico, se barajan y la de arriba gira en 3D para enseñar su reverso de cristal con el detalle; «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "tarjetas",
+    "reverso",
+    "chip",
+    "titular",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-tarjetas-apiladas.html",
+   "muestra": {
+    "mp4": "lanz-tarjetas-apiladas-9x16-previa.mp4",
+    "poster": "lanz-tarjetas-apiladas-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-tarjetas-apiladas con mis tarjetas … (título, número, color), el reverso «…» con las filas …, el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-archivador-pestanas",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Archivador con pestañas",
+   "descripcion": "Carpetas con pestañas de colores suben al cajón; la elegida se saca, se abre en 3D y de dentro salen volando fichas que se colocan en rejilla con su título; «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "papel",
+    "acento",
+    "carpetas",
+    "elegida",
+    "fichas",
+    "etiquetaCajon",
+    "titular",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-archivador-pestanas.html",
+   "muestra": {
+    "mp4": "lanz-archivador-pestanas-9x16-previa.mp4",
+    "poster": "lanz-archivador-pestanas-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-archivador-pestanas con las carpetas …, que se abra «…» y salgan las fichas … (título, texto, etiqueta), el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-polaroids-mesa",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Polaroids sobre la mesa",
+   "descripcion": "Polaroids que caen sobre una mesa con rebote y sombra, cinta adhesiva y pie de foto escrito a mano; la cámara recorre la mesa, se aleja con el titular y entra en la foto principal con «zoom a través»; cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "papel",
+    "acento",
+    "fotos",
+    "titular",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-polaroids-mesa.html",
+   "muestra": {
+    "mp4": "lanz-polaroids-mesa-9x16-previa.mp4",
+    "poster": "lanz-polaroids-mesa-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-polaroids-mesa con mis fotos … y sus pies «…», el titular «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-texto-rejilla",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Rejilla suiza de palabras",
+   "descripcion": "Una rejilla modular se dibuja y cada celda se llena con una palabra que entra por una máscara desde una dirección distinta; bloques de color barren e invierten celdas, la rejilla se reordena y la cámara entra en la palabra clave con «zoom a través» hasta el cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "palabras",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-texto-rejilla.html",
+   "muestra": {
+    "mp4": "lanz-texto-rejilla-9x16-previa.mp4",
+    "poster": "lanz-texto-rejilla-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-texto-rejilla con las palabras … (la clave entre *asteriscos*), la etiqueta «…», el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-texto-tunel",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Túnel de texto 3D",
+   "descripcion": "Tu frase se repite en anillos de letras que giran mientras la cámara avanza sin parar por dentro del túnel; la palabra clave del fondo crece, la atravesamos con «zoom a través» y cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "frase",
+    "clave",
+    "anillos",
+    "velocidad",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-texto-tunel.html",
+   "muestra": {
+    "mp4": "lanz-texto-tunel-9x16-previa.mp4",
+    "poster": "lanz-texto-tunel-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-texto-tunel con la frase «…» en los anillos, la palabra clave «…» al fondo, el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  },
+  {
+   "id": "lanz-texto-eco",
+   "sector": "lanz",
+   "sectorNombre": "Lanzamiento de producto",
+   "nombre": "Eco de palabras al golpe",
+   "descripcion": "Cada palabra cae gigante con sacudida, suelta una estela de copias en contorno, se estira, se parte en dos líneas y se recompone; la clave se queda y la cámara la atraviesa hasta el cierre con logo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "duracion",
+    "fondo",
+    "fondo2",
+    "tinta",
+    "acento",
+    "etiqueta",
+    "palabras",
+    "ritmo",
+    "copias",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/lanzamiento/lanz-texto-eco.html",
+   "muestra": {
+    "mp4": "lanz-texto-eco-9x16-previa.mp4",
+    "poster": "lanz-texto-eco-9x16.jpg"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla lanz-texto-eco con las palabras … (la clave entre *asteriscos*, mejor la última), el ritmo …, el cierre «…», mis colores … y mi logo. Formato 9:16 y 16:9."
+  }
+ ]
+}

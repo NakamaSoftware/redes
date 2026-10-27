@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Pieza «3d-cubo-transicion» · 3D con three.js · Viegas IA · Motion Lab
+     Transición de reel: cada escena es una cara de un prisma que llena el cuadro; al cambiar, el prisma gira 90° con
+     «zoom a través» (la cámara se aleja durante el giro y vuelve a entrar), curva rápida en el centro y frenada suave al
+     llegar, desenfoque de movimiento por obturador y la luz de estudio marcando la arista. Entre giros, push-in lento.
+     "caras": 2 a 4 — { "video": "ruta.mp4" } · { "imagen": "ruta.jpg" } · { "etiqueta", "titulo" } (tarjeta de texto)
+     · { "logo": "claude" } (logo real sobre la marca). Úsala en el montaje encima del corte (o con ?fondo=transparente).
+     Formato: #9x16 (por defecto) · #16x9 · #1x1 · #4x5 · Tema: noche-azul. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 6,
+  "caras": [
+    { "video": "vid/reel-muestra.mp4" },
+    { "etiqueta": "Capítulo 2", "titulo": "Lo que nadie\nte cuenta" },
+    { "logo": "claude", "titulo": "Claude Code" }
+  ],
+  "giro": 0.9,
+  "fondo": "marca"
+}
+</script>
+<script type="module">
+import { pieza3d, THREE } from '../motor/piezas3d.js';
+pieza3d({ duracion: 6, movimiento: { muestras: 12, obturador: 0.6 }, niebla: false },
+  ({ P, W, H, MG, scene, camara, mat, luces, texVideo, texDibujo, texLogo, ACENTO, espera }) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion, N = Math.min(4, P.caras.length), G = P.giro;
+  const FH = 4, FW = FH * W / H;                       // cara = proporción del cuadro; el fondo del prisma = su ancho
+  const cubo = new THREE.Group(); scene.add(cubo);
+  const ac = '#' + ACENTO.toString(16).padStart(6, '0');
+  const tex = (c) => {
+    if (c.video) return texVideo(c.video, 0, { desde: 0, bucle: true });
+    if (c.imagen) { const t = new THREE.TextureLoader().load(c.imagen); t.colorSpace = THREE.SRGBColorSpace; return t; }
+    let logo = null;
+    const dib = (g, w, h) => {
+      const f = g.createLinearGradient(0, 0, 0, h); f.addColorStop(0, '#08090C'); f.addColorStop(.55, '#0A0F20'); f.addColorStop(1, '#0B1530'); g.fillStyle = f; g.fillRect(0, 0, w, h);
+      const r = g.createRadialGradient(w / 2, h * 1.1, 0, w / 2, h * 1.1, h * .6); r.addColorStop(0, 'rgba(59,130,246,.35)'); r.addColorStop(1, 'rgba(59,130,246,0)'); g.fillStyle = r; g.fillRect(0, 0, w, h);
+      g.textAlign = 'center'; const u = Math.min(w, h) / 1080;
+      let y = h * 0.42;
+      if (logo) { const im = logo.image; g.drawImage(im, w / 2 - 170 * u, h * 0.3, 340 * u, 340 * u); y = h * 0.3 + 470 * u; }
+      if (c.etiqueta) { g.font = `500 ${34 * u}px "Geist Mono"`; g.fillStyle = ac; g.fillText(c.etiqueta.toUpperCase().split('').join(String.fromCharCode(8202)), w / 2, y); y += 130 * u; }
+      g.fillStyle = '#F5F7FA'; g.font = `600 ${118 * u}px "Inter Tight"`;
+      String(c.titulo || '').split(/\n|\|/).forEach((l, i) => g.fillText(l, w / 2, y + i * 128 * u));
+    };
+    if (!c.logo) return texDibujo(W, H, dib);
+    // con logo: se dibuja cuando el logo real (SVG) ya ha cargado
+    logo = texLogo(c.logo, { tam: 512, margen: 0 });
+    const previos = MG._listos.slice(), cv = document.createElement('canvas'); cv.width = W; cv.height = H;
+    const t2 = new THREE.CanvasTexture(cv); t2.colorSpace = THREE.SRGBColorSpace;
+    espera(Promise.all(previos).then(() => document.fonts.ready).then(() => { dib(cv.getContext('2d'), W, H); t2.needsUpdate = true; }));
+    return t2;
+  };
+  // caras alrededor del eje Y: 0 delante, 1 a la derecha, 2 detrás, 3 a la izquierda
+  const caras = P.caras.slice(0, N).map((c, i) => {
+    const m = new THREE.Mesh(new THREE.PlaneGeometry(FW, FH), new THREE.MeshBasicMaterial({ map: tex(c), toneMapped: false }));
+    const a = (i * Math.PI) / 2; m.position.set(Math.sin(a) * FW / 2, 0, Math.cos(a) * FW / 2); m.rotation.y = a; cubo.add(m); return m;
+  });
+    
+  const tv = Math.tan((camara.fov * Math.PI) / 360), d0 = FH / 2 / tv + FW / 2;       // a esta distancia la cara llena el cuadro
+  const tramo = (D - (N - 1) * G) / N;                                                   // tiempo quieto (con push-in) por cara
+  const giros = Array.from({ length: N - 1 }, (_, i) => tramo * (i + 1) + G * i);
+  return (t) => {
+    let ang = 0, zoom = 0, mueve = 0;
+    giros.forEach((g0) => { const x = k(t, g0, g0 + G); ang += C.entradaSalidaQuint(x); zoom = Math.max(zoom, Math.sin(Math.PI * C.suave(x))); });
+    cubo.rotation.y = -ang * Math.PI / 2;
+    // las caras se iluminan con la luz solo durante el giro: quietas se ven exactamente como el vídeo
+    caras.forEach((m, i) => { const a = i * Math.PI / 2 + cubo.rotation.y, luz = Math.max(0, Math.cos(a)); m.material.color.setScalar(lerp(0.22, 1, Math.pow(luz, 0.7))); });
+    const seg = (t % (tramo + G)) / (tramo + G);
+    const push = 1 - 0.035 * C.salidaCubica(Math.min(1, seg * 1.2));                      // push-in lento entre giros: la cámara nunca se para
+    camara.position.set(Math.sin(zoom * 0.3) * 0.3, 0, d0 * push * (1 + 0.42 * zoom));
+    camara.lookAt(0, 0, 0); camara.rotation.z = Math.sin(zoom * Math.PI) * 0.02;
+  };
+});
+</script>
+</body></html>

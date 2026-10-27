@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «resto-horario» · Restaurante / negocio local · Viegas IA · Motion Lab
+     Horario y reserva: la foto del local queda de fondo muy desenfocada (gaussiano) y oscurecida; la tarjeta del horario sube,
+     cada día entra escalonado, una barra de acento se desliza hasta «hoy» con rebote y el botón de WhatsApp (logo oficial) late.
+     Cambia "foto", "horario" ([día, horas]), "hoy" (índice), "telefono", "marca". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.fondo-foto{ overflow:hidden; }
+.fondo-foto img{ width:100%; height:100%; object-fit:cover; filter:blur(28px) saturate(1.1); transform:scale(1.15); }
+.velo{ background:linear-gradient(180deg, rgba(var(--fondo-rgb),.55), rgba(var(--fondo-rgb),.85)); }
+.hor{ padding:40px 44px; }
+.fila{ position:relative; display:flex; justify-content:space-between; padding:22px 26px; font:500 40px var(--fuente); color:var(--texto); z-index:1; }
+.fila > span:last-child{ font-family:var(--mono); font-size:34px; color:var(--mute); }
+.fila.cerrado span:last-child{ color:#EF4444; }
+.barra{ position:absolute; left:44px; right:44px; height:86px; border-radius:20px; background:rgba(var(--halo),.22); border:2px solid var(--acento); }
+.hoy-tag{ font:600 22px var(--mono); letter-spacing:.14em; color:#fff; background:var(--acento); padding:4px 10px; border-radius:8px; margin-left:14px; vertical-align:middle; }
+.wa{ display:flex; align-items:center; gap:22px; font:600 42px var(--fuente); color:#fff; background:#25D366; padding:26px 44px; border-radius:99px; box-shadow:0 22px 60px rgba(37,211,102,.4); }
+.wa img{ width:62px; height:62px; filter:brightness(0) invert(1); }
+.wa small{ display:block; font:500 28px var(--mono); opacity:.9; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Horario",
+  "titulo": "Te esperamos *esta semana*",
+  "foto": "fotos/restaurante.jpg",
+  "horario": [["Lunes", "Cerrado"], ["Martes – Jueves", "13:00 – 16:00"], ["Viernes", "13:00 – 23:30"], ["Sábado", "12:30 – 00:00"], ["Domingo", "12:30 – 17:00"]],
+  "hoy": 2,
+  "reserva": "Reserva por WhatsApp",
+  "telefono": "+34 600 123 456",
+  "marca": "Casa Lola · Cocina de mercado",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 220);
+  const ff = MG.el(`<div class="fondo-foto" style="width:${W}px;height:${H}px"><img src="${P.foto}" alt=""></div>`); MG.mundo.prepend(ff);
+  const velo = MG.el(`<div class="velo" style="width:${W}px;height:${H}px"></div>`); ff.after(velo);
+  const tit = N.frase(P.titulo, 'n-tit', cw); tit.style.fontSize = '90px';
+  const hor = MG.el(`<div class="n-card hor" style="width:${cw}px"><div class="barra"></div>${P.horario.map(([d, h], i) => `<div class="fila${/cerrado/i.test(h) ? ' cerrado' : ''}"><span>${d}${i === P.hoy ? '<span class="hoy-tag">HOY</span>' : ''}</span><span>${h}</span></div>`).join('')}</div>`);
+  const filas = [...hor.querySelectorAll('.fila')], barra = hor.querySelector('.barra');
+  const wa = MG.el(`<div class="wa"><img src="_nichos/whatsapp.svg" alt=""><div>${P.reserva}<small>${P.telefono}</small></div></div>`);
+  const marca = MG.el(N.marca(.8));
+  let L;
+  return (t) => {
+    if (!L) { const tot = tit.offsetHeight + 50 + hor.offsetHeight + 60 + wa.offsetHeight; L = { y: (H - tot) / 2, hT: tit.offsetHeight, fh: filas[0].offsetHeight, f0: filas[0].offsetTop }; }
+    N.vivo(t);
+    ff.firstChild.style.transform = `scale(${1.15 + .08 * t / P.duracion})`;
+    const sal = C.entradaCubica(k(t, fin + .2, fin + .7)); ff.style.opacity = 1 - sal; velo.style.opacity = 1 - sal;
+    MG.pon(tit, (W - cw) / 2, L.y);
+    if (t < fin) MG.animaTexto(tit, t, .1, { paso: .08 }); else N.es(tit, t, 0, fin, { x: (W - cw) / 2, y: L.y, oy: -100 });
+    const yH = L.y + L.hT + 50;
+    N.es(hor, t, .5, fin + .08, { x: (W - cw) / 2, y: yH, dy: 360, s0: .92, curva: 'reboteSuave', d: .8, oy: -140 });
+    filas.forEach((f, i) => { const e = MG.entra(f, t, .9 + i * .12, { dx: 80, dy: 0, curva: 'salidaQuint', d: .5 }); f.style.transform = `translateX(${e.x}px)`; });
+    // la barra baja fila a fila y se posa en «hoy» con rebote
+    const pb = C.rebote(k(t, 1.9, 1.9 + .9 * 1.5));
+    barra.style.top = (L.f0 + lerp(0, P.hoy, pb) * L.fh - 3) + 'px'; barra.style.height = (L.fh + 6) + 'px'; barra.style.opacity = k(t, 1.9, 2.1);
+    const yw = yH + hor.offsetHeight + 60;
+    N.es(wa, t, 2.8, fin + .2, { x: N.cx(wa), y: yw, dy: 120, curva: 'reboteFuerte', oy: -60 });
+    if (t > 3.6 && t < fin) wa.style.scale = 1 + .035 * Math.sin((t - 3.6) * 5);
+    N.es(marca, t, 3.1, fin + .3, { x: N.cx(marca), y: H - (VERT ? 220 : 80), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

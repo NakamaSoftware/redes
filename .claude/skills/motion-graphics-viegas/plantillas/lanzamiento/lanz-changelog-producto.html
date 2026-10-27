@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-changelog-producto» · Viegas IA · Motion Lab · categoría Producto y SaaS
+     Changelog animado al estilo de las páginas de lanzamiento de producto (whatships): chip de versión con fecha que entra con
+     muelle, titular por palabras y tres entradas que llegan escalonadas desde la derecha (entrada rápida, frenada suave), cada una
+     con su etiqueta de color (Nuevo / Mejorado / Arreglado) y una mini-interfaz que se despliega dentro de la tarjeta:
+     un interruptor que se enciende, una barra de progreso que se llena contando y un error tachado que pasa a «resuelto».
+     La cámara baja siguiendo la entrada activa, nunca se para, entra con «zoom a través» en la última etiqueta y cierra con logo.
+     Cambia "version", "fecha", "titulo" (*palabra* = acento), "entradas" ([{tipo: nuevo|mejorado|arreglado, titulo, texto,
+     ui: interruptor|progreso|check, detalle}]), "colores" (color de cada tipo), "cierre", "marca", "logo" (ruta o "" = inicial),
+     "fondo", "fondo2", "tinta", "acento", "duracion".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif; --mono:'JetBrains Mono',Consolas,monospace;
+  --fondo:#121014; --fondo2:#2A1A14; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87;
+  --tarjeta:#1A181D; --borde:rgba(255,255,255,.09); --mute:#9C968F; }
+html,body{ background:var(--fondo); }
+body{ -webkit-font-smoothing:antialiased; }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 108%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-style:normal; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:650 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.05; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.card{ background:linear-gradient(180deg,rgba(255,255,255,.055),rgba(255,255,255,.02)),var(--tarjeta); border:1.5px solid var(--borde); border-radius:34px;
+  box-shadow:0 30px 80px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.07); overflow:hidden; }
+.chip{ font:600 28px var(--fuente); letter-spacing:.12em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:14px 28px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.1); }
+
+.cab-tit{ font:700 104px/1 var(--fuente); letter-spacing:-.05em; color:var(--tinta); }
+.ent{ padding:34px 38px; }
+.ent .fila{ display:flex; align-items:center; gap:18px; }
+.tag{ font:700 24px var(--fuente); letter-spacing:.1em; text-transform:uppercase; padding:9px 18px; border-radius:99px; white-space:nowrap; }
+.ent h3{ margin:0; font:650 44px/1.1 var(--fuente); letter-spacing:-.03em; color:var(--tinta); white-space:nowrap; }
+.ent p{ margin:12px 0 0; font:400 29px/1.35 var(--fuente); color:var(--mute); letter-spacing:-.01em; }
+.mini{ margin-top:26px; height:104px; border-radius:22px; background:rgba(255,255,255,.035); border:1.5px solid var(--borde);
+  display:flex; align-items:center; gap:22px; padding:0 28px; font:500 30px var(--fuente); color:var(--tinta); }
+.mini .lb{ flex:1; white-space:nowrap; }
+.sw{ width:96px; height:56px; border-radius:99px; position:relative; flex:none; }
+.sw i{ position:absolute; top:6px; left:6px; width:44px; height:44px; border-radius:50%; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,.35); }
+.barra{ flex:1.4; height:16px; border-radius:99px; background:rgba(255,255,255,.08); overflow:hidden; }
+.barra i{ display:block; height:100%; border-radius:99px; transform-origin:0 50%; }
+.pct{ font:500 28px var(--mono); width:96px; text-align:right; color:var(--tinta); }
+.ok{ width:52px; height:52px; border-radius:50%; display:grid; place-items:center; flex:none; color:#111; font:800 30px var(--fuente); }
+.tachar{ position:relative; }
+.tachar s{ position:absolute; left:0; top:52%; height:3px; background:var(--mute); text-decoration:none; transform-origin:0 50%; width:100%; }
+.linea-v{ width:3px; border-radius:3px; background:linear-gradient(rgba(var(--halo),.6),rgba(var(--halo),0)); transform-origin:50% 0; }
+.punto{ width:22px; height:22px; border-radius:50%; border:4px solid var(--fondo); }
+.fecha{ font:500 30px var(--mono); color:var(--mute); white-space:nowrap; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#121014",
+  "fondo2": "#2A1A14",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "version": "v2.4",
+  "fecha": "Octubre 2026",
+  "titulo": "Lo nuevo en *Tu App*",
+  "entradas": [
+    { "tipo": "nuevo", "titulo": "Modo automático", "texto": "Tu flujo se ejecuta solo cada mañana.", "ui": "interruptor", "detalle": "Activar modo automático" },
+    { "tipo": "mejorado", "titulo": "Exportación 3× más rápida", "texto": "Menos espera, mismo resultado.", "ui": "progreso", "detalle": "Exportando" },
+    { "tipo": "arreglado", "titulo": "Sincronización estable", "texto": "Adiós a los cortes entre dispositivos.", "ui": "check", "detalle": "Error de sincronización" }
+  ],
+  "colores": { "nuevo": "#D97757", "mejorado": "#8AA8FF", "arreglado": "#7FD49B" },
+  "nombres": { "nuevo": "Nuevo", "mejorado": "Mejorado", "arreglado": "Arreglado" },
+  "cierre": "Ya *disponible*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'puntos', tamano: 44, intensidad: .3 }, halo: { fuerza: .2, x: 50, y: 70 } }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  // ---- cámara: encuadra (fx, fy) con zoom z; la escena nunca se para
+  const cam = (MG, fx, fy, z, rot = 0) => { MG.vista.style.transformOrigin = '0 0';
+    MG.vista.style.transform = `translate(${W / 2 - fx * z}px,${H / 2 - fy * z}px) scale(${z}) rotate(${rot}deg)`; };
+
+  const ents = (P.entradas || []).slice(0, 3), N = ents.length;
+  const col = (tp) => (P.colores || {})[tp] || 'var(--acento)';
+  // columna: en vertical todo en una columna; en horizontal cabecera a la izquierda y entradas a la derecha
+  const LX = VERT ? 90 : 130, CW = VERT ? 860 : 620, EX = VERT ? 90 : 800, EW = VERT ? 860 : 990;
+  const chip = MG.el(`<div class="chip">${esc(P.version)} · Novedades</div>`);
+  const fecha = MG.el(`<div class="fecha">${esc(P.fecha)}</div>`);
+  const tit = MG.texto(md(P.titulo), 'cab-tit'); tit.style.width = CW + 'px';
+  if (!VERT) tit.style.fontSize = '112px';
+  const linea = MG.el(`<div class="linea-v"></div>`);
+  const cards = ents.map((e) => {
+    const c = col(e.tipo);
+    let ui = '';
+    if (e.ui === 'progreso') ui = `<span class="lb">${esc(e.detalle || '')}</span><div class="barra"><i style="background:${c}"></i></div><span class="pct">0%</span>`;
+    else if (e.ui === 'check') ui = `<span class="lb"><span class="tachar">${esc(e.detalle || '')}<s></s></span></span><div class="ok" style="background:${c}">✓</div>`;
+    else ui = `<span class="lb">${esc(e.detalle || '')}</span><div class="sw"><i></i></div>`;
+    const el = MG.el(`<div class="card ent" style="width:${EW}px"><div class="fila"><span class="tag" style="color:${c};background:${c}22;border:1.5px solid ${c}66">${esc((P.nombres || {})[e.tipo] || e.tipo)}</span></div>
+      <h3 style="margin-top:18px">${esc(e.titulo)}</h3><p>${esc(e.texto)}</p><div class="mini">${ui}</div></div>`);
+    el.style.height = 'auto';
+    return { el, e, c, mini: el.querySelector('.mini'), tag: el.querySelector('.tag') };
+  });
+  const puntos = cards.map((c) => MG.el(`<div class="punto" style="background:${c.c}"></div>`));
+  const logo = MG.el(logoHTML());
+  const cie = MG.texto(md(P.cierre), 'tit'); const anchoC = VERT ? W - 160 : 1400; cie.style.width = anchoC + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+
+  const tE = (i) => 1.7 + i * 1.75, tZ = D - 2.55, tC = tZ + .7;
+  let L = null;
+  return (t) => {
+    if (!L) {
+      L = { base: cards.map((c) => { c.mini.style.marginTop = '0px'; c.mini.style.height = '0px'; const h = c.el.offsetHeight; c.mini.style.marginTop = ''; c.mini.style.height = ''; return h; }) };
+      L.mini = 104 + 26; L.gap = 30;
+      L.y0 = VERT ? 640 : 110;
+      L.cabY = VERT ? 300 : 300;
+    }
+    // altura de cada tarjeta según cuánto se haya desplegado su mini-interfaz
+    const exp = cards.map((_, i) => C.salidaExpo(k(t, tE(i) + .45, tE(i) + 1.05)));
+    let y = L.y0; const Y = cards.map((c, i) => { const yy = y; y += L.base[i] + L.mini * exp[i] + L.gap; return yy; });
+
+    // cámara: deriva lenta + baja con la entrada activa (en vertical)
+    let fy = H / 2, fx = W / 2;
+    { const bajada = Math.max(0, (Y[N - 1] + L.base[N - 1] + L.mini * exp[N - 1]) - (VERT ? 1460 : H - 60));
+      fy = H / 2 + C.afterEffects75(k(t, 3, tE(N - 1) + 1.2)) * Math.min(VERT ? 260 : 180, bajada + 40); }
+    let z = lerp(1, 1.07, k(t, 0, tZ));
+    fx += Math.sin(t * .45) * 8; fy += Math.cos(t * .33) * 6;
+    // «zoom a través» de la última etiqueta
+    const ul = cards[N - 1], tagX = EX + 38 + ul.tag.offsetWidth / 2, tagY = Y[N - 1] + 34 + ul.tag.offsetHeight / 2;
+    const za = C.salidaCubica(k(t, tZ - .6, tZ + .2)), zt = C.entradaCubica(k(t, tZ, tC));
+    if (t < tC) { fx = lerp(fx, tagX, za); fy = lerp(fy, tagY, za); z = z * lerp(1, 1.5, za) * (1 + 11 * zt); cam(MG, fx, fy, z); }
+    else cam(MG, W / 2, H / 2, lerp(1.22, 1, C.salidaQuint(k(t, tC - .05, tC + 1.3))) * lerp(1, 1.04, k(t, tC, D)));
+    MG.halo(50 + Math.sin(t * .4) * 10, 70 + Math.cos(t * .3) * 8);
+    const vis = t < tC ? 1 : 0;
+
+    // cabecera
+    const ec = MG.entra(chip, t, .25, { d: .55, dy: 0, dx: -60, escala0: .6, curva: 'rebote', base: 6 });
+    MG.pon(chip, LX + ec.x, L.cabY + ec.y, ec.s); chip.style.transformOrigin = '0 50%';
+    const ef = MG.entra(fecha, t, .45, { d: .6, dy: 0, dx: 50, curva: 'salidaQuint', base: 4 });
+    MG.pon(fecha, LX + chip.offsetWidth + 26 + ef.x, L.cabY + 14);
+    MG.pon(tit, LX, L.cabY + 100);
+    tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, .55 + i * .09, { d: .6, dy: 110, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 8 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    // línea de tiempo vertical que se dibuja
+    const lx = VERT ? 60 : EX - 44, lp = C.salidaCubica(k(t, 1.4, tE(N - 1) + 1.2));
+    MG.pon(linea, lx, L.y0 + 20); linea.style.height = Math.max(0, (Y[N - 1] - L.y0 + 60) * lp) + 'px'; linea.style.transform = `translate(${lx}px,${L.y0 + 20}px)`;
+    linea.style.opacity = vis;
+    if (VERT) linea.style.opacity = 0;   // en vertical la línea se esconde para no rozar el margen
+
+    cards.forEach((c, i) => {
+      const t0 = tE(i), dirs = [[200, 0], [0, 160], [200, 0]][i % 3];
+      const e = MG.entra(c.el, t, t0, { d: .65, dx: dirs[0], dy: dirs[1], escala0: .92, curva: ['salidaQuint', 'rebote', 'salidaExpo'][i % 3], base: 7 });
+      MG.pon(c.el, EX + e.x, Y[i] + e.y, e.s); c.el.style.transformOrigin = '0 0';
+      c.el.style.opacity = Math.min(+c.el.style.opacity, vis);
+      c.mini.style.height = 104 * exp[i] + 'px'; c.mini.style.marginTop = 26 * exp[i] + 'px'; c.mini.style.opacity = C.salidaCubica(k(t, t0 + .65, t0 + 1.05));
+      c.mini.style.overflow = 'hidden';
+      const u = k(t, t0 + .95, t0 + 1.55);
+      if (c.e.ui === 'progreso') { const p = C.entradaSalidaQuint(u); c.el.querySelector('.barra i').style.transform = `scaleX(${p})`;
+        c.el.querySelector('.pct').textContent = Math.round(p * 100) + '%'; }
+      else if (c.e.ui === 'check') { const p = C.salidaCubica(k(t, t0 + .9, t0 + 1.3)); c.el.querySelector('s').style.transform = `scaleX(${p})`;
+        const o = c.el.querySelector('.ok'), r = C.reboteFuerte(k(t, t0 + 1.25, t0 + 1.9)); o.style.transform = `scale(${r}) rotate(${(1 - r) * -90}deg)`; o.style.opacity = r > 0 ? 1 : 0; }
+      else { const p = C.rebote(k(t, t0 + 1, t0 + 1.5)), sw = c.el.querySelector('.sw');
+        sw.querySelector('i').style.transform = `translateX(${40 * p}px)`; sw.style.background = `color-mix(in srgb, ${c.c} ${Math.min(100, p * 100)}%, rgba(255,255,255,.14))`; }
+      // brillo de la tarjeta activa
+      const act = Math.max(0, 1 - Math.abs(t - (t0 + 1.2)) / 1.2);
+      c.el.style.boxShadow = `0 30px 80px rgba(0,0,0,.45), 0 0 ${90 * act}px rgba(var(--halo),${.35 * act}), inset 0 1px 0 rgba(255,255,255,.07)`;
+      const pp = C.reboteFuerte(k(t, t0 + .1, t0 + .6));
+      MG.pon(puntos[i], lx - 9.5, Y[i] + 44, pp); puntos[i].style.opacity = VERT ? 0 : (pp > 0 ? vis : 0);
+    });
+    [chip, fecha, tit].forEach((el) => { if (!vis) el.style.opacity = 0; });
+
+    // cierre
+    const bloque = 150 + 60 + cie.offsetHeight + 50 + 60, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - anchoC) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .55 + cie.trozos.length * .08, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+});
+</script>
+</body></html>

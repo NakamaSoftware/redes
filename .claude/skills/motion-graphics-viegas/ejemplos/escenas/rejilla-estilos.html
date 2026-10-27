@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «rejilla-estilos» · Motion Graphics Viegas. Rejilla 4×2 de estilos con número, nombre y vídeo; cabecera que entra al final.
+     Sacado del vídeo de YouTube «Carruseles animados con Claude Code» (Viegas Estudio, 22-10-2026).
+     Cambia textos, tarjetas (vid/…) y tiempos; la curva, el desenfoque y la cámara ya siguen la guía de estilo. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="ejemplos.css">
+<script src="../motor/motor.js"></script>
+</head><body>
+<script>
+escena({ duracion: 8.0, ancho: 1920, alto: 1080, fondo: 'marca' }, (MG) => {
+  // --- compatibilidad con las funciones del vídeo original (mismos nombres, sobre el motor) ---
+  const M = MG.mundo, V = MG.vista, DT = MG.DT, MB = MG.MB, SVGNS = 'http://www.w3.org/2000/svg';
+  const { k, lerp, cl, desenfoca, pon, camara: camara0 } = MG;
+  const C = MG.curvas, quint = C.salidaQuint, inOut = C.entradaSalidaQuint, suave = C.suave, back = (x) => C.atras(x), rebote = C.rebote, reboteSuave = C.reboteSuave;
+  const $ = (h) => { const d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstChild; };
+  const entra = (el, t, t0, d = .7, dx = 0, dy = 220, s0 = .94, base = 3, extra = 0) => MG.entra(el, t, t0, { d, dx, dy, escala0: s0, base, extra });
+  const camara = (t, z0, z1, ox = 960, oy = 540) => camara0(t, z0, z1, ox, oy);
+  const VID = (e, n) => `vid/${String(e).padStart(2, '0')}-${n}.mp4`;
+  const VIDS = { push: (o) => MG.registrar(o.v, o) };
+  function tarjeta(src, w, h, t0, off = .8, bucle = false) { return MG.tarjeta(src, w, h, t0, { desde: off, bucle: true }); }
+  function logoClaude(tam) {
+    const w = $(`<div class="abs" style="width:${tam}px;height:${tam}px"><div class="logo abs" style="width:100%;height:100%;filter:drop-shadow(0 0 40px rgba(var(--halo),.55))"></div><div class="barrido abs" style="width:100%;height:100%"></div></div>`);
+    w.barre = (x) => { w.children[1].style.backgroundPosition = `${lerp(110, -10, x)}% 0`; w.children[1].style.opacity = x > 0 && x < 1 ? 1 : 0; };
+    return w;
+  }
+  
+  let pinta = () => {}; let DUR = 8.0;
+  DUR = 8.0;   // marcas de Diego: 2:22,3 → 2:29,6 (+ la salida con la mascota)
+  const E8 = [[1, 'Sistema', 'limpio y técnico'], [2, 'Fórmula', 'datos que enganchan'], [3, 'Editorial', 'de revista'], [4, 'Terminal', 'para devs'],
+              [5, 'Póster', 'tipografía gigante'], [6, 'Editor Pro', 'interfaz de edición'], [7, 'Estudio claro', 'luminoso'], [8, 'Visor', 'tu cámara, en grande']];
+  const W = 232, H = 290, GX = 300, X0 = 960 - GX * 1.5 - W / 2, Y0 = [185, 570];
+  const T0 = (i) => .55 + i * .3;
+  const it = E8.map(([e, nom, sub], i) => {
+    const c = tarjeta(VID(e, 1), W, H, T0(i), 1.2, true);
+    c.appendChild($(`<div class="num">${String(i + 1).padStart(2, '0')}</div>`));
+    const l = $(`<div class="est abs" style="width:${W + 60}px"><b>${nom}</b><small>${sub}</small></div>`); M.appendChild(l);
+    return {c, l, x: X0 + (i % 4) * GX, y: Y0[Math.floor(i / 4)], dx: (i % 4 < 2 ? -1 : 1) * 160};
+  });
+  const cab = $(`<div class="cab abs" style="width:1400px"><span class="chip">TE LO LLEVAS GRATIS</span><b>8 tipos y 8 estilos de <em>carruseles</em></b></div>`); M.appendChild(cab);
+  pinta = (t) => {
+    camara(t, 1.1, 1.0, 960, 560);
+    const baja = rebote(k(t, 4.7, 5.8));            // al entrar la cabecera, la rejilla baja un poco para dejarle sitio
+    it.forEach((o, i) => {
+      const e = entra(o.c, t, T0(i), .7, o.dx, 200, .8, 4);
+      const flota = Math.sin(t * 1.6 + i) * 5;
+      pon(o.c, o.x + e.x, o.y + 40 * baja + e.y + flota, e.s, `rotate(${(1 - Math.min(1, e.p)) * (i % 2 ? 6 : -6)}deg)`);
+      const e2 = entra(o.l, t, T0(i) + .18, .6, 0, 60, .9, 2);
+      pon(o.l, o.x - 30 + e2.x, o.y + H + 40 * baja + e2.y + flota, e2.s);
+      o.l.style.textAlign = 'center';
+    });
+    const ec = entra(cab, t, 4.8, .7, 0, -120, .85, 4);   // «ocho tipos y ocho estilos»
+    pon(cab, 960 - 700 + ec.x, 40 + ec.y, ec.s);
+  };
+  return pinta;
+});
+</script>
+</body></html>

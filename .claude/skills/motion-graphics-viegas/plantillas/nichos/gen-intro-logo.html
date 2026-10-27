@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla genérica «gen-intro-logo» · Cualquier marca · Viegas IA · Motion Lab
+     Intro de marca con TU logo: tres anillos de luz se cierran sobre el centro con curvas distintas, el logo (tu PNG/SVG, o la inicial
+     si no hay) aparece con rebote fuerte desde muy cerca con desenfoque, el nombre de la marca se escribe letra a letra y el lema
+     sube debajo. La cámara empuja lento todo el rato y al final todo se va hacia la cámara («zoom a través»).
+     Cambia "logo" (ruta a tu logo, mejor PNG/SVG transparente), "marca", "lema". Formato: #9x16 · #16x9 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.anillo{ border-radius:50%; border:3px solid rgba(var(--halo),.7); box-shadow:0 0 40px rgba(var(--halo),.35), inset 0 0 40px rgba(var(--halo),.2); }
+.logo-c{ width:280px; height:280px; border-radius:72px; display:grid; place-items:center; overflow:hidden;
+  background:linear-gradient(160deg, var(--brillo, var(--acento2)), var(--acento)); box-shadow:0 40px 100px rgba(var(--halo),.5); color:#fff; font:700 150px var(--fuente); }
+.logo-c.img{ background:none; box-shadow:none; }
+.logo-c img{ width:100%; height:100%; object-fit:contain; }
+.nombre{ font:600 120px var(--fuente); letter-spacing:-.04em; color:var(--texto); text-align:center; white-space:nowrap; }
+.lema{ font:500 30px var(--mono); letter-spacing:.3em; text-transform:uppercase; color:var(--mute); text-align:center; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 5,
+  "paleta": "noche",
+  "acento": "",
+  "logo": "",
+  "marca": "Estudio Alba",
+  "lema": "Diseño de interiores"
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - .8, cy = H * (VERT ? .42 : .4);
+  const anillos = [900, 640, 420].map((d) => MG.el(`<div class="anillo" style="width:${d}px;height:${d}px"></div>`));
+  const logo = MG.el(`<div class="logo-c${P.logo ? ' img' : ''}">${P.logo ? `<img src="${P.logo}" alt="">` : P.marca.trim()[0].toUpperCase()}</div>`);
+  const nombre = MG.texto(P.marca, 'nombre', 'letras'); nombre.style.width = W + 'px';
+  const lema = MG.el(`<div class="lema" style="width:${W}px">${P.lema}</div>`);
+  const cv = ['salidaExpo', 'salidaQuint', 'rebote'];
+  return (t) => {
+    N.vivo(t, 1, 1.1);
+    const zt = C.entradaCubica(k(t, fin, fin + .7));   // salida: todo hacia la cámara
+    anillos.forEach((a, i) => { const d = [900, 640, 420][i], p = C[cv[i]](k(t, .05 + i * .1, .05 + i * .1 + .9));
+      const s = lerp(2.6, 1, p) * (1 + zt * (3 + i)); MG.pon(a, W / 2 - d / 2, cy - d / 2, s); a.style.opacity = Math.min(1, p * 1.5) * (.5 + .5 * Math.sin(t * 2 + i)) * (1 - zt); MG.desenfoca(a, zt * 20, zt * 20); });
+    const pl = N.pop(t, .5, .7);
+    const sl = lerp(2.2, 1, Math.min(1.2, pl)) * (1 + zt * 4);
+    MG.pon(logo, W / 2 - 140, cy - 140, sl, `rotate(${(1 - Math.min(1, pl)) * -25}deg)`); logo.style.opacity = k(t, .5, .65) * (1 - zt);
+    MG.desenfoca(logo, (1 - Math.min(1, k(t, .5, 1.0))) * 14 + zt * 25, (1 - Math.min(1, k(t, .5, 1.0))) * 14 + zt * 25);
+    const yN = cy + 220; MG.pon(nombre, 0, yN, 1 + zt * .8);
+    MG.animaTexto(nombre, t, 1.2, { paso: .045, dy: 60 }); nombre.style.opacity = 1 - zt;
+    const e = MG.entra(lema, t, 1.9, { dy: 40, curva: 'salidaQuint', d: .6 }); MG.pon(lema, 0, yN + 160 + e.y, 1 + zt * .6); lema.style.opacity = Math.min(+lema.style.opacity, 1 - zt);
+  };
+});
+</script>
+</body></html>

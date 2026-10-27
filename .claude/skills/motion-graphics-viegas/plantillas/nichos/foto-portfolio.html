@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «foto-portfolio» · Fotógrafo / creativo · Viegas IA · Motion Lab
+     Portfolio que se despliega: las fotos llegan apiladas en el centro, ligeramente giradas, y se reparten a su sitio en la
+     cuadrícula (cada una con su retardo y rebote, la de arriba primero); luego la cámara se acerca despacio y aparece la firma.
+     Cambia "fotos" (6, tuyas), "nombre", "especialidad", "boton". Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.n-foto{ border-radius:22px; border:6px solid rgba(var(--claro),.9); }
+.n-claro .n-foto{ border-color:#fff; }
+.nom{ font:400 110px/1 var(--serif); font-style:italic; color:var(--texto); text-align:center; letter-spacing:-.01em; }
+.esp{ font:500 28px var(--mono); letter-spacing:.2em; text-transform:uppercase; color:var(--mute); text-align:center; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "fotos": ["fotos/boda.jpg", "fotos/retrato-1.jpg", "fotos/paisaje-montana.jpg", "fotos/calle.jpg", "fotos/naturaleza.jpg", "fotos/evento.jpg"],
+  "nombre": "Lucía Ferrer",
+  "especialidad": "Bodas · Retrato · Viajes",
+  "boton": "Reserva tu sesión",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT, azar } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, R = azar(11);
+  const cols = VERT ? 2 : 3, filas = Math.ceil(P.fotos.length / cols), g = 24, m = VERT ? 150 : 140;
+  const cw = (W - 2 * m - (cols - 1) * g) / cols, ch = VERT ? cw * 1.04 : cw * .62;
+  const gy = VERT ? 150 : 60;
+  const fotos = P.fotos.map((f) => N.foto(f, cw, ch)).reverse().reverse();
+  const giros = fotos.map(() => (R() - .5) * 26);
+  const nom = MG.el(`<div class="nom" style="width:${W}px">${P.nombre}</div>`);
+  const esp = MG.el(`<div class="esp" style="width:${W}px">${P.especialidad}</div>`);
+  const boton = MG.el(`<div class="n-btn">${P.boton} →</div>`);
+  return (t) => {
+    N.vivo(t, 1, 1.09);
+    fotos.forEach((f, i) => {
+      const c = i % cols, r = Math.floor(i / cols), tx = m + c * (cw + g), ty = gy + r * (ch + g);
+      const sx = (W - cw) / 2, sy = H * .32 - ch / 2;
+      // 1) llegan a la pila desde abajo, 2) se reparten a la cuadrícula
+      const e = MG.entra(f, t, .1 + i * .1, { dy: 900, curva: 'salidaQuint', d: .6, base: 6 });
+      const pr = C.rebote(k(t, 1.3 + i * .09, 1.3 + i * .09 + 1.1));
+      const x = lerp(sx, tx, pr), y = lerp(sy, ty, pr) + e.y, rot = lerp(giros[i], 0, Math.min(1, pr));
+      if (t < fin + i * .05) { MG.pon(f, x, y, lerp(.9, 1, Math.min(1, pr)), `rotate(${rot}deg)`); f.style.zIndex = i; }
+      else N.es(f, t, 0, fin + i * .05, { x: tx, y: ty, oy: -180, ox: (c - (cols - 1) / 2) * 200 });
+      N.kb(f, t, 1.12, 1.0);
+    });
+    const yN = gy + filas * (ch + g) + (VERT ? 40 : 10);
+    N.es(nom, t, 2.6, fin + .2, { x: 0, y: yN, dy: 80, oy: -80 });
+    N.es(esp, t, 2.85, fin + .25, { x: 0, y: yN + 120, dy: 50, curva: 'salidaQuint', oy: -60 });
+    N.es(boton, t, 3.2, fin + .3, { x: N.cx(boton), y: yN + 210, dy: 90, curva: 'reboteFuerte', oy: -60 });
+  };
+});
+</script>
+</body></html>

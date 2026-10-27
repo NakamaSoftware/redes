@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Escena 2D · Motion Graphics Viegas. Edita los tiempos y textos; la curva por defecto es «rebote» (natural).
+     Vista previa en el navegador: abre este archivo con ?ver al final. Render: node scripts/render.mjs video escena-01 -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+</head><body>
+<script>
+escena({ duracion: 5, ancho: 1920, alto: 1080, fondo: 'marca' }, (MG) => {
+  const chip = MG.el(`<div class="mg-abs"><span class="mg-chip" style="font-size:22px">NUEVO</span></div>`);
+  const titulo = MG.texto('Tu título con jerarquía', 'mg-titulo', 'palabras'); titulo.style.fontSize = '110px';
+  const sub = MG.el(`<div class="mg-abs mg-sub" style="font-size:40px">Una línea de apoyo, más pequeña</div>`);
+  return (t) => {
+    MG.camara(t, 1.0, 1.08);                                            // la cámara nunca se para
+    let e = MG.entra(chip, t, 0.2, { dy: 0, dx: -160 }); MG.pon(chip, 260 + e.x, 330 + e.y, e.s);
+    MG.pon(titulo, 260, 400); MG.animaTexto(titulo, t, 0.45, { paso: 0.07 });   // palabra a palabra, con rebote
+    e = MG.entra(sub, t, 1.1, { dy: 60 }); MG.pon(sub, 260 + e.x, 560 + e.y, e.s);
+  };
+});
+</script>
+</body></html>

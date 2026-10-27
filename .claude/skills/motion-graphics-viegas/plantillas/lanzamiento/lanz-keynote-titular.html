@@ -1,0 +1,149 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-keynote-titular» · Viegas IA · Motion Lab
+     Titular de keynote: escenario negro, un foco cenital se enciende, el titular aparece palabra a palabra pasando de
+     desenfocado a nítido (como cuando la cámara enfoca en un escenario), la palabra clave con degradado de acento y un
+     subtítulo gris; la cámara hace un dolly lento que nunca se para. El titular se desenfoca hacia arriba (salida inversa),
+     aparece «Una cosa más.» y la cámara entra en ella con «zoom a través» hasta el logo, la marca y el lema.
+     Cambia "etiqueta" (texto pequeño de arriba), "titular" (*palabra* = degradado de acento; "|" = salto de línea),
+     "subtitulo", "unaCosaMas", "marca", "lema", "logo" (ruta o "" = inicial), colores "fondo", "tinta", "gris", "acento",
+     "acento2" (final del degradado) y "duracion".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?titular=Hola|*mundo* en la dirección. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif;
+  --fondo:#000000; --tinta:#F5F5F7; --gris:#86868B; --acento:#D97757; --acento2:#F4C2A8; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:var(--fondo); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.foco{ border-radius:50%; background:radial-gradient(closest-side, rgba(255,255,255,.13), rgba(255,255,255,.04) 55%, transparent); pointer-events:none; }
+.suelo{ border-radius:50%; background:radial-gradient(closest-side, rgba(var(--halo),.22), transparent); filter:blur(30px); }
+.tit{ font:700 var(--ft)/1.04 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .w{ display:inline-block; padding:0 .04em .08em; }
+.tit .w.g{ background:linear-gradient(100deg, var(--acento) 10%, var(--acento2) 90%); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.sub{ font:500 var(--fs)/1.3 var(--fuente); color:var(--gris); text-align:center; letter-spacing:-.015em; }
+.eti{ font:600 30px var(--fuente); letter-spacing:.2em; text-transform:uppercase; color:var(--gris); white-space:nowrap; }
+.mas{ font:600 var(--fm) var(--fuente); letter-spacing:-.035em; color:var(--tinta); white-space:nowrap; }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:700 64px var(--fuente); letter-spacing:-.035em; color:var(--tinta); white-space:nowrap; }
+.lema{ font:500 36px var(--fuente); color:var(--gris); white-space:nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9.5,
+  "fondo": "#000000",
+  "tinta": "#F5F5F7",
+  "gris": "#86868B",
+  "acento": "#D97757",
+  "acento2": "#F4C2A8",
+  "etiqueta": "Presentamos",
+  "titular": "Diseñado para|*pensar* contigo",
+  "subtitulo": "La herramienta que entiende cómo trabajas.",
+  "unaCosaMas": "Una cosa más.",
+  "marca": "Tu Marca",
+  "lema": "Disponible hoy",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'tinta', 'gris', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+raiz.setProperty('--ft', (VERT ? 128 : 150) + 'px'); raiz.setProperty('--fs', (VERT ? 44 : 44) + 'px'); raiz.setProperty('--fm', (VERT ? 96 : 110) + 'px');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = () => P.logo ? `<div class="logo"><img src="${P.logo}" alt=""></div>` : `<div class="logo">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion;
+  const foco = MG.el(`<div class="foco"></div>`), suelo = MG.el(`<div class="suelo"></div>`);
+  const eti = MG.el(`<div class="eti">${esc(P.etiqueta)}</div>`);
+  const tit = MG.el(`<div class="tit"></div>`);
+  tit.innerHTML = String(P.titular).split('|').map((l) => l.split(' ').filter(Boolean).map((w) =>
+    `<span class="w${/\*/.test(w) ? ' g' : ''}">${esc(w.replace(/\*/g, ''))}</span>`).join(' ')).join('<br>');
+  tit.style.width = (VERT ? W - 140 : 1600) + 'px';
+  const ws = [...tit.querySelectorAll('.w')];
+  const sub = MG.el(`<div class="sub">${esc(P.subtitulo)}</div>`); sub.style.width = (VERT ? 820 : 1200) + 'px';
+  const mas = MG.el(`<div class="mas">${esc(P.unaCosaMas)}</div>`);
+  const logo = MG.el(logoHTML()), marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`), lema = MG.el(`<div class="lema">${esc(P.lema)}</div>`);
+
+  const tW = .9, paso = .2, tSub = tW + ws.length * paso + .35, tS = Math.max(tSub + 1.4, D * .48), tM = tS + .75;
+  const tZ = Math.max(tM + 1.2, D - 2.6), tC = tZ + .62;
+  // enfoque: de desenfocado a nítido, con curva propia por elemento
+  const enfoca = (el, t, t0, o = {}) => {
+    const d = o.d || .95, f = (C[o.curva || 'salidaQuint'])(k(t, t0, t0 + d));
+    const s = o.s0 ?? 1.12;
+    el.style.opacity = Math.min(1, f * 1.6);
+    el.style.filter = f < .999 ? `blur(${((1 - f) * (o.blur || 26)).toFixed(2)}px)` : 'none';
+    return { f, s: lerp(s, 1, f), y: (1 - f) * (o.dy ?? 30) };
+  };
+  const desenfocaSale = (el, t, t0, d = .55) => {   // salida inversa: arranca suave y se va rápida
+    const f = C.entradaCubica(k(t, t0, t0 + d));
+    if (f > 0) { el.style.opacity = 1 - f; el.style.filter = `blur(${(f * 30).toFixed(2)}px)`; }
+    return f;
+  };
+
+  return (t) => {
+    // cámara: dolly lento y continuo + deriva; en el cierre, «zoom a través» de «Una cosa más.»
+    const yT = VERT ? 860 : 520;
+    const zt = C.entradaCubica(k(t, tZ, tC)), zc = C.salidaQuint(k(t, tC - .05, tC + 1.4));
+    const z = t < tC ? lerp(1, 1.09, k(t, 0, tZ)) * (1 + 10 * zt) : lerp(1.3, 1, zc) * lerp(1, 1.05, k(t, tC, D));
+    const oy = t < tS ? lerp(H * .5, yT, C.salidaCubica(k(t, 0, 3))) : lerp(yT, H / 2, C.entradaSalidaQuint(k(t, tS, tM + .6)));
+    MG.vista.style.transformOrigin = `${W / 2}px ${oy}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .45) * 6}px, ${Math.cos(t * .33) * 5 - lerp(0, 18, k(t, 0, D))}px)`;
+
+    // foco cenital (se enciende con un leve parpadeo amortiguado)
+    const fo = C.salidaCubica(k(t, .05, 1.1)) * (1 - .12 * Math.exp(-t * 3) * Math.sin(t * 40)) * (1 - zt);
+    const FW = VERT ? 1500 : 1900, FH = VERT ? 1700 : 1150;
+    MG.pon(foco, W / 2 - FW / 2 + Math.sin(t * .3) * 20, (VERT ? 120 : -120), 1); foco.style.width = FW + 'px'; foco.style.height = FH + 'px'; foco.style.opacity = fo;
+    MG.pon(suelo, W / 2 - 600, VERT ? 1380 : 860, 1); suelo.style.width = '1200px'; suelo.style.height = '260px'; suelo.style.opacity = fo * .9;
+
+    // etiqueta
+    const e0 = enfoca(eti, t, .5, { d: .8, blur: 14, curva: 'salidaExpo', dy: -20 });
+    const yTit = yT - tit.offsetHeight / 2 - 20;
+    MG.pon(eti, (W - eti.offsetWidth) / 2, yTit - 90 + e0.y); desenfocaSale(eti, t, tS - .1, .45);
+
+    // titular palabra a palabra: desenfocado → nítido (curvas alternas)
+    MG.pon(tit, (W - tit.offsetWidth) / 2, yTit);
+    const curvasW = ['salidaQuint', 'salidaExpo', 'salidaCubica'];
+    ws.forEach((w, i) => {
+      const e = enfoca(w, t, tW + i * paso, { d: 1, curva: curvasW[i % 3], blur: 30, s0: 1.18, dy: 26 });
+      const sale = C.entradaCubica(k(t, tS + i * .05, tS + .5 + i * .05));
+      w.style.transform = `translateY(${e.y - sale * 70}px) scale(${e.s * (1 + .08 * sale)})`;
+      if (sale > 0) { w.style.opacity = 1 - sale; w.style.filter = `blur(${(sale * 30).toFixed(2)}px)`; }
+    });
+    const es = enfoca(sub, t, tSub, { d: .9, blur: 16, dy: 34, curva: 'salidaCubica' });
+    MG.pon(sub, (W - sub.offsetWidth) / 2, yTit + tit.offsetHeight + 46 + es.y); desenfocaSale(sub, t, tS + .15, .5);
+
+    // «Una cosa más.»
+    const em = enfoca(mas, t, tM, { d: 1, blur: 24, s0: .9, dy: 0, curva: 'salidaQuint' });
+    MG.pon(mas, (W - mas.offsetWidth) / 2, H / 2 - mas.offsetHeight / 2, em.s);
+    if (t > tZ) mas.style.opacity = 1 - C.salidaCubica(k(t, tZ + .25, tC));
+
+    // cierre
+    const bloque = 150 + 50 + 80 + 20 + 50, y0 = (H - bloque) / 2 - (VERT ? 40 : 0);
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .25, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s);
+    const ma = enfoca(marca, t, tC + .3, { d: .8, blur: 20, dy: 40, curva: 'salidaExpo' });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 200 + ma.y);
+    const le = enfoca(lema, t, tC + .55, { d: .8, blur: 12, dy: 30, curva: 'salidaCubica' });
+    MG.pon(lema, (W - lema.offsetWidth) / 2, y0 + 290 + le.y);
+  };
+});
+</script>
+</body></html>

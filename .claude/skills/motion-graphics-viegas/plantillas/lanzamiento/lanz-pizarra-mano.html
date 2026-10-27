@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-pizarra-mano» · Viegas IA · Motion Lab
+     Pizarra blanca dibujada a mano: un rotulador escribe el título (letra manuscrita), lo subraya, escribe cada paso,
+     lo rodea con un círculo tembloroso y lo une al siguiente con una flecha curva; el último paso va en el acento con
+     doble círculo y estrella. La cámara sigue la punta del rotulador (suavizada), se aleja para ver el esquema entero
+     y hace «zoom a través» del último círculo hasta el cierre con logo, titular y marca.
+     Cambia "titulo" (*palabra* = acento), "pasos" (3 textos cortos), "nota", "titular" (*palabra* = acento), "marca",
+     "logo" (ruta o "" = inicial), colores "fondo", "fondo2", "tinta", "acento", "pizarra", "rotulador", "semilla".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=Caveat:wght@500;700&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif; --mano:'Caveat','Segoe Print',cursive;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; --pizarra:#F3F0EA; --rotulador:#23201D; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *, .capa > *{ position:absolute; left:0; top:0; }
+.capa{ position:absolute; left:0; top:0; width:var(--ancho); height:var(--alto); }
+em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+.pizarra{ border-radius:34px; background:radial-gradient(90% 70% at 30% 20%, #fff 0, var(--pizarra) 60%), var(--pizarra);
+  box-shadow:0 0 0 16px #2E2A27, 0 0 0 18px #4a443f, 0 50px 120px rgba(0,0,0,.6); overflow:hidden; }
+.pizarra .fantasma{ position:absolute; border-radius:50%; background:rgba(35,32,29,.05); filter:blur(18px); }
+.mano{ font:700 100px/1 var(--mano); color:var(--rotulador); white-space:nowrap; letter-spacing:-.005em; }
+.mano em{ font-family:var(--mano); font-style:normal; font-weight:700; }
+.mano.acento{ color:var(--acento); }
+.mano.peq{ font-size:64px; font-weight:500; }
+svg.trazos{ overflow:visible; }
+svg.trazos path{ fill:none; stroke-linecap:round; stroke-linejoin:round; }
+.boli{ width:44px; height:250px; transform-origin:0 0; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10.5,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "pizarra": "#F3F0EA",
+  "rotulador": "#23201D",
+  "titulo": "¿Cómo *lanzar* tu idea?",
+  "pasos": ["Idea", "Prueba", "Lanzamiento"],
+  "nota": "¡en 3 pasos!",
+  "titular": "Del boceto *al lanzamiento*",
+  "marca": "Tu Marca",
+  "logo": "",
+  "semilla": 7
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'pizarra', 'rotulador']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  let sem = P.semilla || 7; const rnd = () => { sem = (sem * 16807) % 2147483647; return sem / 2147483647; };
+  const capa = document.createElement('div'); capa.className = 'capa'; document.body.appendChild(capa);
+
+  // pizarra
+  const BX = VERT ? 50 : 60, BY = VERT ? 60 : 50, BW = W - 2 * BX, BH = H - 2 * BY;
+  const piz = MG.el(`<div class="pizarra" style="width:${BW}px;height:${BH}px">${Array.from({ length: 5 }, () => `<div class="fantasma" style="left:${rnd() * BW * .8}px;top:${rnd() * BH * .8}px;width:${200 + rnd() * 300}px;height:${60 + rnd() * 90}px"></div>`).join('')}</div>`);
+  MG.pon(piz, BX, BY);
+  const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('class', 'trazos'); svg.setAttribute('width', W); svg.setAttribute('height', H); MG.mundo.appendChild(svg);
+
+  // elementos manuscritos
+  const titulo = MG.el(`<div class="mano">${md(esc(P.titulo))}</div>`);
+  titulo.style.fontSize = (VERT ? 104 : 112) + 'px';
+  const pasos = P.pasos.slice(0, 3).map((p, i) => MG.el(`<div class="mano ${i === 2 ? 'acento' : ''}">${esc(p)}</div>`));
+  pasos.forEach((p) => { p.style.fontSize = (VERT ? 112 : 96) + 'px'; });
+  const nota = MG.el(`<div class="mano peq">${esc(P.nota)}</div>`);
+  const boli = MG.el(`<svg class="boli" viewBox="0 0 44 250"><defs><linearGradient id="bg" x1="0" x2="1"><stop offset="0" stop-color="#3a3532"/><stop offset=".5" stop-color="#5b544f"/><stop offset="1" stop-color="#2a2624"/></linearGradient></defs>
+    <path d="M22 0 L30 26 L14 26 Z" fill="var(--acento)"/><rect x="8" y="24" width="28" height="30" rx="4" fill="#d8d2ca"/><rect x="4" y="52" width="36" height="198" rx="12" fill="url(#bg)"/>
+    <rect x="4" y="150" width="36" height="20" fill="var(--acento)"/></svg>`);
+
+  // trazos (una ruta por trazo; la punta se lee con getPointAtLength)
+  const traza = (d, color, ancho) => { const p = document.createElementNS(NS, 'path'); p.setAttribute('d', d); p.style.stroke = color; p.setAttribute('stroke-width', ancho); svg.appendChild(p);
+    const L = p.getTotalLength(); p.style.strokeDasharray = L; p.L = L; p.pon = (x) => { p.style.strokeDashoffset = L * (1 - x); p.style.opacity = x > 0 ? 1 : 0; }; p.pon(0); return p; };
+  const circulo = (cx, cy, rx, ry, vueltas = 1.12) => { const a0 = -2.2 + rnd() * .4, n = 70, f1 = rnd() * 6, f2 = rnd() * 6; let d = '';
+    for (let i = 0; i <= n; i++) { const u = i / n, a = a0 + u * vueltas * 2 * Math.PI, r = 1 + .045 * Math.sin(a * 2 + f1) + .03 * Math.sin(a * 3 + f2) + u * .05;
+      d += (i ? ' L' : 'M') + (cx + Math.cos(a) * rx * r).toFixed(1) + ' ' + (cy + Math.sin(a) * ry * r).toFixed(1); } return d; };
+  const flecha = (x1, y1, x2, y2, curva) => { const mx = (x1 + x2) / 2 + (y2 - y1) * curva, my = (y1 + y2) / 2 - (x2 - x1) * curva;
+    const ang = Math.atan2(y2 - my, x2 - mx), h = 38;
+    return `M${x1} ${y1} Q${mx} ${my} ${x2} ${y2} M${x2 + Math.cos(ang + 2.6) * h} ${y2 + Math.sin(ang + 2.6) * h} L${x2} ${y2} L${x2 + Math.cos(ang - 2.6) * h} ${y2 + Math.sin(ang - 2.6) * h}`; };
+  const estrella = (cx, cy, r) => { let d = ''; for (let i = 0; i <= 5; i++) { const a = -Math.PI / 2 + i * 4 * Math.PI / 5; d += (i ? ' L' : 'M') + (cx + Math.cos(a) * r).toFixed(1) + ' ' + (cy + Math.sin(a) * r).toFixed(1); } return d; };
+
+  let L = null;
+  const monta = () => {
+    const tw = titulo.offsetWidth, th = titulo.offsetHeight;
+    const tx = (W - tw) / 2, ty = VERT ? 300 : 120;
+    const ps = pasos.map((p) => [p.offsetWidth, p.offsetHeight]);
+    const pos = VERT ? [[300, 680], [W - 300, 980], [W / 2, 1290]] : [[340, 600], [930, 690], [1540, 560]];
+    const st = [];
+    // título y subrayado bajo la palabra clave
+    st.push({ tipo: 'texto', el: titulo, x: tx, y: ty, w: tw, h: th, t0: .45, t1: 1.6 });
+    const em = titulo.querySelector('em'); const ux = em ? tx + em.offsetLeft : tx, uw = em ? em.offsetWidth : tw;
+    st.push({ tipo: 'trazo', p: traza(`M${ux - 6} ${ty + th + 4} C${ux + uw * .3} ${ty + th - 10}, ${ux + uw * .7} ${ty + th + 16}, ${ux + uw + 10} ${ty + th - 2}`, 'var(--acento)', 9), t0: 1.65, t1: 1.95 });
+    let t = 2.1; const centros = [];
+    pos.forEach(([cx, cy], i) => {
+      const [w, h] = ps[i], x = cx - w / 2, y = cy - h / 2; centros.push([cx, cy]);
+      st.push({ tipo: 'texto', el: pasos[i], x, y, w, h, t0: t, t1: t + .42 }); t += .45;
+      const rx = w / 2 + 70, ry = h / 2 + 52;
+      st.push({ tipo: 'trazo', p: traza(circulo(cx, cy + 6, rx, ry, i === 2 ? 1.9 : 1.12), i === 2 ? 'var(--acento)' : 'var(--rotulador)', i === 2 ? 8 : 6), t0: t, t1: t + (i === 2 ? .55 : .4) }); t += i === 2 ? .6 : .45;
+      pasos[i]._r = [rx, ry];
+      if (i < 2) {
+        const [nx, ny] = pos[i + 1], [nw, nh] = ps[i + 1], nrx = nw / 2 + 70, nry = nh / 2 + 52;
+        const ang = Math.atan2(ny - cy, nx - cx);
+        const x1 = cx + Math.cos(ang) * (rx + 18), y1 = cy + Math.sin(ang) * (ry + 18), x2 = nx - Math.cos(ang) * (nrx + 24), y2 = ny - Math.sin(ang) * (nry + 24);
+        st.push({ tipo: 'trazo', p: traza(flecha(x1, y1, x2, y2, VERT ? (i ? -.25 : .25) : (i ? .28 : -.28)), 'var(--rotulador)', 6), t0: t, t1: t + .35 }); t += .42;
+      }
+    });
+    const [c3x, c3y] = centros[2], [r3x, r3y] = pasos[2]._r;
+    st.push({ tipo: 'trazo', p: traza(estrella(c3x + r3x * (VERT ? .8 : .78), c3y - r3y - 30, 34), 'var(--acento)', 6), t0: t, t1: t + .3 }); t += .35;
+    const nw = nota.offsetWidth, nh = nota.offsetHeight;
+    const nx = VERT ? c3x - nw / 2 : c3x - nw / 2, ny = c3y + r3y + 30;
+    st.push({ tipo: 'texto', el: nota, x: nx, y: ny, w: nw, h: nh, t0: t, t1: t + .5 }); t += .5;
+    st.forEach((s) => { if (s.tipo === 'texto') MG.pon(s.el, s.x, s.y); });
+    L = { st, fin: t, c3: [c3x, c3y] };
+  };
+  // punta del rotulador en el instante t (también entre trazos: se desplaza levantado)
+  const punta = (t) => {
+    const st = L.st; let prev = null;
+    for (let i = 0; i < st.length; i++) {
+      const s = st[i];
+      if (t < s.t0) {
+        const a = prev ? fin(prev) : [W * .62, H * .3], b = ini(s), t0 = prev ? prev.t1 : 0, u = C.afterEffects75(k(t, t0, s.t0));
+        return { x: lerp(a[0], b[0], u), y: lerp(a[1], b[1], u) - Math.sin(u * Math.PI) * 40, alto: Math.sin(u * Math.PI) };
+      }
+      if (t <= s.t1) return { ...en(s, k(t, s.t0, s.t1)), alto: 0 };
+      prev = s;
+    }
+    const a = fin(prev), u = C.entradaCubica(k(t, L.fin + .1, L.fin + .8));
+    return { x: lerp(a[0], W * 1.3, u), y: lerp(a[1], H * 1.2, u), alto: u };
+  };
+  const en = (s, u) => { if (s.tipo === 'texto') return { x: s.x + s.w * u, y: s.y + s.h * .62 + Math.sin(u * 40) * s.h * .14 };
+    const p = s.p.getPointAtLength(s.p.L * u); return { x: p.x, y: p.y }; };
+  const ini = (s) => { const p = en(s, 0); return [p.x, p.y]; }, fin = (s) => { const p = en(s, 1); return [p.x, p.y]; };
+
+  const logo = MG.el(logoHTML(), capa);
+  const anchoTit = VERT ? W - 160 : 1500;
+  const tit = MG.texto(md(P.titular), 'tit'); capa.appendChild(tit); tit.style.width = anchoTit + 'px'; tit.style.fontSize = (VERT ? 116 : 136) + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`, capa);
+
+  return (t) => {
+    if (!L) monta();
+    const tC = D - 2.6, tA = L.fin + .2;
+    // dibujar
+    L.st.forEach((s) => { const u = C.lineal(k(t, s.t0, s.t1));
+      if (s.tipo === 'texto') { s.el.style.clipPath = `inset(-30% ${(110 * (1 - u) - 10).toFixed(2)}% -30% -5%)`; s.el.style.opacity = u > 0 ? 1 : 0; }
+      else s.p.pon(C.salidaCubica(u) * .15 + u * .85); });
+    // rotulador
+    const pt = punta(t), pq = punta(t - DT), v = Math.hypot(pt.x - pq.x, pt.y - pq.y) / DT;
+    const ang = 28 + pt.alto * 8 + Math.sin(t * 9) * 2;
+    boli.style.transform = `translate(${pt.x}px,${pt.y}px) rotate(${-122 - ang}deg) translate(-22px,0) scale(${1 + pt.alto * .06})`;
+    boli.style.filter = `drop-shadow(${18 + pt.alto * 30}px ${22 + pt.alto * 30}px ${10 + pt.alto * 10}px rgba(0,0,0,.35))`;
+    boli.style.opacity = 1 - k(t, tC - .4, tC - .1);
+    // cámara: sigue la punta suavizada (media de los últimos 0.45 s), se aleja al final y entra por el último círculo
+    let fx = 0, fy = 0; const n = 10; for (let i = 0; i < n; i++) { const q = punta(Math.max(0, t - .45 * i / n)); fx += q.x / n; fy += q.y / n; }
+    const ua = C.afterEffects75(k(t, tA - .3, tA + .7));
+    const zDib = VERT ? 1.42 : 1.55, zTot = VERT ? .98 : .97;
+    const zt = C.entradaCubica(k(t, tC - .6, tC + .05));
+    fx = lerp(lerp(fx, W / 2, VERT ? .35 : .25), lerp(W / 2, L.c3[0], zt), ua); fy = lerp(lerp(fy, H / 2, .2), lerp(H / 2 + (VERT ? 20 : 0), L.c3[1], zt), ua);
+    const z = lerp(zDib + Math.sin(t * .8) * .03, zTot + .03 * k(t, tA, tC), ua) * (1 + 7 * zt);
+    MG.vista.style.transformOrigin = '0 0';
+    MG.vista.style.transform = `translate(${W / 2 + Math.sin(t * .6) * 10}px, ${H / 2 + Math.cos(t * .5) * 8}px) scale(${z}) translate(${-fx}px, ${-fy}px) rotate(${Math.sin(t * .4) * .7 - (1 - ua) * .8}deg)`;
+    MG.vista.style.opacity = 1 - C.salidaCubica(k(t, tC - .2, tC + .15));
+    MG.desenfoca(MG.vista, Math.min(3, v * MB * .03) + zt * 10, zt * 10);
+
+    // cierre
+    capa.style.opacity = t < tC - .1 ? 0 : 1;
+    const zc = C.salidaQuint(k(t, tC - .1, tC + 1.3));
+    capa.style.transformOrigin = `${W / 2}px ${H / 2}px`; capa.style.transform = `scale(${lerp(1.25, 1, zc) * lerp(1, 1.04, k(t, tC, D))})`;
+    const bloque = 150 + 60 + tit.offsetHeight + 60 + 50, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(tit, (W - anchoTit) / 2, y0 + 210);
+    tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .07, { d: .6, dy: 90, escala0: 1, curva: 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + tit.trozos.length * .07, { d: .6, dy: 40, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 210 + tit.offsetHeight + 60 + em.y);
+  };
+});
+</script>
+</body></html>

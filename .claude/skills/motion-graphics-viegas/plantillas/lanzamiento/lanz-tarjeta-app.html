@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-tarjeta-app» · Viegas IA · Motion Lab
+     Tarjeta de app con cabecera de imagen desenfocada (o degradado vivo del color de la tarjeta) y panel con muesca en
+     pestaña. Entra con muelle y respira, las cifras cuentan hasta su número, a mitad pasa a modo oscuro (con interruptor) y
+     luego aparecen más tarjetas en pila que se barajan: la de delante sale por abajo y vuelve al fondo con muelle.
+     Cambia "tarjetas" ([{titulo, subtitulo, cifras: [{valor, texto, ceros}], imagen (ruta o ""), color, etiqueta: [l1, l2]}],
+     1–4; la primera es la protagonista), "fondo" y "oscuro" (true = pasa a oscuro; false = siempre claro), "tOscuro".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','SF Pro Display','Inter','Segoe UI',system-ui,sans-serif;
+  --fondo:#F4F2EB; --marco:#ECEAE2; --panel:#F3F1EA; --texto:#141414; --mute:#8A877F; --borde:rgba(0,0,0,.04); }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:var(--fondo); }
+.grupo{ position:absolute; left:0; top:0; width:0; height:0; }
+.tarjeta{ position:absolute; left:-330px; top:-310px; width:660px; height:620px; border-radius:60px; background:var(--marco);
+  box-shadow:0 50px 90px rgba(30,20,10,.14), 0 8px 20px rgba(30,20,10,.06), inset 0 0 0 1.5px var(--borde); transform-origin:50% 100%; }
+.cab{ position:absolute; left:14px; top:14px; right:14px; height:290px; border-radius:46px; overflow:hidden; background:#300; }
+.cab .gota{ position:absolute; border-radius:50%; filter:blur(30px); }
+.cab img{ position:absolute; inset:-15%; width:130%; height:130%; object-fit:cover; filter:blur(18px) saturate(130%); }
+.cab .rotulo{ position:absolute; right:38px; top:44px; text-align:right; color:#fff; font:600 34px/1.12 var(--fuente); letter-spacing:-.02em;
+  text-shadow:0 2px 14px rgba(0,0,0,.25); }
+.cuerpo{ position:absolute; left:14px; top:204px; width:632px; height:402px; }
+.cuerpo svg{ position:absolute; inset:0; overflow:visible; }
+.cuerpo svg path{ fill:var(--panel); }
+.cuerpo h3{ position:absolute; left:38px; top:34px; font:600 40px var(--fuente); letter-spacing:-.025em; color:var(--texto); }
+.cuerpo p{ position:absolute; left:38px; top:86px; font:400 34px var(--fuente); letter-spacing:-.015em; color:var(--mute); }
+.cifra1{ position:absolute; left:36px; bottom:30px; font:600 118px/1 var(--fuente); letter-spacing:-.035em; color:var(--texto); font-variant-numeric:tabular-nums; }
+.cifra1 small{ font:400 36px var(--fuente); letter-spacing:-.01em; color:var(--mute); margin-left:12px; }
+.cifra2{ position:absolute; right:40px; bottom:42px; font:600 38px var(--fuente); letter-spacing:-.025em; color:var(--texto); font-variant-numeric:tabular-nums; }
+.velo{ position:absolute; inset:0; border-radius:60px; background:var(--fondo); pointer-events:none; }
+/* interruptor claro/oscuro */
+.inter{ position:absolute; left:-90px; width:180px; height:84px; border-radius:42px; background:var(--marco); box-shadow:inset 0 0 0 1.5px var(--borde), 0 14px 30px rgba(0,0,0,.08); }
+.inter .bola{ position:absolute; top:8px; left:8px; width:68px; height:68px; border-radius:50%; background:#fff; box-shadow:0 6px 14px rgba(0,0,0,.18); display:grid; place-items:center; }
+.inter svg{ width:34px; height:34px; position:absolute; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#F4F2EB",
+  "oscuro": true,
+  "tOscuro": 3.7,
+  "tarjetas": [
+    { "titulo": "Notas diarias", "subtitulo": "Notas y diario", "cifras": [{ "valor": 5, "texto": "Docs", "ceros": 2 }, { "valor": 1270, "texto": "notas" }],
+      "imagen": "", "color": "#FF4A1C", "etiqueta": ["Taskello App", "Diseño de tarjeta"] },
+    { "titulo": "Recordatorios", "subtitulo": "Tareas de la semana", "cifras": [{ "valor": 12, "texto": "Tareas", "ceros": 2 }, { "valor": 348, "texto": "hechas" }],
+      "imagen": "", "color": "#F5A300", "etiqueta": ["Taskello App", "Recordatorios"] },
+    { "titulo": "Diseño", "subtitulo": "Ideas y referencias", "cifras": [{ "valor": 4, "texto": "Tableros", "ceros": 2 }, { "valor": 912, "texto": "fotos" }],
+      "imagen": "", "color": "#6B4DFF", "etiqueta": ["Taskello App", "Moodboard"] }
+  ]
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : typeof d === 'boolean' ? v !== 'false' : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const hex = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const mezcla = (a, b, x) => { const A = hex(a), B = hex(b); return `rgb(${A.map((v, i) => Math.round(v + (B[i] - v) * x)).join(',')})`; };
+const miles = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');   // 1.270 (también con 4 cifras)
+// paletas clara y oscura (la oscura, como la versión negra de la referencia)
+const CLARO = { fondo: P.fondo || '#F4F2EB', marco: '#ECEAE2', panel: '#F4F2EC', texto: '#141414', mute: '#8A877F' };
+const OSCURO = { fondo: '#0F0F10', marco: '#050505', panel: '#1E1E20', texto: '#F5F5F3', mute: '#8E8E93' };
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const lista = (P.tarjetas || []).slice(0, 4), n = lista.length;
+  const S = VERT ? 1.25 : .95;
+  const g = MG.el('<div class="grupo"></div>');
+  const cw = 632, ch = 402, tw = 250;
+  const ruta = `M0,40 Q0,0 40,0 L${tw - 20},0 C${tw + 10},0 ${tw + 22},8 ${tw + 40},24 L${tw + 62},44 C${tw + 76},54 ${tw + 88},56 ${tw + 112},56 L${cw - 40},56 Q${cw},56 ${cw},96 L${cw},${ch - 46} Q${cw},${ch} ${cw - 46},${ch} L46,${ch} Q0,${ch} 0,${ch - 46} Z`;
+
+  const cartas = lista.map((o, i) => {
+    const c = o.color || '#FF4A1C', cf = o.cifras || [];
+    const el = MG.el(`<div class="tarjeta"><div class="cab">${o.imagen ? `<img src="${o.imagen}" alt="">` : ''}<div class="rotulo">${(o.etiqueta || []).map(esc).join('<br>')}</div></div>
+      <div class="cuerpo"><svg viewBox="0 0 ${cw} ${ch}"><path d="${ruta}"/></svg><h3>${esc(o.titulo)}</h3><p>${esc(o.subtitulo)}</p>
+      <div class="cifra1"><span>0</span><small>${esc(cf[0]?.texto)}</small></div><div class="cifra2"><span>0</span> ${esc(cf[1]?.texto)}</div></div><div class="velo"></div></div>`, g);
+    const cab = el.querySelector('.cab');
+    // degradado vivo: gotas desenfocadas del color de la tarjeta (luz, sombra y un reflejo claro)
+    const gotas = o.imagen ? [] : [[c, 380, .1, .2], [mezcla(c, '#FFD27A', .55), 260, .55, .1], [mezcla(c, '#2A0000', .65), 300, .8, .55], ['#FFFFFF', 140, .62, .18], [mezcla(c, '#FF2D55', .4), 320, .2, .75]]
+      .map(([col, r, x, y], j) => { const d = MG.el(`<div class="gota" style="width:${r}px;height:${r * .7}px;background:${col};opacity:${j === 3 ? .55 : .95}"></div>`, cab); d._g = { x: x * 632 - r / 2, y: y * 290 - r * .35, f: .6 + j * .17 }; return d; });
+    cab.style.background = mezcla(c, '#200000', .35);
+    cab.prepend(...gotas);
+    return { el, o, gotas, img: cab.querySelector('img'), n1: el.querySelector('.cifra1 span'), n2: el.querySelector('.cifra2 span'), velo: el.querySelector('.velo') };
+  });
+
+  const inter = MG.el(`<div class="inter"><div class="bola">
+     <svg class="sol" viewBox="0 0 24 24" fill="none" stroke="#F5A300" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="4.2"/><path d="M12 2.5v2.2M12 19.3v2.2M2.5 12h2.2M19.3 12h2.2M5.3 5.3l1.6 1.6M17.1 17.1l1.6 1.6M5.3 18.7l1.6-1.6M17.1 6.9l1.6-1.6"/></svg>
+     <svg class="luna" viewBox="0 0 24 24" fill="#141414"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg></div></div>`, g);
+  const bola = inter.firstChild, sol = inter.querySelector('.sol'), luna = inter.querySelector('.luna');
+  inter.style.top = "-560px";
+
+  // tiempos: barajadas y llegada de cada tarjeta al frente (para que sus cifras cuenten)
+  const tPila = 5.0, TS = n > 1 ? [6.1, 7.8, 9.2].slice(0, n - 1) : [];
+  const llegada = lista.map((_, i) => i === 0 ? .6 : TS[i - 1] + .35);
+  const tO = P.tOscuro ?? 3.7;
+  const cx = W / 2, cy = H / 2 + (VERT ? 130 : 60) * S;
+  const yProf = (d) => -48 * d, sProf = (d) => 1 - .065 * d;
+
+  return (t) => {
+    // ---- modo claro → oscuro (curva con 75 % de influencia)
+    const m = P.oscuro === false ? 0 : C.afterEffects75(k(t, tO, tO + .8));
+    const R = document.documentElement.style;
+    for (const key of ['fondo', 'marco', 'panel', 'texto', 'mute']) R.setProperty('--' + key, mezcla(CLARO[key], OSCURO[key], m));
+    R.setProperty('--borde', `rgba(${m > .5 ? '255,255,255,.06' : '0,0,0,.04'})`);
+    document.body.style.background = mezcla(CLARO.fondo, OSCURO.fondo, m);
+
+    // ---- cámara
+    const z = lerp(1, 1.08, C.suave(t / D));
+    MG.vista.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .45) * 12}px, ${Math.cos(t * .33) * 14}px)`;
+    g.style.transform = `translate(${cx}px, ${cy}px) scale(${S})`;
+
+    // ---- interruptor: entra antes del cambio y se desliza con muelle
+    const ei = MG.entra(inter, t, tO - .9, { d: .6, dy: -60, escala0: .8, curva: 'rebote', base: 5 });
+    MG.pon(inter, 0, ei.y, ei.s);
+    const sw = C.rebote(k(t, tO - .05, tO + .9));
+    bola.style.transform = `translateX(${96 * sw}px) rotate(${180 * sw}deg)`;
+    sol.style.opacity = 1 - k(sw, .3, .6); luna.style.opacity = k(sw, .4, .7);
+    bola.style.background = mezcla('#FFFFFF', '#F5F5F3', m);
+
+    // ---- tarjetas
+    let s = 0; TS.forEach((a) => { if (t >= a) s++; });
+    cartas.forEach((c, i) => {
+      const el = c.el;
+      // profundidad continua en la pila
+      const dAhora = ((i - s) % n + n) % n;
+      let y, sc, rot = 0, z = 50 - dAhora, op = 1;
+      const tsAct = s > 0 ? TS[s - 1] : -9, dAntes = ((i - (s - 1)) % n + n) % n;
+      if (s > 0 && dAntes === 0 && t < tsAct + 1.6) {
+        // la de delante sale hacia abajo girando y vuelve al fondo con muelle
+        const a = C.salidaCubica(k(t, tsAct, tsAct + .42)), b = C.rebote(k(t, tsAct + .4, tsAct + 1.5));
+        const yFuera = 560;
+        y = lerp(lerp(0, yFuera, a), yProf(n - 1), b); sc = lerp(lerp(1, .98, a), sProf(n - 1), b);
+        rot = lerp(9 * a, 0, b); z = t < tsAct + .42 ? 100 : 0;
+        const q = C.salidaCubica(k(t - DT, tsAct, tsAct + .42)), q2 = C.rebote(k(t - DT, tsAct + .4, tsAct + 1.5));
+        MG.desenfoca(el, 0, Math.abs(y - lerp(lerp(0, yFuera, q), yProf(n - 1), q2)) / DT * MB);
+      } else {
+        const p = s > 0 ? C.rebote(k(t, tsAct + .15, tsAct + 1.2)) : 1;
+        const d = s > 0 ? lerp(dAntes, dAhora, p) : dAhora;
+        y = yProf(d); sc = sProf(d);
+        // antes de la pila, las de detrás están escondidas justo detrás de la primera
+        if (i > 0) { const pp = C.rebote(k(t, tPila + i * .12, tPila + 1.2 + i * .12)); y = lerp(0, y, pp); sc = lerp(1, sc, pp); op = k(t, tPila - .1 + i * .12, tPila + .2 + i * .12); }
+        MG.desenfoca(el, 0, 0);
+      }
+      // la protagonista entra desde abajo con muelle
+      if (i === 0) { const e = MG.entra(el, t, .1, { d: 1, dy: 640, escala0: .82, curva: 'rebote', base: 10, desenfoque: t < 2 }); y += e.y; sc *= e.s; op = Math.min(op, e.p * 1.8); }
+      // respirar
+      const resp = 1 + .012 * Math.sin(t * 1.7 + i);
+      el.style.zIndex = z; el.style.opacity = Math.max(0, Math.min(1, op));
+      MG.pon(el, 0, y + Math.sin(t * 1.2 + i) * 4, sc * resp, `rotate(${rot + Math.sin(t * .8 + i) * .35}deg)`);
+      c.velo.style.opacity = Math.min(.55, .2 * (s > 0 && dAntes === 0 && t < tsAct + 1.6 ? 0 : dAhora));
+      // cabecera viva
+      c.gotas.forEach((gt, j) => { const o = gt._g; gt.style.transform = `translate(${o.x + Math.sin(t * o.f + j * 1.7) * 60}px, ${o.y + Math.cos(t * o.f * .8 + j) * 30}px) scale(${1 + .15 * Math.sin(t * o.f * 1.3 + j)})`; });
+      if (c.img) c.img.style.transform = `translate(${Math.sin(t * .5) * 3}%, ${Math.cos(t * .4) * 3}%) scale(${1.05 + .03 * Math.sin(t * .7)})`;
+      // cifras que cuentan al llegar al frente
+      const cf = c.o.cifras || [], tl = llegada[i];
+      const v1 = (cf[0]?.valor || 0) * C.salidaQuint(k(t, tl + .2, tl + 1.5)), v2 = (cf[1]?.valor || 0) * C.salidaQuint(k(t, tl + .3, tl + 1.8));
+      c.n1.textContent = String(Math.round(v1)).padStart(cf[0]?.ceros || 1, '0');
+      c.n2.textContent = miles(v2);
+    });
+  };
+});
+</script>
+</body></html>

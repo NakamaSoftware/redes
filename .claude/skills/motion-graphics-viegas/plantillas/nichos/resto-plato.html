@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «resto-plato» · Restaurante / comida · Viegas IA · Motion Lab
+     Plato del día: la foto entra en círculo girando desde abajo con rebote suave y sigue girando muy despacio; el nombre del
+     plato entra por palabras, el precio cae como sello girado con rebote fuerte y el menú (primero, segundo, postre) entra escalonado.
+     Cambia "foto" (mejor cenital), "plato", "descripcion", "precio", "incluye", "marca". Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.plato{ border-radius:50%; overflow:hidden; box-shadow:0 60px 120px rgba(var(--sombra),.6), 0 0 0 14px rgba(var(--claro),.06); }
+.plato img{ width:100%; height:100%; object-fit:cover; }
+.sello{ width:260px; height:260px; border-radius:50%; background:var(--acento); display:grid; place-items:center; text-align:center; color:#fff; box-shadow:0 26px 60px rgba(var(--halo),.5); }
+.sello b{ display:block; font:700 70px/1 var(--fuente); letter-spacing:-.04em; }
+.sello small{ display:block; font:500 22px var(--mono); letter-spacing:.14em; text-transform:uppercase; margin-top:6px; opacity:.85; }
+.desc{ font:500 38px/1.3 var(--fuente); color:var(--mute); text-align:center; }
+.menu{ display:flex; gap:14px; justify-content:center; }
+.menu span{ font:500 30px var(--fuente); color:var(--texto); padding:14px 24px; border-radius:99px; border:1px solid rgba(var(--claro),.18); background:rgba(var(--claro),.06); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Menú del día · martes",
+  "foto": "fotos/plato-ensalada.jpg",
+  "plato": "Ensalada de la *huerta*",
+  "descripcion": "Tomate valenciano, alubias, maíz y vinagreta de cilantro",
+  "precio": "12,50 €",
+  "precioNota": "menú",
+  "incluye": ["Primero", "Segundo", "Postre o café"],
+  "marca": "Casa Lola · Cocina de mercado",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 140 : 220), D = VERT ? 820 : 600;
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const plato = MG.el(`<div class="plato" style="width:${D}px;height:${D}px"><img src="${P.foto}" alt=""></div>`);
+  const sello = MG.el(`<div class="sello"><div><b>${P.precio}</b><small>${P.precioNota}</small></div></div>`);
+  const tit = N.frase(P.plato, 'n-tit', cw); tit.style.fontSize = (VERT ? 96 : 80) + 'px';
+  const desc = MG.el(`<div class="desc" style="width:${cw}px">${P.descripcion}</div>`);
+  const menu = MG.el(`<div class="menu" style="width:${cw}px">${P.incluye.map((m) => `<span>${m}</span>`).join('')}</div>`);
+  const marca = MG.el(N.marca(.8));
+  return (t) => {
+    N.vivo(t);
+    const yP = VERT ? 260 : 60, xP = (W - D) / 2;
+    N.es(chip, t, .05, fin, { x: N.cx(chip), y: yP - 110, dy: -60, curva: 'salidaQuint', oy: -60 });
+    const e = N.es(plato, t, .1, fin + .05, { x: xP, y: yP, dy: 700, s0: .7, curva: 'reboteSuave', d: 1, oy: -250, s1: 1.15 });
+    plato.firstChild.style.transform = `rotate(${-70 * (1 - C.salidaQuint(k(t, .1, 1.5))) + t * 3}deg) scale(1.08)`;
+    const ps = N.pop(t, 1.3, .6);
+    N.es(sello, t, 1.3, fin + .1, { x: xP + D - 310, y: yP + D - 290, dy: 0, d: .3, curva: 'salidaQuint', oy: -60 });
+    sello.style.scale = ps; sello.style.rotate = `${-14 + (1 - Math.min(1, ps)) * -50}deg`;
+    const yT = yP + D + (VERT ? 80 : 40);
+    MG.pon(tit, (W - cw) / 2, yT);
+    if (t < fin + .1) MG.animaTexto(tit, t, 1.0, { paso: .08 }); else N.es(tit, t, 0, fin + .1, { x: (W - cw) / 2, y: yT, oy: -100 });
+    const yD = yT + tit.offsetHeight + 24;
+    N.es(desc, t, 1.6, fin + .18, { x: (W - cw) / 2, y: yD, dy: 60, curva: 'salidaQuint', oy: -70 });
+    [...menu.children].forEach((m, i) => { const e2 = MG.entra(m, t, 2.1 + i * .13, { dy: 70, curva: 'reboteFuerte', d: .5 }); m.style.transform = `translateY(${e2.y}px) scale(${e2.s})`; });
+    N.es(menu, t, 0, fin + .25, { x: (W - cw) / 2, y: yD + desc.offsetHeight + 40, dy: 0, oy: -60 }); if (t < fin + .25) menu.style.opacity = 1;
+    N.es(marca, t, 2.7, fin + .33, { x: N.cx(marca), y: H - (VERT ? 220 : 80), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

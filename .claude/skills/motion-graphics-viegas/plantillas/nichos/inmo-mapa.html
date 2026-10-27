@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «inmo-mapa» · Inmobiliaria / negocio local · Viegas IA · Motion Lab
+     Mapa con pin: un plano dibujado en código (calles, río y parque, siempre con la paleta) sobre el que la cámara se acerca sin
+     pararse; el pin cae con rebote fuerte, late con ondas y aparece la tarjeta de la dirección con las distancias clave.
+     No es un mapa real: es un plano ilustrado. Cambia "direccion", "zona", "cercanias" ([icono, texto]), "marca".
+     Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.pin{ width:150px; height:190px; transform-origin:50% 100%; }
+.pin svg{ width:100%; height:100%; filter:drop-shadow(0 20px 30px rgba(var(--sombra),.6)); }
+.onda{ width:200px; height:200px; margin:-100px 0 0 -100px; border-radius:50%; border:4px solid var(--acento); }
+.ficha{ padding:40px 44px; }
+.ficha .dir{ font:600 58px/1.1 var(--fuente); color:var(--texto); letter-spacing:-.03em; }
+.ficha .zn{ font:500 32px var(--fuente); color:var(--mute); margin-top:8px; }
+.cerca{ display:flex; flex-direction:column; gap:16px; margin-top:28px; }
+.cerca div{ display:flex; align-items:center; gap:18px; font:500 36px var(--fuente); color:var(--texto); }
+.cerca span{ width:64px; height:64px; border-radius:18px; display:grid; place-items:center; background:rgba(var(--halo),.16); font-size:34px; flex:none; }
+.gm{ display:flex; align-items:center; gap:12px; font:500 26px var(--mono); color:var(--mute); letter-spacing:.06em; margin-top:26px; }
+.gm img{ width:34px; height:34px; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Ubicación",
+  "direccion": "Calle de Sueca, 32",
+  "zona": "Ruzafa · Valencia",
+  "cercanias": [["🚇", "Metro a 3 min andando"], ["🌳", "Parque a 5 min"], ["🏖️", "Playa a 15 min en bici"]],
+  "marca": "Casa Norte Inmobiliaria",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT, lienzo, token, azar } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 220);
+  // plano dibujado: una sola vez en un lienzo grande; la cámara lo mueve con transform
+  const M = 2400, mapa = MG.el(`<canvas width="${M}" height="${M}" style="border-radius:0"></canvas>`), g = mapa.getContext('2d');
+  const cl = getComputedStyle(document.documentElement).getPropertyValue('--claro').trim(), ac = token('--acento'), R = azar(7);
+  g.fillStyle = token('--fondo'); g.fillRect(0, 0, M, M);
+  g.fillStyle = `rgba(${cl},.035)`; for (let i = 0; i < 70; i++) g.fillRect(R() * M, R() * M, 80 + R() * 220, 80 + R() * 220);   // manzanas
+  g.fillStyle = 'rgba(34,197,94,.18)'; g.beginPath(); g.ellipse(1650, 900, 260, 170, .4, 0, 7); g.fill();   // parque
+  g.strokeStyle = 'rgba(59,130,246,.35)'; g.lineWidth = 70; g.lineCap = 'round'; g.beginPath(); g.moveTo(-50, 1700); g.bezierCurveTo(700, 1500, 1300, 2000, 2500, 1550); g.stroke();   // río
+  const calle = (x1, y1, x2, y2, w) => { g.strokeStyle = `rgba(${cl},${w > 20 ? .16 : .09})`; g.lineWidth = w; g.beginPath(); g.moveTo(x1, y1); g.lineTo(x2, y2); g.stroke(); };
+  for (let i = 0; i < 16; i++) calle(i * 160 + R() * 40, 0, i * 160 + R() * 120 - 60, M, i % 4 ? 10 : 26);
+  for (let i = 0; i < 16; i++) calle(0, i * 160 + R() * 40, M, i * 160 + R() * 120 - 60, i % 5 ? 10 : 26);
+  calle(0, 300, M, 2200, 34); calle(200, M, 2300, 0, 30);
+  const PX = 1200, PY = 1200;   // el punto en el plano
+  const ondas = [0, 1, 2].map(() => MG.el(`<div class="onda"></div>`));
+  const pin = MG.el(`<div class="pin"><svg viewBox="0 0 60 76"><path d="M30 2C15 2 4 13 4 27c0 19 26 47 26 47s26-28 26-47C56 13 45 2 30 2z" fill="var(--acento)"/><circle cx="30" cy="27" r="10" fill="#fff"/></svg></div>`);
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const ficha = MG.el(`<div class="n-card ficha" style="width:${cw}px"><div class="dir">${P.direccion}</div><div class="zn">${P.zona}</div>
+    <div class="cerca">${P.cercanias.map(([i, tx]) => `<div><span>${i}</span>${tx}</div>`).join('')}</div>
+    <div class="gm"><img src="_nichos/google-maps.svg" alt="">Búscalo en Google Maps</div></div>`);
+  const marca = MG.el(N.marca(.8));
+  return (t) => {
+    N.vivo(t, 1, 1.04);
+    // cámara del plano: zoom continuo hacia el punto (1,0 → 1,9), con frenada suave al llegar y deriva lineal después
+    const z = lerp(1.0, 1.7, C.entradaSalidaQuint(k(t, 0, 2.2))) + .05 * t, cy = VERT ? H * .36 : H * .42;
+    mapa.style.transformOrigin = '0 0'; MG.pon(mapa, W / 2 - PX * z, cy - PY * z, z);
+    const sal = C.entradaCubica(k(t, fin + .1, fin + .6)); mapa.style.opacity = 1 - sal;
+    const pp = N.pop(t, 1.6, .7);
+    N.es(pin, t, 1.6, fin, { x: W / 2 - 75, y: cy - 190, dy: -700, curva: 'reboteFuerte', d: .6, oy: -200 });
+    pin.style.scale = `${1 + (1 - Math.min(1, pp)) * .3} ${pp}`;
+    ondas.forEach((o, i) => { const c = ((t - 2.1 - i * .55) % 1.65) / 1.65, on = t > 2.1 + i * .55 && t < fin; MG.pon(o, W / 2, cy, .2 + c * 1.6); o.style.opacity = on ? (1 - c) * .8 : 0; });
+    N.es(chip, t, .1, fin, { x: N.cx(chip), y: VERT ? 170 : 60, dy: -70, curva: 'salidaQuint', oy: -60 });
+    N.es(ficha, t, 2.4, fin + .15, { x: (W - cw) / 2, y: VERT ? H * .53 : H * .55, dy: 320, s0: .92, curva: 'reboteSuave', d: .8, oy: 200 });
+    [...ficha.querySelectorAll('.cerca div')].forEach((d, i) => { const e = MG.entra(d, t, 2.9 + i * .18, { dx: -90, dy: 0, curva: 'salidaQuint', d: .5 }); d.style.transform = `translateX(${e.x}px)`; });
+    N.es(marca, t, 3.6, fin + .3, { x: N.cx(marca), y: H - (VERT ? 200 : 80), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

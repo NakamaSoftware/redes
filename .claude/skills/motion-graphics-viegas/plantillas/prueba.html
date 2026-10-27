@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+</head><body>
+<script>
+// Prueba del kit: 2 s. Si este MP4 sale, el equipo está listo.
+escena({ duracion: 2, ancho: 1920, alto: 1080, fondo: 'marca' }, (MG) => {
+  const t1 = MG.el(`<div class="mg-abs mg-titulo" style="font-size:120px">Todo <em>listo</em></div>`);
+  return (t) => { MG.camara(t, 1, 1.05); const e = MG.entra(t1, t, 0.1, { dy: 120 }); MG.pon(t1, 960 - 330 + e.x, 460 + e.y, e.s); };
+});
+</script>
+</body></html>

@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «carrusel-ovalado» · Motion Graphics Viegas. Carrusel 3D ovalado que pasa slide a slide con rebote; los de atrás desenfocados.
+     Sacado del vídeo de YouTube «Carruseles animados con Claude Code» (Viegas Estudio, 22-10-2026).
+     Cambia textos, tarjetas (vid/…) y tiempos; la curva, el desenfoque y la cámara ya siguen la guía de estilo. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="ejemplos.css">
+<script src="../motor/motor.js"></script>
+</head><body>
+<script>
+escena({ duracion: 5.8, ancho: 1920, alto: 1080, fondo: 'marca' }, (MG) => {
+  // --- compatibilidad con las funciones del vídeo original (mismos nombres, sobre el motor) ---
+  const M = MG.mundo, V = MG.vista, DT = MG.DT, MB = MG.MB, SVGNS = 'http://www.w3.org/2000/svg';
+  const { k, lerp, cl, desenfoca, pon, camara: camara0 } = MG;
+  const C = MG.curvas, quint = C.salidaQuint, inOut = C.entradaSalidaQuint, suave = C.suave, back = (x) => C.atras(x), rebote = C.rebote, reboteSuave = C.reboteSuave;
+  const $ = (h) => { const d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstChild; };
+  const entra = (el, t, t0, d = .7, dx = 0, dy = 220, s0 = .94, base = 3, extra = 0) => MG.entra(el, t, t0, { d, dx, dy, escala0: s0, base, extra });
+  const camara = (t, z0, z1, ox = 960, oy = 540) => camara0(t, z0, z1, ox, oy);
+  const VID = (e, n) => `vid/${String(e).padStart(2, '0')}-${n}.mp4`;
+  const VIDS = { push: (o) => MG.registrar(o.v, o) };
+  function tarjeta(src, w, h, t0, off = .8, bucle = false) { return MG.tarjeta(src, w, h, t0, { desde: off, bucle: true }); }
+  function logoClaude(tam) {
+    const w = $(`<div class="abs" style="width:${tam}px;height:${tam}px"><div class="logo abs" style="width:100%;height:100%;filter:drop-shadow(0 0 40px rgba(var(--halo),.55))"></div><div class="barrido abs" style="width:100%;height:100%"></div></div>`);
+    w.barre = (x) => { w.children[1].style.backgroundPosition = `${lerp(110, -10, x)}% 0`; w.children[1].style.opacity = x > 0 && x < 1 ? 1 : 0; };
+    return w;
+  }
+  
+  let pinta = () => {}; let DUR = 5.8;
+  DUR = 5.8;
+  const N = 8, PASO = 360 / N, CADA = .95;
+  const cards = Array.from({length: N}, (_, i) => tarjeta(`vid/mc-${i + 1}.mp4`, 320, 400, 0, 2.2 + i * .6, true));
+  const puntos = Array.from({length: N}, () => { const p = $('<div class="punto abs"></div>'); M.appendChild(p); return p; });
+  // giro: cada ~1 s pasa al siguiente slide (con ease) y entre medias sigue derivando despacio: nunca se queda quieto
+  const GIRO = (t) => { const u = Math.max(0, t - .5) / CADA, n = Math.floor(u), f = u - n; return (n + rebote(k(f, .3, 1))) * PASO + t * 3; };
+  pinta = (t) => {
+    camara(t, 1.0, 1.1, 960, 430);
+    const g = GIRO(t), gq = GIRO(t - DT);
+    cards.forEach((c, i) => {
+      const ang = i * PASO - g, a = ang * Math.PI / 180, aq = (i * PASO - gq) * Math.PI / 180;
+      const R = 600, D = 760;
+      const x = 960 + Math.sin(a) * R, z = (Math.cos(a) - 1) * D, xq = 960 + Math.sin(aq) * R;
+      const fondo = (1 - Math.cos(a)) / 2;                                    // 0 delante · 1 detrás
+      const e = entra(c, t, .05 + i * .05, .7, 0, 200, .85, 4, fondo * 6);   // las de atrás, desenfocadas
+      const r = Math.max(0, 1 - e.p), RB = (u) => rebote(k(u, .05 + i * .05, .05 + i * .05 + 1.05));
+      desenfoca(c, Math.abs(x - xq) / DT * MB + fondo * 6 + r * 4, r * 4 + fondo * 6 + Math.abs(200 * (RB(t) - RB(t - DT))) / DT * MB);
+      c.style.transform = `translate(${x - 160}px, ${400 - 200 + e.y}px) translateZ(${z}px) rotateY(${-Math.sin(a) * 28}deg) scale(${e.s})`;
+      c.style.zIndex = Math.round(1000 + z);
+      c.style.opacity = Math.min(1, e.p * 1.8) * lerp(1, .5, fondo);
+    });
+    // puntos del carrusel (el activo, blanco y más ancho)
+    const act = ((Math.round((g - t * 3) / PASO) % N) + N) % N, ep = quint(k(t, .4, 1.0));
+    puntos.forEach((p, i) => {
+      const on = i === act;
+      p.style.width = on ? '30px' : '12px'; p.style.background = on ? '#fff' : 'rgba(var(--claro),.3)'; p.style.borderRadius = '6px';
+      p.style.opacity = ep; pon(p, 960 - (N - 1) * 11 - 9 + i * 22 + (i > act ? 18 : 0), 640);
+    });
+  };
+  return pinta;
+});
+</script>
+</body></html>

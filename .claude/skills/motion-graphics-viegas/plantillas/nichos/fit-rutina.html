@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «fit-rutina» · Fitness / salud · Viegas IA · Motion Lab
+     Rutina con temporizador: la foto entra con Ken Burns, el anillo del temporizador corre en tiempo real (cuenta atrás de verdad),
+     las repeticiones suben con un golpe en cada una y la lista de ejercicios marca el actual con una barra que se desliza.
+     Cambia "foto", "ronda", "ejercicios" ([nombre, reps]), "actual", "segundos", "marca". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.ft{ border-radius:40px; }
+.ft::after{ content:''; position:absolute; inset:0; background:linear-gradient(180deg, transparent 45%, rgba(var(--fondo-rgb),.92)); }
+.ej{ font:600 80px/1.02 var(--fuente); letter-spacing:-.035em; color:var(--texto); }
+.ronda{ font:500 28px var(--mono); letter-spacing:.14em; text-transform:uppercase; color:var(--brillo, var(--acento)); margin-bottom:12px; }
+.reloj{ width:330px; height:330px; }
+.reloj svg{ width:100%; height:100%; transform:rotate(-90deg); }
+.reloj .n{ position:absolute; inset:0; display:grid; place-items:center; font:600 92px var(--fuente); letter-spacing:-.04em; color:var(--texto); font-variant-numeric:tabular-nums; }
+.reps{ padding:26px 30px; text-align:center; width:330px; }
+.reps b{ display:block; font:600 120px/1 var(--fuente); letter-spacing:-.05em; color:var(--texto); font-variant-numeric:tabular-nums; }
+.reps small{ font:500 24px var(--mono); letter-spacing:.14em; color:var(--mute); text-transform:uppercase; }
+.lista{ padding:16px 0; }
+.lista div{ position:relative; display:flex; justify-content:space-between; padding:18px 36px; font:500 36px var(--fuente); color:var(--mute); z-index:1; }
+.lista div.on{ color:var(--texto); }
+.lista .sel{ position:absolute; left:14px; right:14px; border-radius:18px; background:rgba(var(--halo),.2); border:2px solid var(--acento); z-index:0; padding:0; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "foto": "fotos/fitness.jpg",
+  "ronda": "Ronda 2 de 4",
+  "ejercicios": [["Sentadilla con salto", 12], ["Flexiones", 10], ["Plancha", "40 s"], ["Zancadas", 16]],
+  "actual": 0,
+  "segundos": 40,
+  "marca": "Entrena con Álex",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 220), fh = VERT ? 620 : 380;
+  const foto = N.foto(P.foto, cw, fh); foto.classList.add('ft');
+  const [nombre, reps] = P.ejercicios[P.actual];
+  const tit = MG.el(`<div style="width:${cw - 80}px"><div class="ronda">${P.ronda}</div><div class="ej">${nombre}</div></div>`);
+  const reloj = MG.el(`<div class="reloj"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="rgba(var(--claro),.1)" stroke-width="7"/><circle class="c" cx="50" cy="50" r="44" fill="none" stroke="var(--acento)" stroke-width="7" stroke-linecap="round" pathLength="1" stroke-dasharray="1"/></svg><div class="n"></div></div>`);
+  const rep = MG.el(`<div class="n-card reps"><b>0</b><small>de ${reps} reps</small></div>`);
+  const lista = MG.el(`<div class="n-card lista" style="width:${cw}px"><span class="sel"></span>${P.ejercicios.map(([n, r]) => `<div><span>${n}</span><span>${typeof r === 'number' ? '×' + r : r}</span></div>`).join('')}</div>`);
+  const filas = [...lista.querySelectorAll('div')], sel = lista.querySelector('.sel');
+  const marca = MG.el(N.marca(.8));
+  return (t) => {
+    N.vivo(t, 1, 1.06);
+    const x0 = (W - cw) / 2, y0 = VERT ? 170 : 50;
+    N.es(foto, t, .05, fin + .05, { x: x0, y: y0, dy: -300, s0: .94, curva: 'reboteSuave', d: .8, oy: -200 }); N.kb(foto, t, 1.18, 1.04);
+    N.es(tit, t, .5, fin, { x: x0 + 40, y: y0 + fh - 200, dx: -120, dy: 0, curva: 'salidaQuint', d: .6, oy: -120 });
+    const yR = y0 + fh + 50, gap = cw - 330 * 2;
+    N.es(reloj, t, .9, fin + .1, { x: x0, y: yR, dy: 0, s0: .5, curva: 'reboteFuerte', d: .6, oy: -100 });
+    const trans = Math.max(0, t - 1.2), rest = Math.max(0, P.segundos - trans);
+    reloj.querySelector('.c').style.strokeDashoffset = 1 - rest / P.segundos;
+    reloj.querySelector('.n').textContent = `0:${String(Math.ceil(rest)).padStart(2, '0')}`;
+    N.es(rep, t, 1.05, fin + .15, { x: x0 + cw - 330, y: yR + 10, dy: 0, s0: .5, curva: 'reboteFuerte', d: .6, oy: -100 });
+    const nr = typeof reps === 'number' ? Math.min(reps, Math.floor(Math.max(0, t - 1.4) / .55)) : 0, frac = (Math.max(0, t - 1.4) / .55) % 1;
+    const b = rep.querySelector('b'); b.textContent = nr; b.style.transform = `scale(${1 + .18 * (1 - C.salidaCubica(Math.min(1, frac * 2.5))) * (nr > 0 && nr < reps ? 1 : 0)})`;
+    const yL = yR + 380;
+    N.es(lista, t, 1.5, fin + .2, { x: x0, y: yL, dy: 300, s0: .94, curva: 'reboteSuave', d: .8, oy: -120 });
+    filas.forEach((f, i) => { f.classList.toggle('on', i === P.actual); const e = MG.entra(f, t, 1.8 + i * .1, { dx: 70, dy: 0, curva: 'salidaQuint', d: .45 }); f.style.transform = `translateX(${e.x}px)`; });
+    const fy = filas[P.actual]; sel.style.top = (fy.offsetTop) + 'px'; sel.style.height = fy.offsetHeight + 'px';
+    sel.style.transform = `scaleX(${C.rebote(k(t, 2.2, 3.1))})`;
+    N.es(marca, t, 2.6, fin + .3, { x: N.cx(marca), y: H - (VERT ? 200 : 70), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

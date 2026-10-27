@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «proceso-pasos» · Motion Graphics Viegas. Proceso en 4 pasos: navegador escribiendo código → fotogramas JPG → tira de película → render con barras y ✓.
+     Sacado del vídeo de YouTube «Carruseles animados con Claude Code» (Viegas Estudio, 22-10-2026).
+     Cambia textos, tarjetas (vid/…) y tiempos; la curva, el desenfoque y la cámara ya siguen la guía de estilo. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="ejemplos.css">
+<script src="../motor/motor.js"></script>
+</head><body>
+<script>
+escena({ duracion: 20.4, ancho: 1920, alto: 1080, fondo: 'marca' }, (MG) => {
+  // --- compatibilidad con las funciones del vídeo original (mismos nombres, sobre el motor) ---
+  const M = MG.mundo, V = MG.vista, DT = MG.DT, MB = MG.MB, SVGNS = 'http://www.w3.org/2000/svg';
+  const { k, lerp, cl, desenfoca, pon, camara: camara0 } = MG;
+  const C = MG.curvas, quint = C.salidaQuint, inOut = C.entradaSalidaQuint, suave = C.suave, back = (x) => C.atras(x), rebote = C.rebote, reboteSuave = C.reboteSuave;
+  const $ = (h) => { const d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstChild; };
+  const entra = (el, t, t0, d = .7, dx = 0, dy = 220, s0 = .94, base = 3, extra = 0) => MG.entra(el, t, t0, { d, dx, dy, escala0: s0, base, extra });
+  const camara = (t, z0, z1, ox = 960, oy = 540) => camara0(t, z0, z1, ox, oy);
+  const VID = (e, n) => `vid/${String(e).padStart(2, '0')}-${n}.mp4`;
+  const VIDS = { push: (o) => MG.registrar(o.v, o) };
+  function tarjeta(src, w, h, t0, off = .8, bucle = false) { return MG.tarjeta(src, w, h, t0, { desde: off, bucle: true }); }
+  function logoClaude(tam) {
+    const w = $(`<div class="abs" style="width:${tam}px;height:${tam}px"><div class="logo abs" style="width:100%;height:100%;filter:drop-shadow(0 0 40px rgba(var(--halo),.55))"></div><div class="barrido abs" style="width:100%;height:100%"></div></div>`);
+    w.barre = (x) => { w.children[1].style.backgroundPosition = `${lerp(110, -10, x)}% 0`; w.children[1].style.opacity = x > 0 && x < 1 ? 1 : 0; };
+    return w;
+  }
+  
+  let pinta = () => {}; let DUR = 20.4;
+  DUR = 20.4;
+  const svg = document.createElementNS(SVGNS, 'svg'); svg.setAttribute('class', 'lineas'); svg.setAttribute('width', 4400); svg.setAttribute('height', 1200); M.appendChild(svg);
+  const linea = (d) => { const p = document.createElementNS(SVGNS, 'path'); p.setAttribute('d', d); p.setAttribute('fill', 'none');
+    p.style.stroke = 'var(--acento)'; p.setAttribute('stroke-width', 3); p.setAttribute('stroke-linecap', 'round'); svg.appendChild(p); const L = p.getTotalLength();
+    p.style.strokeDasharray = L; p.dibuja = (x) => { p.style.strokeDashoffset = L * (1 - x); p.style.opacity = x > 0 ? 1 : 0; }; return p; };
+  const etiqueta = (txt) => { const e = $(`<div class="lbl abs"><small style="margin:0 0 10px">${txt[0]}</small><b style="font-size:40px">${txt[1]}</b></div>`); M.appendChild(e); return e; };
+  // 1 · la página web (HTML): navegador con el código a la izquierda y el slide animado a la derecha
+  const nav = $(`<div class="card abs" style="width:720px;height:470px;background:var(--tarjeta2)"><div class="nav"><i></i><i></i><i></i><span>carrusel/slide-01.html</span></div></div>`); M.appendChild(nav);
+  const cod = $(`<div class="cod abs" style="left:22px;top:60px"></div>`); nav.appendChild(cod);
+  const CODIGO = ['<span class="c">&lt;!-- slide 01 · portada --&gt;</span>', '<span class="k">&lt;section</span> class=<span class="s">"slide"</span>&gt;', '  <span class="k">&lt;h1&gt;</span>Tu carrusel<span class="k">&lt;/h1&gt;</span>',
+    '  <span class="k">&lt;p&gt;</span>empieza con<span class="k">&lt;/p&gt;</span>', '  <span class="k">&lt;b&gt;</span>una frase<span class="k">&lt;/b&gt;</span>', '<span class="k">&lt;/section&gt;</span>', '', '<span class="k">&lt;script&gt;</span>',
+    '  seek(t) <span class="c">// anima</span>', '  ease(<span class="s">"out-quint"</span>)', '<span class="k">&lt;/script&gt;</span>'];
+  const slideNav = $(`<div class="abs" style="left:392px;top:58px;width:304px;height:380px;border-radius:12px;overflow:hidden"><video muted playsinline preload="auto" src="vid/mc-1.mp4" style="width:100%;height:100%;object-fit:cover"></video></div>`);
+  nav.appendChild(slideNav); VIDS.push({v: slideNav.firstChild, t0: 1.0, off: 0, bucle: true});
+  const flash = $(`<div class="abs" style="left:392px;top:58px;width:304px;height:380px;border-radius:12px;background:#fff;opacity:0"></div>`); nav.appendChild(flash);
+  const e1 = etiqueta(['Paso 1', 'Una página web (HTML)']);
+  // 2 · Playwright fotografía cada fotograma → imágenes JPG
+  const pw = $(`<div class="nodo abs"><div class="ic" style="background:var(--superficie)"><span style="font-weight:800;color:var(--acento);font-size:22px">P</span></div><div><b>Playwright</b><small>fotografía cada fotograma</small></div></div>`); M.appendChild(pw);
+  const frames = Array.from({length: 8}, (_, i) => {
+    const f = $(`<div class="fr abs" style="width:132px"><div class="card" style="width:132px;height:165px"><video muted playsinline preload="auto" src="vid/mc-1.mp4"></video></div><small>${String(i * 8 + 1).padStart(4, '0')}.jpg</small></div>`);
+    M.appendChild(f); VIDS.push({v: f.querySelector('video'), fijo: .15 + i * .32}); return f; });
+  const e2 = etiqueta(['Paso 2', 'Imágenes JPG']);
+  // 3 · la secuencia de imágenes: tira de película que no deja de avanzar + contador
+  const tira = $(`<div class="tira abs" style="width:900px;height:250px"><div class="agu" style="top:8px"></div><div class="agu" style="bottom:8px"></div></div>`); M.appendChild(tira);
+  const tf = Array.from({length: 12}, (_, i) => { const c = $(`<div class="card abs" style="width:126px;height:158px;top:46px"><video muted playsinline preload="auto" src="vid/mc-${1 + (i >> 2)}.mp4"></video></div>`);
+    tira.appendChild(c); VIDS.push({v: c.firstChild, fijo: .3 + (i % 4) * .9}); return c; });
+  const cont = $(`<div class="abs" style="font:800 30px Consolas,monospace;color:var(--texto);white-space:nowrap"></div>`); M.appendChild(cont);
+  const e3 = etiqueta(['Paso 3', 'La secuencia de imágenes']);
+  // 4 · FFmpeg convierte la secuencia en MP4 a 60 FPS: cada slide se renderiza con su barra y su ✓
+  const ff = $(`<div class="nodo abs"><div class="ic" style="background:var(--superficie)"><span style="font-weight:800;color:var(--acento);font-size:22px">F</span></div><div><b>FFmpeg</b><small>de imágenes a vídeo</small></div></div>`); M.appendChild(ff);
+  const TR = (i) => 11.6 + i * .95;   // fin del render de cada slide
+  const outs = [1, 2, 3, 4, 5].map((n, i) => {
+    const o = $(`<div class="out abs" style="width:190px"><div class="card" style="width:190px;height:238px;position:relative"><video muted playsinline preload="auto" src="vid/mc-${n}.mp4"></video><div class="velo abs" style="inset:0;background:rgba(var(--fondo-rgb),.72)"></div><div class="ok abs" style="left:auto;right:10px;top:10px;width:34px;height:34px;border-radius:50%;background:var(--acento);color:var(--tinta);font-weight:900;display:flex;align-items:center;justify-content:center;font-size:19px">✓</div></div><div class="barra"><i></i></div><small>slide-0${n}.mp4</small></div>`);
+    M.appendChild(o); VIDS.push({v: o.querySelector('video'), t0: TR(i), off: .4, bucle: true}); return o; });
+  const fps = $(`<div class="fps abs">60 FPS</div>`); M.appendChild(fps);
+  const e4 = etiqueta(['Paso 4', 'Archivos MP4']);
+  const auto = $(`<div class="abs"><span class="chipc">✓ Todo, de forma automática</span></div>`); M.appendChild(auto);
+  // líneas entre etapas
+  const L1 = linea('M 760 485 L 880 485'), L2 = linea('M 1772 485 L 1826 485'), L3 = linea('M 2734 485 L 2756 485'), L4 = linea('M 3080 485 L 3098 485');
+  // la cámara va de etapa en etapa (con rebote suave) y el zoom no se para
+  const CX = (t) => { let x = 410; [[5.3, 6.4, 1320], [7.6, 8.7, 2280], [10.1, 11.3, 3300]].forEach(([a, b, v]) => { x = lerp(x, v, reboteSuave(k(t, a, b))); }); return x; };
+  pinta = (t) => {
+    camara(t, 1.0, 1.1, 960, 480);
+    const cx = CX(t), vcx = (cx - CX(t - DT)) / DT;
+    M.style.transformOrigin = `${cx}px 480px`; M.style.transform = `translate(${960 - cx}px, 0px)`;
+    desenfoca(M, Math.abs(vcx) * MB * .45, 0);
+    // 1
+    let e = entra(nav, t, .35, .8, 0, 240, .9, 4); pon(nav, 40 + e.x, 250 + e.y, e.s);   // ya se ve dentro del logo que la revela
+    const nl = Math.floor(lerp(0, CODIGO.length + .99, k(t, .9, 4.6)));
+    cod.innerHTML = CODIGO.slice(0, nl).join('\n') + (t % .8 < .4 && nl < CODIGO.length ? '<span class="k">▌</span>' : '');
+    slideNav.style.opacity = k(t, 1.0, 1.5);
+    flash.style.opacity = t > 5.9 && t < 7.6 ? Math.max(0, 1 - ((t - 5.9) % .19) / .12) * .8 : 0;   // los «disparos» de Playwright
+    e = entra(e1, t, .6, .7, -160, 0); pon(e1, 40 + e.x, 140 + e.y, e.s);
+    // 2
+    L1.dibuja(inOut(k(t, 5.3, 5.8)));
+    e = entra(pw, t, 5.5, .7, -200, 0); pon(pw, 880 + e.x, 440 + e.y, e.s);
+    frames.forEach((f, i) => {
+      const t0 = 6.0 + i * .19, ef = entra(f, t, t0, .75, -380, 0, .6, 6);
+      pon(f, 1180 + (i % 4) * 150 + ef.x, (i < 4 ? 190 : 560) + ef.y, ef.s, `rotate(${(1 - Math.min(1, ef.p)) * -10}deg)`);
+    });
+    e = entra(e2, t, 5.9, .7, -160, 0); pon(e2, 1180 + e.x, 100 + e.y, e.s);
+    // 3
+    L2.dibuja(inOut(k(t, 7.6, 8.0)));
+    e = entra(tira, t, 7.9, .8, 0, 240, .9, 4); pon(tira, 1830 + e.x, 360 + e.y, e.s);
+    const avance = t * 110;
+    tf.forEach((c, i) => { const x = ((i * 140 - avance) % 1680 + 1680) % 1680 - 140; c.style.left = x + 'px'; });
+    const nfr = Math.min(480, Math.max(1, Math.round(lerp(1, 480, k(t, 8.1, 12.5)))));
+    cont.textContent = `fotograma ${String(nfr).padStart(4, '0')} / 0480`;
+    e = entra(cont, t, 8.3, .6, 0, 60); pon(cont, 2040 + e.x, 640 + e.y, e.s);
+    e = entra(e3, t, 8.0, .7, -160, 0); pon(e3, 1830 + e.x, 230 + e.y, e.s);
+    // 4
+    L3.dibuja(inOut(k(t, 10.1, 10.6)));
+    e = entra(ff, t, 10.4, .7, -200, 0); pon(ff, 2760 + e.x, 440 + e.y, e.s);
+    L4.dibuja(inOut(k(t, 10.9, 11.3)));
+    outs.forEach((o, i) => {
+      const eo = entra(o, t, 10.8 + i * .12, .75, 0, 220, .85, 4);
+      pon(o, 3100 + i * 215 + eo.x, 330 + eo.y, eo.s);
+      const pr = k(t, TR(i) - .85, TR(i));
+      o.querySelector('.barra i').style.width = (pr * 100) + '%';
+      o.querySelector('.velo').style.opacity = 1 - k(t, TR(i), TR(i) + .25);
+      const okb = o.querySelector('.ok'), ks = back(k(t, TR(i), TR(i) + .4)); okb.style.transform = `scale(${t >= TR(i) ? ks : 0})`;
+    });
+    e = entra(e4, t, 10.6, .7, -160, 0); pon(e4, 3100 + e.x, 220 + e.y, e.s);
+    const ef2 = entra(fps, t, 16.5, .6, 0, -120, .6, 4); pon(fps, 3560 + ef2.x, 222 + ef2.y, ef2.s, `rotate(${-4 + (1 - Math.min(1, ef2.p)) * -10}deg)`);
+    const ea = entra(auto, t, 18.7, .7, 0, 140, .8, 4); pon(auto, 3290 + ea.x, 690 + ea.y, ea.s);
+  };
+  return pinta;
+});
+</script>
+</body></html>

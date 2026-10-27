@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-polaroids-mesa» · Viegas IA · Motion Lab
+     Polaroids que caen sobre una mesa: cada una baja desde la cámara acelerando (grande y desenfocada), golpea la mesa con
+     un pequeño rebote y la sombra se pega a ella, gira hasta su ángulo con frenada suave; una tira de cinta adhesiva se
+     pega encima y el pie de foto se escribe a mano. La cámara recorre la mesa siguiendo cada foto, se aleja para enseñar
+     el conjunto con el titular, entra en la foto principal con «zoom a través» y cierre con logo y lema.
+     Cambia "fotos" (3–6: {src, pie}; src vacío = degradado de color), "titular" (*palabra* = acento), "cierre", "marca",
+     "logo" (ruta o "" = inicial), colores "fondo" (mesa), "fondo2", "tinta", "papel", "acento" y "duracion".
+     La última foto de la lista es la principal (va encima y la cámara entra en ella).
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?titular=Hola en la dirección. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Caveat:wght@500;700&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --mano:'Caveat','Segoe Print',cursive;
+  --fondo:#17130F; --fondo2:#3A2518; --tinta:#F4EDE4; --tintaRgb:244,237,228; --papel:#F7F2EA; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(90% 70% at 50% 55%, var(--fondo2), var(--fondo) 75%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-style:normal; color:var(--acento); }
+.vetas{ opacity:.22; background:repeating-linear-gradient(92deg, rgba(0,0,0,0) 0 38px, rgba(0,0,0,.35) 40px, rgba(0,0,0,0) 46px 90px),
+  repeating-linear-gradient(88deg, rgba(255,255,255,.04) 0 3px, transparent 3px 17px); }
+.pol{ background:var(--papel); border-radius:6px; box-sizing:border-box; transform-origin:50% 50%;
+  box-shadow:0 2px 3px rgba(0,0,0,.25), inset 0 0 0 1px rgba(0,0,0,.05); }
+.pol .foto{ position:absolute; overflow:hidden; border-radius:2px; background-size:cover; background-position:center; }
+.pol .foto::after{ content:''; position:absolute; inset:0; background:linear-gradient(160deg,rgba(255,255,255,.16),transparent 40%,rgba(0,0,0,.18)); }
+.pol .pie{ position:absolute; left:0; right:0; text-align:center; font:700 var(--fp) var(--mano); color:#2A2522; white-space:nowrap; }
+.sombra{ border-radius:10px; background:rgba(0,0,0,.6); filter:blur(18px); transform-origin:50% 50%; }
+.cinta{ width:150px; height:46px; background:rgba(240,228,205,.62); transform-origin:0 50%;
+  box-shadow:0 2px 6px rgba(0,0,0,.15); clip-path:polygon(3% 0,97% 4%,100% 50%,96% 100%,2% 96%,0 50%); }
+.tit{ font:700 100px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; text-shadow:0 10px 40px rgba(0,0,0,.6); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.08; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#17130F",
+  "fondo2": "#3A2518",
+  "tinta": "#F4EDE4",
+  "papel": "#F7F2EA",
+  "acento": "#D97757",
+  "fotos": [
+    { "src": "", "pie": "el primer día" },
+    { "src": "", "pie": "probando ideas" },
+    { "src": "", "pie": "el equipo" },
+    { "src": "", "pie": "casi listo…" },
+    { "src": "", "pie": "¡lanzamos!" }
+  ],
+  "titular": "Cada paso *cuenta*",
+  "cierre": "Nuestra *historia*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'papel', 'acento']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = () => P.logo ? `<div class="logo"><img src="${P.logo}" alt=""></div>` : `<div class="logo">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+const GRADS = ['linear-gradient(150deg,#E8A27F,#D97757 45%,#5A2E22)', 'linear-gradient(160deg,#9DB2C9,#4A5A73 60%,#1E2533)', 'linear-gradient(140deg,#E9D6B4,#B99A7A 55%,#5B4632)',
+  'linear-gradient(170deg,#C9B8D9,#6E5C83 60%,#2B2335)', 'radial-gradient(120% 90% at 30% 20%,#FFD9B8,#D97757 45%,#3A1E16)', 'linear-gradient(150deg,#A8C3A0,#5C7A57 60%,#223020)'];
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'nada' }, halo: { fuerza: .18, x: 50, y: 50 } }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const FO = (P.fotos || []).slice(0, 6), N = FO.length;
+  const pw = VERT ? 370 : 340, ph = Math.round(pw * 1.2), m = pw * .07, fp = pw * .1;
+  const LV = [[300, 840, -8], [780, 780, 7], [310, 1300, 5], [770, 1320, -6], [540, 1080, -2], [540, 600, 4]];
+  const LH = [[330, 650, -8], [730, 590, 6], [1200, 640, -5], [1590, 600, 8], [960, 700, -2], [960, 520, 4]];
+  const L = (VERT ? LV : LH).slice(0, N - 1).concat([(VERT ? LV : LH)[4]]);
+  const vetas = MG.el(`<div class="vetas" style="width:${W * 1.6}px;height:${H * 1.6}px"></div>`);
+  const pols = FO.map((f, i) => {
+    const sh = MG.el(`<div class="sombra" style="width:${pw}px;height:${ph}px"></div>`);
+    const el = MG.el(`<div class="pol" style="width:${pw}px;height:${ph}px;--fp:${fp}px">
+      <div class="foto" style="left:${m}px;top:${m}px;width:${pw - 2 * m}px;height:${pw - 2 * m}px;background-image:${f.src ? `url('${f.src}')` : GRADS[i % GRADS.length]}"></div>
+      <div class="pie" style="top:${pw - m + (ph - pw + m) / 2 - fp * .62}px">${esc(f.pie || '')}</div></div>`);
+    const cinta = MG.el(`<div class="cinta"></div>`);
+    el.pie = el.querySelector('.pie'); return { el, sh, cinta };
+  });
+  const tit = MG.texto(md(P.titular), 'tit'); const anchoTit = VERT ? W - 160 : 1500; tit.style.width = anchoTit + 'px';
+  const logo = MG.el(logoHTML());
+  const cie = MG.texto(md(P.cierre), 'tit'); cie.style.width = (VERT ? W - 180 : 1400) + 'px'; cie.style.fontSize = '120px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+
+  const tD = (i) => .3 + i * .62, CAE = .38;                // empieza a caer · dura la caída
+  const tTodo = tD(N - 1) + 1.0, tZ = Math.max(tTodo + 1.6, D - 2.9), tC = tZ + .7;
+  const heroi = N - 1, hx = L[heroi][0], hy = L[heroi][1] - (ph - pw) / 2 + m / 2;
+  const cen = { x: W / 2, y: VERT ? 1060 : 620 };
+  const foco = (t) => {                                      // la cámara recorre la mesa siguiendo cada foto
+    let x = L[0][0], y = L[0][1];
+    for (let i = 1; i < N; i++) { const p = C.afterEffects75(k(t, tD(i) - .1, tD(i) + .45)); x = lerp(x, L[i][0], p); y = lerp(y, L[i][1], p); }
+    const a = C.reboteSuave(k(t, tTodo - .3, tTodo + .9)); x = lerp(x, cen.x, a); y = lerp(y, cen.y, a);
+    const zz = C.salidaCubica(k(t, tZ - 1.0, tZ)); return { x: lerp(x, hx, zz), y: lerp(y, hy, zz), a };
+  };
+  return (t) => {
+    const f = foco(t), zt = C.entradaCubica(k(t, tZ, tC)), zc = C.salidaQuint(k(t, tC - .05, tC + 1.3));
+    const zBase = lerp(1.32, 1.0, f.a) * lerp(1, 1.06, k(t, 0, D));
+    const z = t < tC ? zBase * (1 + 7 * zt) : lerp(1.25, 1, zc) * lerp(1, 1.04, k(t, tC, D));
+    const fx = t < tC ? f.x : W / 2, fy = t < tC ? f.y : H / 2;
+    MG.vista.style.transformOrigin = '0 0';
+    MG.vista.style.transform = `translate(${W / 2 + Math.sin(t * .5) * 9}px,${H / 2 + Math.cos(t * .4) * 8}px) scale(${z}) rotate(${Math.sin(t * .27) * .8}deg) translate(${-fx}px,${-fy}px)`;
+    MG.pon(vetas, -W * .3, -H * .3); vetas.style.opacity = t < tC ? 1 : 0;
+    const vis = 1 - C.salidaCubica(k(t, tZ + .3, tC));
+
+    pols.forEach(({ el, sh, cinta }, i) => {
+      const [x, y, r] = L[i], t0 = tD(i);
+      const cae = C.entradaCubica(k(t, t0, t0 + CAE)), caeq = C.entradaCubica(k(t - DT, t0, t0 + CAE));
+      const u = t - (t0 + CAE), bote = u > 0 ? .045 * Math.exp(-u * 9) * Math.sin(u * 32) : 0;
+      const alt = 1 - cae, s = 1 + 1.3 * alt + bote;
+      const rr = r + (i % 2 ? 24 : -22) * (1 - C.salidaQuint(k(t, t0, t0 + .9)));
+      const dxy = (i % 2 ? 1 : -1) * 120 * alt;
+      el.style.opacity = t < t0 ? 0 : Math.min(1, k(t, t0, t0 + .12)) * (i === heroi ? 1 : vis);
+      el.style.zIndex = 10 + i * 2; sh.style.zIndex = 9 + i * 2; cinta.style.zIndex = 10 + i * 2 + 1;
+      MG.pon(el, x - pw / 2 + dxy, y - ph / 2 - 60 * alt, s, `rotate(${rr}deg)`);
+      const v = Math.abs(cae - caeq) / DT; MG.desenfoca(el, Math.min(30, v * 6), Math.min(30, v * 6));
+      // sombra: lejos y suave mientras cae, pegada al aterrizar
+      sh.style.opacity = el.style.opacity * lerp(.25, .75, cae);
+      MG.pon(sh, x - pw / 2 + dxy + 40 * alt + 10, y - ph / 2 + 70 * alt + 16, s * (1 + .1 * alt), `rotate(${rr}deg)`);
+      sh.style.filter = `blur(${8 + 40 * alt}px)`;
+      // cinta adhesiva
+      const ec = C.salidaExpo(k(t, t0 + CAE + .12, t0 + CAE + .45));
+      const ang = (rr - 90 + (i % 2 ? 18 : -18)) * Math.PI / 180;
+      cinta.style.opacity = (ec > 0 ? 1 : 0) * (i === heroi ? 1 : vis);
+      const rad = rr * Math.PI / 180; cinta.style.transformOrigin = '50% 50%';
+      MG.pon(cinta, x + dxy + Math.sin(rad) * ph / 2 - 75, y - 60 * alt - Math.cos(rad) * ph / 2 - 23, 1, `rotate(${rr + (i % 2 ? 8 : -8)}deg) scaleX(${ec})`);
+      // pie de foto escrito a mano
+      const w = C.suave(k(t, t0 + CAE + .25, t0 + CAE + 1.05));
+      el.pie.style.clipPath = `inset(-20% ${100 - w * 100}% -20% 0)`;
+    });
+
+    // titular con todo a la vista
+    const tx = (W - anchoTit) / 2, ty = VERT ? 290 : 110;
+    MG.pon(tit, tx, ty);
+    tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tTodo + .1 + i * .1, { d: .55, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 6 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; sp.style.opacity = Math.min(+sp.style.opacity, vis); });
+    if (t > tC) pols.forEach(({ el, sh, cinta }) => { el.style.opacity = 0; sh.style.opacity = 0; cinta.style.opacity = 0; });
+
+    // cierre
+    const bloque = 150 + 60 + cie.offsetHeight + 110, y0 = VERT ? 260 + (1220 - bloque) / 2 : (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - cie.offsetWidth) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+});
+</script>
+</body></html>

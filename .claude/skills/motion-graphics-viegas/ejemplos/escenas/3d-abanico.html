@@ -1,0 +1,112 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Pieza «3d-abanico» · 3D con three.js · Viegas IA · Motion Lab
+     Una pila de ventanas de app (placas 3D con canto biselado) llega apilada desde abajo, se despliega en abanico en
+     profundidad y la del centro sale hacia la cámara. Profundidad de campo real: la ventana enfocada nítida y las demás en
+     bokeh suave. Cámara con órbita y dolly continuos, desenfoque de movimiento. Las ventanas se dibujan desde los parámetros
+     (título, tipo: chat · grafica · lista · codigo · timeline), o pon tu captura con "imagen".
+     Formato: #9x16 (por defecto) · #16x9 · #1x1 · #4x5 · Fondo transparente: ?fondo=transparente · Tema: noche-azul. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+<style>
+.tit{ position:absolute; left:0; text-align:center; font:600 104px var(--fuente); letter-spacing:-.04em; color:var(--texto); white-space:nowrap; }
+.tit em{ font-family:var(--serif); font-style:italic; font-weight:400; color:#E8A38A; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 7,
+  "titular": "Todo tu flujo, <em>en una app</em>",
+  "ventanas": [
+    { "titulo": "Guion", "tipo": "lista" },
+    { "titulo": "Analíticas", "tipo": "grafica" },
+    { "titulo": "Claude", "tipo": "chat" },
+    { "titulo": "Timeline", "tipo": "timeline" },
+    { "titulo": "Código", "tipo": "codigo" }
+  ],
+  "destacada": 2,
+  "salida": true,
+  "fondo": "marca"
+}
+</script>
+<script type="module">
+import { pieza3d, THREE } from '../motor/piezas3d.js';
+pieza3d({ duracion: 7, profundidad: { apertura: 22, max: 30 }, movimiento: { muestras: 8, obturador: 0.5 }, nieblaCerca: 14, nieblaLejos: 40 },
+  ({ P, W, H, VERT, MG, scene, camara, lente, encuadre, texDibujo, texLogo, placa, bokeh, ACENTO }) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion;
+  const ac = '#' + ACENTO.toString(16).padStart(6, '0');
+  // ---- interfaz de cada ventana, dibujada con canvas (todo editable desde los parámetros)
+  const TW = 900, TH = 1240;
+  const redondo = (g, x, y, w, h, r) => { g.beginPath(); g.roundRect(x, y, w, h, r); };
+  function ventana(v, i) {
+    if (v.imagen) return new THREE.TextureLoader().load(v.imagen, (t) => { t.colorSpace = THREE.SRGBColorSpace; });
+    return texDibujo(TW, TH, (g) => {
+      const fondo = g.createLinearGradient(0, 0, 0, TH); fondo.addColorStop(0, '#141B2E'); fondo.addColorStop(1, '#0B1020');
+      g.fillStyle = fondo; g.fillRect(0, 0, TW, TH);
+      g.fillStyle = 'rgba(255,255,255,.04)'; g.fillRect(0, 0, TW, 96);
+      ['#FF5F57', '#FEBC2E', '#28C840'].forEach((c, j) => { g.fillStyle = c; g.beginPath(); g.arc(52 + j * 40, 48, 13, 0, 7); g.fill(); });
+      g.fillStyle = '#F5F7FA'; g.font = '600 40px "Inter Tight"'; g.textAlign = 'center'; g.fillText(v.titulo, TW / 2, 62); g.textAlign = 'left';
+      const L = (x, y, w, c = 'rgba(170,200,255,.16)', h = 22) => { g.fillStyle = c; redondo(g, x, y, w, h, h / 2); g.fill(); };
+      if (v.tipo === 'chat') {
+        [[0, 'Quita los silencios y pon subtítulos', 1], [1, 'Hecho: 47 cortes y 212 subtítulos ✓', 0], [0, 'Añade un intro en 3D', 1], [1, 'Renderizando el intro…', 0]].forEach(([yo, txt, mio], j) => {
+          const y = 150 + j * 230, w = 640, x = mio ? TW - w - 50 : 50;
+          g.fillStyle = mio ? ac : '#1E2840'; redondo(g, x, y, w, 170, 36); g.fill();
+          g.fillStyle = mio ? '#10131C' : '#E6ECF7'; g.font = '500 36px "Inter Tight"'; const cut = txt.lastIndexOf(' ', 24) > 0 && txt.length > 24 ? txt.lastIndexOf(' ', 24) : txt.length; g.fillText(txt.slice(0, cut), x + 36, y + 70); g.fillText(txt.slice(cut + 1), x + 36, y + 120);
+        });
+        g.fillStyle = '#1A2238'; redondo(g, 40, TH - 150, TW - 80, 100, 50); g.fill(); L(90, TH - 112, 420);
+      } else if (v.tipo === 'grafica') {
+        g.fillStyle = '#9AA3B2'; g.font = '500 30px "Geist Mono"'; g.fillText('VISUALIZACIONES', 60, 180);
+        g.fillStyle = '#F5F7FA'; g.font = '600 110px "Inter Tight"'; g.fillText('1,2 M', 56, 300);
+        const vals = [.3, .42, .38, .55, .5, .7, .66, .88, 1];
+        vals.forEach((h, j) => { const x = 70 + j * 88, y = TH - 120 - h * 600; const gr = g.createLinearGradient(0, y, 0, TH - 120);
+          gr.addColorStop(0, j === vals.length - 1 ? ac : '#60A5FA'); gr.addColorStop(1, 'rgba(96,165,250,.05)'); g.fillStyle = gr; redondo(g, x, y, 60, h * 600, 14); g.fill(); });
+      } else if (v.tipo === 'lista') {
+        ['Gancho en 2 s', 'Problema', 'Demo con Claude', 'Resultado', 'Llamada a la acción'].forEach((t, j) => {
+          const y = 160 + j * 200; g.fillStyle = j === 2 ? 'rgba(217,119,87,.16)' : 'rgba(255,255,255,.04)'; redondo(g, 40, y, TW - 80, 160, 30); g.fill();
+          g.fillStyle = j < 3 ? ac : 'rgba(170,200,255,.25)'; g.beginPath(); g.arc(110, y + 80, 26, 0, 7); g.fill();
+          g.fillStyle = '#F5F7FA'; g.font = '500 44px "Inter Tight"'; g.fillText(t, 170, y + 96); });
+      } else if (v.tipo === 'codigo') {
+        g.font = '400 34px "Geist Mono"';
+        [['#C792EA', 'import'], ['#F5F7FA', '{ pieza3d }'], ['#C792EA', 'from'], ['#C3E88D', "'./motor'"]].reduce((x, [c, s]) => { g.fillStyle = c; g.fillText(s, x, 180); return x + g.measureText(s + ' ').width; }, 50);
+        for (let j = 0; j < 16; j++) { const ind = [0, 1, 2, 2, 1, 2, 3, 3, 2, 1, 0, 1, 2, 2, 1, 0][j]; L(50 + ind * 50, 250 + j * 58, 160 + ((j * 137) % 380), j % 5 === 2 ? 'rgba(217,119,87,.55)' : j % 3 ? 'rgba(147,197,253,.35)' : 'rgba(195,232,141,.35)', 24); }
+      } else {
+        for (let p = 0; p < 4; p++) { g.fillStyle = 'rgba(255,255,255,.03)'; g.fillRect(40, 170 + p * 230, TW - 80, 200);
+          for (let c = 0; c < 4; c++) { const x = 60 + c * 200 + (p * 53) % 70, w = 140 + ((p + c) * 41) % 70; g.fillStyle = [ac, '#3B82F6', '#22C55E', '#A78BFA'][p]; g.globalAlpha = .85; redondo(g, x, 190 + p * 230, w, 160, 18); g.fill(); g.globalAlpha = 1; } }
+        g.fillStyle = '#F5F7FA'; g.fillRect(470, 150, 4, 960);
+      }
+    });
+  }
+  const N = P.ventanas.length, mid = P.destacada ?? Math.floor(N / 2), w = 2.1, h = w * TH / TW;
+  const pila = new THREE.Group(); scene.add(pila);
+  const cartas = P.ventanas.map((v, i) => { const c = placa(ventana(v, i), w, h, { radio: 0.14, grosor: 0.05 }); pila.add(c); return c; });
+  const bk = bokeh(28, { radio: 8, alto: 12, z: -9, fondo: 6, tam: 0.08 }); scene.add(bk);
+  const dist = encuadre(VERT ? 4.4 : 9, VERT ? h * 1.75 : h * 1.35);
+  const tit = MG.el(`<div class="tit">${P.titular}</div>`); tit.style.width = W + 'px'; if (VERT) { tit.style.whiteSpace = 'normal'; tit.style.padding = '0 90px'; tit.style.width = W + 'px'; tit.style.boxSizing = 'border-box'; tit.style.fontSize = '96px'; tit.style.lineHeight = '1.02'; }
+  const yTit = VERT ? H * 0.78 : H * 0.83;
+  const tmp = new THREE.Vector3();
+  return (t) => {
+    const ab = C.entradaSalidaQuint(k(t, 1.0, 2.4));                     // apertura del abanico
+    const sale = C.salidaQuint(k(t, 2.5, 3.6)) - C.entradaCubica(k(t, D - 0.8, D)) * (P.salida ? 1 : 0);   // la destacada se acerca (y vuelve)
+    cartas.forEach((c, i) => {
+      const o = i - mid, lleg = C.salidaExpo(k(t, 0.1 + i * 0.07, 1.0 + i * 0.07));   // llegan apiladas desde abajo, rápido con frenada
+      const sp = VERT ? 1.05 : 2.0;
+      const x = o * sp * ab, ang = -o * 0.22 * ab, z = -Math.abs(o) * 0.9 * ab + i * 0.01 + (o === 0 ? sale * 1.3 : 0);
+      c.position.set(x, lerp(-9, 0, lleg) - Math.abs(o) * 0.25 * ab + (o === 0 ? sale * 0.15 : 0), z);
+      c.rotation.set(lerp(0.9, 0, lleg) * (1 - ab * 0.2), o * 0.28 * ab + (o === 0 ? 0 : 0), ang);
+      c.visible = t > 0.1 + i * 0.07;
+      if (P.salida) { const x2 = C.entradaCubica(k(t, D - 0.7 + Math.abs(o) * 0.04, D)); c.position.y -= x2 * 9; c.rotation.x += x2 * 0.8; }
+    });
+    pila.rotation.y = Math.sin(t * 0.5) * 0.08;
+    const ang = lerp(14, -14, t / D) * Math.PI / 180, R = dist * lerp(1.12, 0.96, C.salidaQuint(k(t, 0, D)));
+    camara.position.set(Math.sin(ang) * R, lerp(1.4, 0.4, t / D), Math.cos(ang) * R); camara.lookAt(0, VERT ? -1.1 : -0.35, 0);
+    bk.flota(t);
+    lente.enfocar(cartas[mid].getWorldPosition(tmp));
+    const e = MG.entra(tit, t, 2.7, { d: 0.75, dy: 90, curva: 'salidaExpo', escala0: 0.94 }); MG.pon(tit, 0, yTit + e.y, e.s);
+    if (P.salida) { const x = C.entradaCubica(k(t, D - 0.55, D)); if (x > 0) { tit.style.opacity = 1 - x; MG.desenfoca(tit, 0, x * 16); MG.pon(tit, 0, yTit + x * 120); } }
+  };
+});
+</script>
+</body></html>

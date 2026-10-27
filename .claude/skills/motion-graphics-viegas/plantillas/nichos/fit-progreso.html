@@ -1,0 +1,77 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «fit-progreso» · Fitness / salud · Viegas IA · Motion Lab
+     Progreso de un cliente: las barras de cada semana crecen escalonadas con rebote (cada una 0,08 s después), la línea de
+     tendencia se dibuja encima, la cifra «+45 kg» cuenta y da un golpe al llegar. Una idea: cuánto ha mejorado.
+     Cambia "titulo", "ejercicio", "valores" (uno por semana), "unidad", "marca". Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.graf{ padding:46px 40px 34px; }
+.graf .cab{ display:flex; justify-content:space-between; font:500 26px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute); }
+.zona{ position:relative; margin-top:40px; }
+.bar{ position:absolute; bottom:0; border-radius:14px 14px 6px 6px; background:linear-gradient(180deg, var(--brillo, var(--acento2)), var(--acento)); transform-origin:50% 100%; }
+.bar.vieja{ background:rgba(var(--claro),.16); }
+.eje{ display:flex; justify-content:space-between; margin-top:16px; font:500 22px var(--mono); color:var(--mute); }
+.gran{ font:600 210px/1 var(--fuente); letter-spacing:-.06em; color:var(--texto); font-variant-numeric:tabular-nums; white-space:nowrap; text-align:center; }
+.gran small{ font-size:.42em; color:var(--brillo, var(--acento)); letter-spacing:-.02em; }
+.pie{ font:500 38px/1.3 var(--fuente); color:var(--mute); text-align:center; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "12 semanas",
+  "titulo": "El progreso de *Ana*",
+  "ejercicio": "Peso muerto",
+  "valores": [40, 45, 47.5, 50, 55, 57.5, 60, 65, 70, 75, 80, 85],
+  "unidad": "kg",
+  "pie": "Sin lesiones, 3 días a la semana y 45 minutos por sesión",
+  "marca": "Entrena con Álex",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 220), gh = VERT ? 520 : 330;
+  const v = P.valores, n = v.length, max = Math.max(...v) * 1.08, dif = v[n - 1] - v[0];
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const tit = N.frase(P.titulo, 'n-tit', cw); tit.style.fontSize = '96px';
+  const gran = MG.el(`<div class="gran"><span>+0</span><small> ${P.unidad}</small></div>`);
+  const graf = MG.el(`<div class="n-card graf" style="width:${cw}px"><div class="cab"><span>${P.ejercicio}</span><span>${v[0]} → ${v[n - 1]} ${P.unidad}</span></div><div class="zona" style="height:${gh}px"></div><div class="eje"><span>Sem. 1</span><span>Sem. ${n}</span></div></div>`);
+  const zona = graf.querySelector('.zona'), iw = cw - 80, bw = iw / n * .62;
+  const barras = v.map((x, i) => { const b = document.createElement('div'); b.className = 'bar' + (i === 0 ? ' vieja' : ''); b.style.cssText += `left:${i * iw / n + (iw / n - bw) / 2}px;width:${bw}px;height:${gh * x / max}px`; zona.appendChild(b); return b; });
+  const ns = 'http://www.w3.org/2000/svg', svg = document.createElementNS(ns, 'svg'); svg.setAttribute('width', iw); svg.setAttribute('height', gh); svg.style.cssText = 'position:absolute;left:0;top:0;overflow:visible';
+  const pth = document.createElementNS(ns, 'path'); pth.setAttribute('d', v.map((x, i) => `${i ? 'L' : 'M'}${i * iw / n + iw / n / 2} ${gh - gh * x / max - 26}`).join(' '));
+  pth.setAttribute('fill', 'none'); pth.style.stroke = 'var(--texto)'; pth.setAttribute('stroke-width', 5); pth.setAttribute('stroke-linecap', 'round'); pth.setAttribute('stroke-linejoin', 'round'); pth.setAttribute('pathLength', 1); pth.setAttribute('stroke-dasharray', 1); svg.appendChild(pth); zona.appendChild(svg);
+  const pie = MG.el(`<div class="pie" style="width:${cw}px">${P.pie}</div>`);
+  const marca = MG.el(N.marca(.8));
+  let L;
+  return (t) => {
+    if (!L) { gran.firstChild.textContent = '+' + dif; const tot = 100 + tit.offsetHeight + 20 + gran.offsetHeight + 40 + graf.offsetHeight + 40 + pie.offsetHeight; L = { y: (H - tot) / 2, wg: gran.offsetWidth }; }
+    N.vivo(t);
+    N.es(chip, t, .05, fin, { x: N.cx(chip), y: L.y, dy: -60, curva: 'salidaQuint', oy: -60 });
+    const yT = L.y + 100; MG.pon(tit, (W - cw) / 2, yT);
+    if (t < fin) MG.animaTexto(tit, t, .15, { paso: .08 }); else N.es(tit, t, 0, fin, { x: (W - cw) / 2, y: yT, oy: -100 });
+    const yG = yT + tit.offsetHeight + 20;
+    MG.contador(gran.firstChild, t, 1.2, 3.6, 0, dif, { prefijo: '+', decimales: dif % 1 ? 1 : 0 });
+    N.es(gran, t, 1.0, fin + .08, { x: (W - L.wg) / 2, y: yG, dy: 80, s0: .8, oy: -100 });
+    gran.style.scale = 1 + .1 * C.rebote(k(t, 3.5, 4.1)) * (1 - k(t, 3.8, 4.4));
+    const yC = yG + gran.offsetHeight + 40;
+    N.es(graf, t, .5, fin + .15, { x: (W - cw) / 2, y: yC, dy: 320, s0: .94, curva: 'reboteSuave', d: .8, oy: -120 });
+    barras.forEach((b, i) => { const p = C.rebote(k(t, 1.1 + i * .08, 1.1 + i * .08 + .9)); b.style.transform = `scaleY(${Math.max(0, p)})`; });
+    pth.style.strokeDashoffset = 1 - C.entradaSalidaQuint(k(t, 1.6, 3.4));
+    N.es(pie, t, 3.4, fin + .25, { x: (W - cw) / 2, y: yC + graf.offsetHeight + 40, dy: 60, curva: 'reboteSuave', oy: -60 });
+    N.es(marca, t, 3.7, fin + .33, { x: N.cx(marca), y: H - (VERT ? 200 : 70), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

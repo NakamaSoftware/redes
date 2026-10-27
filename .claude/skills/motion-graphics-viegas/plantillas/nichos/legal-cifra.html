@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «legal-cifra» · Asesor / finanzas · Viegas IA · Motion Lab
+     Cifra que cuenta: un anillo se llena con salidaQuint mientras el número cuenta hasta la cifra (ahorro, plazo, devolución),
+     y al llegar da un golpe de escala con rebote. Debajo, el contexto y las píldoras de «cómo» entran escalonadas.
+     Cambia "titulo", "cifra", "prefijo", "sufijo", "contexto", "claves", "marca". Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.anillo{ width:720px; height:720px; }
+.anillo svg{ width:100%; height:100%; transform:rotate(-90deg); overflow:visible; }
+.cifra{ font:600 168px/1 var(--fuente); letter-spacing:-.05em; color:var(--texto); font-variant-numeric:tabular-nums; text-align:center; white-space:nowrap; }
+.cifra small{ font-size:.5em; color:var(--brillo, var(--acento)); margin-left:8px; }
+.ctx{ font:500 44px/1.3 var(--fuente); color:var(--mute); text-align:center; }
+.claves{ display:flex; gap:16px; flex-wrap:wrap; justify-content:center; }
+.claves span{ font:500 32px var(--fuente); color:var(--texto); padding:16px 28px; border-radius:99px; background:rgba(var(--claro),.07); border:1px solid rgba(var(--claro),.16); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "titulo": "Lo que ahorró *Javier* este año",
+  "cifra": 3480,
+  "prefijo": "",
+  "sufijo": "€",
+  "contexto": "en su declaración de la renta, sin trampas: solo aplicando bien las deducciones",
+  "claves": ["Alquiler", "Plan de pensiones", "Donativos"],
+  "marca": "Asesoría Lumen",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 140 : 220), R = VERT ? 1 : .72;
+  const tit = N.frase(P.titulo, 'n-tit', cw); tit.style.fontSize = (VERT ? 84 : 70) + 'px';
+  const an = MG.el(`<div class="anillo" style="width:${720 * R}px;height:${720 * R}px"><svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="none" stroke="rgba(var(--claro),.08)" stroke-width="5"/>
+    <circle class="c" cx="50" cy="50" r="44" fill="none" stroke="var(--acento)" stroke-width="5" stroke-linecap="round" pathLength="1" stroke-dasharray="1" style="filter:drop-shadow(0 0 3px var(--acento))"/></svg></div>`);
+  const cifra = MG.el(`<div class="cifra"><span></span><small>${P.sufijo}</small></div>`); cifra.style.fontSize = 168 * R + 'px';
+  const ctx = MG.el(`<div class="ctx" style="width:${cw}px">${P.contexto}</div>`);
+  const claves = MG.el(`<div class="claves" style="width:${cw}px">${P.claves.map((c) => `<span>✓ ${c}</span>`).join('')}</div>`);
+  const marca = MG.el(N.marca(.85));
+  let L;
+  return (t) => {
+    if (!L) { cifra.firstChild.textContent = P.prefijo + P.cifra.toLocaleString('de-DE'); L = { hT: tit.offsetHeight, wc: cifra.offsetWidth, hc: cifra.offsetHeight, y: VERT ? 300 : 70 }; }
+    N.vivo(t);
+    MG.pon(tit, (W - cw) / 2, L.y);
+    if (t < fin) MG.animaTexto(tit, t, .1, { paso: .07 }); else N.es(tit, t, 0, fin, { x: (W - cw) / 2, y: L.y, oy: -110 });
+    const ya = L.y + L.hT + (VERT ? 80 : 30), sa = 720 * R;
+    N.es(an, t, .5, fin + .1, { x: (W - sa) / 2, y: ya, dy: 0, s0: .6, curva: 'rebote', d: .8, s1: 1.25, oy: 0 });
+    const p = C.salidaQuint(k(t, .7, 3.1));
+    an.querySelector('.c').style.strokeDashoffset = 1 - p;
+    MG.contador(cifra.firstChild, t, .7, 3.1, 0, P.cifra, { prefijo: P.prefijo, idioma: 'de-DE' });
+    const golpe = 1 + .12 * C.rebote(k(t, 3.05, 3.6)) * (1 - k(t, 3.3, 3.9));
+    N.es(cifra, t, .7, fin + .15, { x: (W - L.wc) / 2, y: ya + (sa - L.hc) / 2, dy: 60, s0: .8, oy: -40, s1: 1.3 });
+    cifra.style.scale = golpe;
+    const yc = ya + sa + (VERT ? 70 : 30);
+    N.es(ctx, t, 2.4, fin + .25, { x: (W - cw) / 2, y: yc, dy: 70, curva: 'reboteSuave', oy: -70 });
+    [...claves.children].forEach((c, i) => { const e = MG.entra(c, t, 3.2 + i * .14, { dy: 50, dx: 0, curva: 'reboteFuerte', d: .5 }); c.style.transform = `translateY(${e.y}px) scale(${e.s})`; });
+    N.es(claves, t, 0, fin + .3, { x: (W - cw) / 2, y: yc + ctx.offsetHeight + 40, dy: 0, oy: -60 });
+    claves.style.opacity = t < fin + .3 ? 1 : claves.style.opacity;
+    N.es(marca, t, 3.8, fin + .38, { x: N.cx(marca), y: H - (VERT ? 250 : 90), dy: 60, oy: -50 });
+  };
+});
+</script>
+</body></html>

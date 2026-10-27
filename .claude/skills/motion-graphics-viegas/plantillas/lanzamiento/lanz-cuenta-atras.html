@@ -1,0 +1,174 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-cuenta-atras» · Viegas IA · Motion Lab
+     Cuenta atrás de lanzamiento: días, horas, minutos y segundos en celdas tipo flip cuyos dígitos ruedan (con desenfoque de
+     movimiento según la velocidad), un anillo de progreso que se cierra alrededor, el último tramo acelera hasta 00:00:00:00,
+     «zoom a través» del contador y cierre con la fecha, el titular y el logo.
+     Cambia "desde" ([días, horas, min, seg]), "velocidad" (segundos de reloj por segundo de vídeo), "unidades", "etiqueta",
+     "fecha", "titular" (*palabra* = acento), "marca", "logo" (ruta o "" = inicial), colores "fondo", "fondo2", "tinta", "acento".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.chip{ font:600 30px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:16px 30px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.08); }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+.grupo{ display:flex; flex-direction:column; align-items:center; gap:22px; }
+.cifras{ display:flex; gap:12px; }
+.cel{ position:relative; overflow:hidden; border-radius:26px; background:linear-gradient(180deg, rgba(var(--tintaRgb),.09), rgba(var(--tintaRgb),.04));
+  border:1.5px solid rgba(var(--tintaRgb),.12); box-shadow:0 24px 50px rgba(0,0,0,.35), inset 0 1px 0 rgba(var(--tintaRgb),.12); }
+.cel::after{ content:''; position:absolute; left:0; right:0; top:50%; height:2px; background:rgba(0,0,0,.45); box-shadow:0 1px 0 rgba(var(--tintaRgb),.06); }
+.tira{ position:absolute; left:0; right:0; top:0; text-align:center; color:var(--tinta); font-weight:700; font-variant-numeric:tabular-nums; letter-spacing:-.04em; }
+.tira div{ display:block; }
+.grupo small{ font:600 26px var(--fuente); letter-spacing:.2em; text-transform:uppercase; color:rgba(var(--tintaRgb),.55); }
+.dospuntos{ font:700 120px var(--fuente); color:var(--acento); }
+.anillo{ overflow:visible; }
+.fecha{ font:400 64px var(--serif); font-style:italic; color:var(--tinta); white-space:nowrap; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "etiqueta": "Lanzamiento en",
+  "desde": [3, 12, 45, 9],
+  "velocidad": 1,
+  "unidades": ["días", "horas", "min", "seg"],
+  "fecha": "1 de noviembre · 18:00",
+  "titular": "Viegas Studio *ya está aquí*",
+  "marca": "Viegas Estudio",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const CH = VERT ? 200 : 190, CW = Math.round(CH * .7), FS = Math.round(CH * .78);
+  const uds = P.unidades || ['días', 'horas', 'min', 'seg'];
+  const tiraHTML = Array.from({ length: 20 }, (_, i) => `<div style="height:${CH}px;line-height:${CH}px">${i % 10}</div>`).join('');
+  const grupos = uds.map((u) => MG.el(`<div class="grupo"><div class="cifras">${[0, 1].map(() => `<div class="cel" style="width:${CW}px;height:${CH}px"><div class="tira" style="font:700 ${FS}px var(--fuente)">${tiraHTML}</div></div>`).join('')}</div><small>${esc(u)}</small></div>`));
+  const tiras = grupos.flatMap((g) => [...g.querySelectorAll('.tira')]);
+  const puntos = VERT ? [] : [0, 1, 2].map(() => MG.el(`<div class="dospuntos">:</div>`));
+  const chip = MG.el(`<div class="chip">${esc(P.etiqueta)}</div>`);
+
+  // anillo de progreso (SVG)
+  const R = VERT ? 450 : 390, cx = W / 2, cy = VERT ? 880 : 560;
+  const NS = 'http://www.w3.org/2000/svg', svg = document.createElementNS(NS, 'svg');
+  svg.setAttribute('width', R * 2 + 80); svg.setAttribute('height', R * 2 + 80); svg.setAttribute('class', 'anillo'); MG.mundo.prepend(svg); svg.style.transformOrigin = '50% 50%';
+  svg.innerHTML = `<circle cx="${R + 40}" cy="${R + 40}" r="${R}" fill="none" stroke="rgba(${'var(--tintaRgb)'})" style="stroke:rgba(var(--tintaRgb),.08)" stroke-width="3"/>
+    <circle class="pr" cx="${R + 40}" cy="${R + 40}" r="${R}" fill="none" style="stroke:var(--acento)" stroke-width="7" stroke-linecap="round" transform="rotate(-90 ${R + 40} ${R + 40})"/>
+    <circle class="pu" r="13" style="fill:var(--acento);filter:drop-shadow(0 0 18px var(--acento))"/>
+    ${Array.from({ length: 60 }, (_, i) => { const a = i / 60 * 2 * Math.PI, r1 = R - 34, r2 = R - (i % 5 ? 26 : 16);
+      return `<line x1="${R + 40 + Math.sin(a) * r1}" y1="${R + 40 - Math.cos(a) * r1}" x2="${R + 40 + Math.sin(a) * r2}" y2="${R + 40 - Math.cos(a) * r2}" style="stroke:rgba(var(--tintaRgb),${i % 5 ? .12 : .3})" stroke-width="3"/>`; }).join('')}`;
+  const pr = svg.querySelector('.pr'), pu = svg.querySelector('.pu'), L = 2 * Math.PI * R; pr.style.strokeDasharray = L;
+
+  // cierre
+  const logo = MG.el(logoHTML());
+  const anchoTit = VERT ? W - 140 : 1500;
+  const tit = MG.texto(md(P.titular), 'tit'); tit.style.width = anchoTit + 'px'; tit.style.fontSize = (VERT ? 118 : 128) + 'px';
+  const fecha = MG.el(`<div class="fecha">${esc(P.fecha)}</div>`);
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+
+  const [d0, h0, m0, s0] = (P.desde || [3, 12, 45, 9]).map(Number), S0 = d0 * 86400 + h0 * 3600 + m0 * 60 + s0;
+  const tA = 4.9, tZ = 6.3, tT = 6.55, tC = 7.0, vel = P.velocidad || 1;
+  // valor del reloj (segundos): cuenta normal con «golpe» de rodillo cada segundo, luego acelera hasta 0
+  const valor = (t) => {
+    if (t <= tA) { const e = S0 - vel * Math.max(0, t - .4), n = Math.floor(e), f = e - n; return n + 1 - C.salidaCubica(k(1 - f, 0, .32)); }
+    const eA = valor(tA); return lerp(eA, 0, C.afterEffects75(k(t, tA, tZ)));
+  };
+  const digitos = (N) => { N = Math.max(0, N); const d = Math.floor(N / 86400), h = Math.floor(N % 86400 / 3600), m = Math.floor(N % 3600 / 60), s = N % 60;
+    return [d, h, m, s].map((x) => String(Math.min(99, x)).padStart(2, '0')).join('').split('').map(Number); };
+  const posiciones = (v) => { const N = Math.ceil(v - 1e-6), r = N - v, a = digitos(N), b = digitos(N - 1);
+    return a.map((x, i) => { if (r <= 0 || x === b[i]) return x + 10; const de = x + 10, a2 = b[i] <= x ? b[i] + 10 : b[i]; return lerp(de, a2, r); }); };
+
+  let Lay = null;
+  return (t) => {
+    if (!Lay) {
+      const gw = grupos[0].offsetWidth, gh = grupos[0].offsetHeight;
+      let pos;
+      if (VERT) { const gx = 70, gy = 70; const x0 = (W - 2 * gw - gx) / 2, y0 = cy - (2 * gh + gy) / 2;
+        pos = [[x0, y0], [x0 + gw + gx, y0], [x0, y0 + gh + gy], [x0 + gw + gx, y0 + gh + gy]]; }
+      else { const gx = 110, tot = 4 * gw + 3 * gx, x0 = (W - tot) / 2, y0 = cy - gh / 2 + 10; pos = [0, 1, 2, 3].map((i) => [x0 + i * (gw + gx), y0]);
+        puntos.forEach((p, i) => { p._x = x0 + (i + 1) * (gw + gx) - gx / 2 - p.offsetWidth / 2; p._y = y0 + CH / 2 - p.offsetHeight / 2 - 8; }); }
+      Lay = { pos, gw, gh };
+    }
+    // cámara: deriva y zoom continuos; zoom a través del contador al llegar a cero
+    const zt = C.entradaCubica(k(t, tT, tT + .6));
+    const zc = C.salidaQuint(k(t, tC - .15, tC + 1.4));
+    const z = t < tC - .15 ? lerp(1, 1.1, t / D) * (1 + 5 * zt) : lerp(1.3, 1, zc) * lerp(1, 1.05, k(t, tC, D));
+    MG.vista.style.transformOrigin = `${cx}px ${cy}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .5) * 10}px, ${Math.cos(t * .37) * 8}px) rotate(${Math.sin(t * .3) * .6}deg)`;
+    const vis = 1 - C.salidaCubica(k(t, tT + .15, tT + .55));
+
+    // chip
+    const ec = MG.entra(chip, t, .15, { d: .6, dy: -60, curva: 'salidaQuint', base: 6 });
+    MG.pon(chip, (W - chip.offsetWidth) / 2, (VERT ? 300 : 60) + ec.y); chip.style.opacity = Math.min(1, ec.p * 1.8) * vis;
+
+    // anillo
+    const ea = C.salidaQuint(k(t, .1, 1.1)), v = valor(t), prog = Math.min(1, (1 - v / S0) * 6 + C.salidaQuint(k(t, tA, tZ)) * .0) ;
+    const pv = lerp(.0, 1, Math.max(C.salidaCubica(k(t, .3, tA)) * .35, k(t, tA, tZ) > 0 ? .35 + .65 * C.afterEffects75(k(t, tA, tZ)) : 0));
+    pr.style.strokeDashoffset = L * (1 - pv * ea);
+    const ang = pv * ea * 2 * Math.PI; pu.setAttribute('cx', R + 40 + Math.sin(ang) * R); pu.setAttribute('cy', R + 40 - Math.cos(ang) * R);
+    MG.pon(svg, cx - R - 40, cy - R - 40, lerp(.82, 1, ea), `rotate(${(1 - ea) * -40}deg)`); svg.style.opacity = ea * vis;
+
+    // dígitos que ruedan
+    const ps = posiciones(v), pq = posiciones(valor(t - DT));
+    tiras.forEach((ti, i) => { const vy = Math.abs(ps[i] - pq[i]) * CH / DT; ti.style.transform = `translateY(${-ps[i] * CH}px)`; MG.desenfoca(ti, 0, Math.min(40, vy * MB * .6)); });
+    grupos.forEach((g, i) => { const e = MG.entra(g, t, .35 + i * .09, { d: .65, dy: 140, escala0: .86, curva: 'rebote', base: 8 });
+      MG.pon(g, Lay.pos[i][0], Lay.pos[i][1] + e.y, e.s); g.style.opacity = Math.min(1, e.p * 1.8) * vis; if (t > tT) MG.desenfoca(g, 0, zt * 18); });
+    puntos.forEach((p, i) => { const e = MG.entra(p, t, .55 + i * .09, { d: .5, dy: 40, curva: 'salidaQuint' }); MG.pon(p, p._x, p._y + e.y);
+      p.style.opacity = Math.min(1, e.p * 1.8) * vis * (.55 + .45 * Math.abs(Math.cos(t * Math.PI))); });
+
+    // cierre: logo, titular palabra a palabra, fecha y marca
+    const bloque = 150 + 60 + tit.offsetHeight + 50 + 80 + 30 + 50, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-20 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(tit, (W - anchoTit) / 2, y0 + 210);
+    tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .22 + i * .07, { d: .6, dy: 90, escala0: 1, curva: 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const ef = MG.entra(fecha, t, tC + .55 + tit.trozos.length * .07, { d: .6, dx: -80, dy: 0, curva: 'salidaExpo', base: 6 });
+    MG.pon(fecha, (W - fecha.offsetWidth) / 2 + ef.x, y0 + 210 + tit.offsetHeight + 50);
+    const em = MG.entra(marca, t, tC + .75 + tit.trozos.length * .07, { d: .6, dy: 40, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 210 + tit.offsetHeight + 160 + em.y);
+  };
+});
+</script>
+</body></html>

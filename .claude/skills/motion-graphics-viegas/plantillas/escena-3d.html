@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Escena 3D · Motion Graphics Viegas (three.js). Objetos, luces y cámara real; todo se renderiza en cada fotograma.
+     Vista previa: abre con ?ver. Render: node scripts/render.mjs video escena-01 -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+</head><body>
+<script type="module">
+import { escena3d } from '../motor/motor3d.js';
+escena3d({ duracion: 6, ancho: 1920, alto: 1080, fondo: 'marca' }, ({ THREE, MG, scene, obj, mat, rig, entra3d }) => {
+  const suelo = obj.suelo(); suelo.position.y = -1.2; scene.add(suelo);
+  const piezas = [obj.cajaRedonda(1.6, 1.6, 1.6, mat.coral()), obj.esfera(0.95, mat.vidrio()), obj.toro(0.8, 0.28, mat.metal())];
+  piezas.forEach((p, i) => { p.position.x = (i - 1) * 2.8; scene.add(p); });
+  const titulo = MG.el(`<div class="mg-abs mg-titulo" style="font-size:96px">Objetos <em>3D</em> reales</div>`);
+  return (t) => {
+    rig.orbita(t, { radio: 11, desde: -28, hasta: 22, altura: 2.2, centro: [0, 0, 0] });   // órbita lenta que no se para
+    piezas.forEach((p, i) => { entra3d(p, t, 0.3 + i * 0.18, { y: 0, subida: -2 }); p.rotation.y = t * 0.6 + i; p.rotation.x = Math.sin(t + i) * 0.2; });
+    const e = MG.entra(titulo, t, 1.2, { dy: 80 }); MG.pon(titulo, 960 - 520 + e.x, 120 + e.y, e.s);
+  };
+});
+</script>
+</body></html>

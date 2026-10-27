@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-indice-editorial» · Viegas IA · Motion Lab
+     Sumario de revista o índice de un curso: «Sumario» en serif enorme se compone letra a letra, y cada capítulo entra como
+     una fila con su NÚMERO serif gigante (sube con rebote), el título en serif (entra deslizando), una entradilla, el número
+     de página que cuenta y una línea fina que se dibuja de lado a lado. La cámara baja por el índice sin pararse, se detiene
+     sobre el capítulo elegido (su número se rellena de acento y las demás filas se apagan) y entra con «zoom a través» por
+     el número hasta la portadilla del capítulo: número gigante detrás, título, chip y logo con la marca.
+     Cambia "titulo" (cabecera, *palabra* = acento), "subtitulo", "capitulos" ([{titulo, texto, pagina}], 3–6),
+     "elegido" (índice del capítulo que se abre, empezando en 1), "etiqueta" (p. ej. "Capítulo"), "marca", "logo" (ruta o "" =
+     inicial), colores "fondo", "fondo2", "tinta", "acento".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?elegido=2 en la dirección. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Serif+Display:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif; --display:'DM Serif Display','Instrument Serif',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; --papel:#F1EADF; --tintaPapel:#1A1614; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.07; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.mg-mundo .abs, .abs{ position:absolute; left:0; top:0; }
+.cabS{ font:400 210px/0.85 var(--display); letter-spacing:-.03em; color:var(--tinta); white-space:nowrap; }
+.cabS .mg-trozo{ display:inline-block; }
+.subS{ font:600 24px var(--fuente); letter-spacing:.24em; text-transform:uppercase; color:var(--tinta); opacity:.55; white-space:nowrap; }
+.fila{ width:var(--fw); height:var(--fh); }
+.fila > *{ position:absolute; left:0; top:0; }
+.num{ font:400 var(--fn)/0.8 var(--display); letter-spacing:-.04em; color:transparent; -webkit-text-stroke:2px rgba(var(--tintaRgb),.85); white-space:nowrap; }
+.num.on{ color:var(--acento); -webkit-text-stroke:2px var(--acento); }
+.ft{ font:400 var(--ft)/1.0 var(--serif); letter-spacing:-.015em; color:var(--tinta); white-space:nowrap; }
+.fd{ font:500 var(--fd)/1.3 var(--fuente); color:var(--tinta); opacity:.55; white-space:nowrap; }
+.fp{ font:600 var(--fd) var(--fuente); letter-spacing:.08em; color:var(--tinta); opacity:.7; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.raya{ height:1.5px; background:rgba(var(--tintaRgb),.35); transform-origin:0 50%; }
+.raya.on{ background:var(--acento); height:3px; }
+.gig{ font:400 900px/0.8 var(--display); letter-spacing:-.05em; color:var(--acento); white-space:nowrap; opacity:.16; }
+.chipC{ font:600 28px var(--fuente); letter-spacing:.2em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:14px 28px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.08); }
+.titC{ font:400 140px/0.95 var(--serif); letter-spacing:-.02em; color:var(--tinta); text-align:center; }
+.titC .mg-trozo{ display:inline-block; }
+.pie{ display:flex; align-items:center; gap:22px; }
+.pie .logo{ width:84px; height:84px; border-radius:24px; font-size:48px; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "titulo": "*Sumario*",
+  "subtitulo": "Número 07 · Otoño 2026",
+  "capitulos": [
+    { "titulo": "El punto de partida", "texto": "Por qué empezar pequeño", "pagina": 4 },
+    { "titulo": "Herramientas", "texto": "Lo justo y necesario", "pagina": 12 },
+    { "titulo": "El método", "texto": "Paso a paso, sin atajos", "pagina": 26 },
+    { "titulo": "Casos reales", "texto": "Lo que funcionó y lo que no", "pagina": 38 },
+    { "titulo": "Lo que viene", "texto": "Ideas para el próximo año", "pagina": 52 }
+  ],
+  "elegido": 3,
+  "etiqueta": "Capítulo",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'papel', 'tintaPapel']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+const azar = (s) => () => { s = (s * 16807) % 2147483647; return s / 2147483647; };   // pseudoaleatorio con semilla (render exacto)
+const offA = (el, anc) => { let x = 0, y = 0; while (el && el !== anc) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x, y }; };
+// cámara libre: el punto del mundo (fx, fy) queda en el centro de la pantalla, con zoom z
+const camaraEn = (MG, fx, fy, z, rot = 0) => { MG.vista.style.transformOrigin = '0 0';
+  MG.vista.style.transform = `translate(${W / 2 - z * fx}px,${H / 2 - z * fy}px) scale(${z}) rotate(${rot}deg)`; };
+// cierre común: logo + frase + marca (entra tras el «zoom a través»)
+function cierre(MG, ancho) {
+  const logo = MG.el(logoHTML()), cie = MG.texto(md(P.cierre), 'tit'), marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+  cie.style.width = ancho + 'px'; cie.style.fontSize = (VERT ? 124 : 134) + 'px';
+  return (t, tC) => {
+    const { k, curvas: C } = MG, vis = t >= tC - .05 ? 1 : 0;
+    [logo, cie, marca].forEach((e) => e.style.visibility = vis ? 'visible' : 'hidden');
+    const bloque = 150 + 60 + cie.offsetHeight + 50 + 60, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - ancho) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + cie.trozos.length * .08, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+}
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'lineas', tamano: 80, intensidad: .25 }, halo: { fuerza: .24, x: 50, y: 40 } }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const caps = P.capitulos, N = caps.length, iE = Math.min(N, Math.max(1, P.elegido | 0)) - 1;
+  const X = VERT ? 80 : 210, FW = W - X * 2, FH = VERT ? 240 : 190;
+  const r = document.documentElement.style;
+  r.setProperty('--fw', FW + 'px'); r.setProperty('--fh', FH + 'px');
+  r.setProperty('--fn', (VERT ? 190 : 160) + 'px'); r.setProperty('--ft', (VERT ? 62 : 64) + 'px'); r.setProperty('--fd', (VERT ? 25 : 24) + 'px');
+  const cab = MG.el(`<div class="cabS"></div>`);
+  { let h = ''; String(P.titulo).split(/(\*[^*]+\*)/).forEach((seg) => { const ac = /^\*.*\*$/.test(seg); [...seg.replace(/\*/g, '')].forEach((ch) =>
+      h += ch === ' ' ? ' ' : `<span class="mg-trozo"${ac ? ' style="color:var(--acento);font-style:italic"' : ''}>${esc(ch)}</span>`); });
+    cab.innerHTML = h; cab.trozos = [...cab.querySelectorAll(".mg-trozo")]; }
+  const sub = MG.el(`<div class="subS">${esc(P.subtitulo)}</div>`);
+  const dos = (n) => String(n).padStart(2, '0');
+  const filas = caps.map((c, i) => { const f = MG.el(`<div class="fila"></div>`);
+    return { f, num: MG.el(`<div class="num">${dos(i + 1)}</div>`, f), ti: MG.el(`<div class="ft">${esc(c.titulo)}</div>`, f),
+      tx: MG.el(`<div class="fd">${esc(c.texto)}</div>`, f), pg: MG.el(`<div class="fp">p. 0</div>`, f), ra: MG.el(`<div class="raya"></div>`, f) }; });
+  // portadilla del capítulo
+  const gig = MG.el(`<div class="gig">${dos(iE + 1)}</div>`), chip = MG.el(`<div class="chipC">${esc(P.etiqueta)} ${dos(iE + 1)}</div>`);
+  const titC = MG.texto(esc(caps[iE].titulo), 'titC'), pie = MG.el(`<div class="pie">${logoHTML()}<div class="marca">${esc(P.marca)}</div></div>`);
+  const yCab = VERT ? 330 : 120, y0 = yCab + (VERT ? 330 : 280);
+  const tF = (i) => 1.2 + i * .32;                    // entrada de cada fila
+  const tE = tF(N - 1) + .9, tZ = Math.max(tE + 1.3, D - 3.3), tC = tZ + .65;
+  let Lay = null;
+  return (t) => {
+    if (!Lay) {
+      cab.style.fontSize = Math.min(210, 210 * (VERT ? W - 170 : 1300) / cab.offsetWidth) + 'px'; titC.style.width = (VERT ? W - 160 : 1500) + 'px'; titC.style.fontSize = (VERT ? 130 : 150) + 'px';
+      filas.forEach((o) => { o.num.style.top = '0px'; const nw = VERT ? 230 : 210; o.ti.style.left = o.tx.style.left = nw + 'px';
+        o.ra.style.top = (FH - 18) + 'px'; o.ra.style.width = FW + 'px';
+        o.pg.style.top = (FH * .14 + 20) + 'px'; o.nw = nw; });
+      const n = filas[iE].num; Lay = { kx: X + n.offsetWidth / 2, ky: y0 + iE * FH + n.offsetHeight * .45, rx: W / 2, ry: y0 + iE * FH + FH / 2 };
+    }
+    // --- cabecera
+    MG.pon(cab, X - 6, yCab); cab.style.opacity = 1;
+    cab.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, .15 + i * .06, { d: .6, dy: 140, escala0: 1, curva: i % 2 ? 'salidaQuint' : 'rebote', base: 8 }); sp.style.transform = `translateY(${e.y}px)`; });
+    const es = MG.entra(sub, t, .75, { d: .5, dx: -70, dy: 0, curva: 'salidaExpo' }); MG.pon(sub, X + es.x, yCab + (VERT ? 205 : 190));
+    // --- filas (cada pieza con su curva) y foco en la elegida
+    const foco = C.salidaCubica(k(t, tE, tE + .6));
+    filas.forEach((o, i) => { const t0 = tF(i), y = y0 + i * FH;
+      MG.pon(o.f, X, y);
+      const en = MG.entra(o.num, t, t0, { d: .6, dy: 120, escala0: .8, curva: 'reboteFuerte', base: 6 }); MG.pon(o.num, 0, en.y, en.s);
+      const et = MG.entra(o.ti, t, t0 + .1, { d: .55, dx: 110, dy: 0, curva: 'salidaExpo', base: 4 }); MG.pon(o.ti, o.nw + et.x, FH * .12);
+      const ex = MG.entra(o.tx, t, t0 + .2, { d: .5, dx: 0, dy: 26, curva: 'salidaCubica', base: 3 }); MG.pon(o.tx, o.nw, FH * .12 + (VERT ? 76 : 76) + ex.y);
+      const ep = MG.entra(o.pg, t, t0 + .15, { d: .5, dy: -20, curva: 'salidaQuint' }); MG.pon(o.pg, FW - o.pg.offsetWidth, FH * .14 + 20 + ep.y);
+      MG.contador(o.pg, t, t0 + .15, t0 + .8, 0, caps[i].pagina || 0, { prefijo: 'p. ' });
+      o.ra.style.transform = `scaleX(${C.salidaExpo(k(t, t0 + .05, t0 + .75))})`;
+      const sel = i === iE; o.num.classList.toggle('on', sel && foco > .3); o.ra.classList.toggle('on', sel && foco > .3);
+      o.f.style.opacity = sel ? 1 : 1 - .7 * foco;
+      if (!sel && foco > 0) MG.desenfoca(o.f, foco * 3, foco * 3);
+    });
+    // --- cámara: baja por el índice (nunca se para), se posa en el capítulo y entra por su número
+    const totalH = y0 + N * FH, baja = C.afterEffects(k(t, .9, tE)), fy0 = VERT ? H / 2 : H / 2;
+    let fx = W / 2, fy = lerp(fy0, Math.max(fy0, totalH - H / 2 + 60), baja);
+    const ir = C.entradaSalidaQuint(k(t, tE - .2, tZ - .3)); fx = lerp(fx, Lay.rx, ir); fy = lerp(fy, Lay.ry, ir);
+    const iz = C.salidaCubica(k(t, tZ - .45, tZ + .25)); fx = lerp(fx, Lay.kx, iz); fy = lerp(fy, Lay.ky, iz);
+    const z = lerp(1.04, 1.0, k(t, 0, tE)) * lerp(1, 1.1, ir) * lerp(1, 1.15, iz) * (1 + 11 * C.entradaCubica(k(t, tZ, tC)));
+    const vis = t < tC;
+    if (vis) camaraEn(MG, fx + Math.sin(t * .5) * 7, fy + Math.cos(t * .4) * 5, z, Math.sin(t * .3) * .4);
+    else { const zc = C.salidaQuint(k(t, tC - .05, tC + 1.4)); camaraEn(MG, W / 2 + Math.sin(t * .5) * 6, H / 2 + Math.cos(t * .4) * 4, lerp(1.3, 1, zc) * lerp(1, 1.05, k(t, tC, D)), Math.sin(t * .3) * .3); }
+    const fuera = 1 - C.salidaCubica(k(t, tZ + .3, tC));
+    [cab, sub, ...filas.map((o) => o.f)].forEach((e) => { e.style.visibility = vis ? 'visible' : 'hidden'; if (vis && t > tZ) e.style.opacity = (parseFloat(e.style.opacity) || 1) * fuera; });
+    // --- portadilla
+    [gig, chip, titC, pie].forEach((e) => e.style.visibility = vis ? 'hidden' : 'visible');
+    const cy = VERT ? 880 : H / 2;
+    const eg = C.salidaQuint(k(t, tC - .05, tC + 1.2)); gig.style.opacity = .16 * Math.min(1, eg * 2);
+    MG.pon(gig, (W - gig.offsetWidth) / 2, cy - gig.offsetHeight / 2 + lerp(60, 0, eg), lerp(1.5, 1, eg));
+    const ec = MG.entra(chip, t, tC + .15, { d: .5, dy: -40, curva: 'salidaExpo' }); MG.pon(chip, (W - chip.offsetWidth) / 2, cy - titC.offsetHeight / 2 - 110 + ec.y);
+    MG.pon(titC, (W - titC.offsetWidth) / 2, cy - titC.offsetHeight / 2);
+    titC.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .25 + i * .09, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 }); sp.style.transform = `translateY(${e.y}px)`; });
+    const ep = MG.entra(pie, t, tC + .6 + titC.trozos.length * .09, { d: .6, dy: 50, escala0: .8, curva: 'rebote', base: 5 });
+    MG.pon(pie, (W - pie.offsetWidth) / 2, cy + titC.offsetHeight / 2 + 70 + ep.y, ep.s);
+    MG.halo(50 + Math.sin(t * .4) * 12, 40 + Math.cos(t * .3) * 10 + 30 * baja);
+  };
+});
+
+</script>
+</body></html>

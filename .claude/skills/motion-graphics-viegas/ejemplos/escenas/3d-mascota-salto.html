@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Pieza «3d-mascota-salto» · 3D con three.js · Viegas IA · Motion Lab
+     La mascota de Claude Code (coral #D97757 siempre) cae sobre una plataforma, da tres saltos con anticipación, estiramiento,
+     aplastamiento al caer y rebote natural (el segundo con giro completo), y termina saludando. Sombra real que se encoge
+     con la altura, anillo de luz en la plataforma, cámara baja que orbita, desenfoque de movimiento y de profundidad.
+     Formato: #9x16 (por defecto) · #16x9 · #1x1 · #4x5 · Fondo transparente: ?fondo=transparente · Tema: noche-azul. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+<style>
+.tit{ position:absolute; left:0; text-align:center; font:600 120px var(--fuente); letter-spacing:-.04em; color:var(--texto); white-space:nowrap; }
+.tit em{ font-family:var(--serif); font-style:italic; font-weight:400; color:#E8A38A; }
+.sub{ position:absolute; left:0; text-align:center; font:500 30px var(--mono); letter-spacing:.22em; text-transform:uppercase; color:var(--mute); white-space:nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 7,
+  "titular": "Claude <em>Code</em>",
+  "subtitulo": "tu editor que nunca se cansa",
+  "saltos": 3,
+  "altura": 1.5,
+  "salida": true,
+  "fondo": "marca"
+}
+</script>
+<script type="module">
+import { pieza3d, THREE } from '../motor/piezas3d.js';
+pieza3d({ duracion: 7, profundidad: { apertura: 12, max: 20 }, movimiento: { muestras: 8, obturador: 0.5 }, nieblaCerca: 12, nieblaLejos: 34 },
+  ({ P, W, H, VERT, MG, scene, camara, obj, mat, coral, luces, lente, encuadre, bokeh }) => {
+  const { k, lerp, curvas: C, cl } = MG, D = P.duracion;
+  // ---- plataforma: disco oscuro con canto biselado y anillo de luz coral
+  const plat = new THREE.Group(); scene.add(plat);
+  const disco = obj.cilindro(1.7, 0.32, mat.oscuro({ roughness: 0.28, metalness: 0.5 })); disco.position.y = -0.16; plat.add(disco);
+  const tapa = obj.cilindro(1.62, 0.02, mat.oscuro({ roughness: 0.6, metalness: 0.1, color: 0x0E1322 })); tapa.position.y = 0.005; plat.add(tapa);
+  const anillo = new THREE.Mesh(new THREE.TorusGeometry(1.7, 0.025, 16, 160), new THREE.MeshBasicMaterial({ color: 0xE8A38A, toneMapped: false })); anillo.rotation.x = Math.PI / 2; plat.add(anillo);
+  const suelo = obj.suelo(new THREE.ShadowMaterial({ opacity: 0.35 })); suelo.position.y = -0.32; scene.add(suelo);
+  // sombra de contacto (suave, se encoge y se aclara con la altura del salto)
+  const cs = document.createElement('canvas'); cs.width = cs.height = 256; const g = cs.getContext('2d'), gr = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  gr.addColorStop(0, 'rgba(0,0,0,.75)'); gr.addColorStop(.55, 'rgba(0,0,0,.3)'); gr.addColorStop(1, 'rgba(0,0,0,0)'); g.fillStyle = gr; g.fillRect(0, 0, 256, 256);
+  const sombra = new THREE.Mesh(new THREE.PlaneGeometry(1.9, 0.9), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(cs), transparent: true, depthWrite: false }));
+  sombra.rotation.x = -Math.PI / 2; sombra.position.y = 0.02; plat.add(sombra);
+  // ---- la mascota (coral fijo)
+  const masc = obj.mascotaClaude({ tam: 2.3, mat: coral({ roughness: 0.36 }) }); scene.add(masc);
+  const bk = bokeh(30, { radio: 8, alto: 10, z: -10, fondo: 6, tam: 0.08 }); scene.add(bk);
+  luces.clave.intensity = 1.8; luces.clave.position.set(4, 9, 5);
+  const dist = encuadre(3.9, VERT ? 6.0 : 3.6);
+  const tit = MG.el(`<div class="tit">${P.titular}</div>`), sub = MG.el(`<div class="sub">${P.subtitulo}</div>`);
+  [tit, sub].forEach((e) => { e.style.width = W + 'px'; });
+  const yTit = VERT ? H * 0.12 : H * 0.07, ySub = yTit + (VERT ? 160 : 140);
+
+  // ---- el salto: caída inicial y N saltos (anticipación → despegue estirado → vuelo → aplastamiento → rebote)
+  const T0 = 0.35, CAIDA = 0.75, L = 1.15, ESPERA = 0.12;
+  function estado(t) {
+    let y = 0, sy = 1, giro = 0, brazos = 0;
+    if (t < T0 + CAIDA) {                                   // cae desde fuera de cuadro (entradaCubica: acelera como la gravedad)
+      const x = k(t, T0, T0 + CAIDA * 0.62); y = lerp(6, 0, C.entradaCubica(x)); brazos = 1 - x;
+      const a = k(t, T0 + CAIDA * 0.62, T0 + CAIDA);         // aterriza: aplasta y vuelve con rebote
+      if (x >= 1) sy = 1 - 0.28 * Math.sin(Math.PI * Math.min(1, a * 1.6)) * (1 - a) - (1 - C.rebote(a)) * 0.0;
+      return { y, sy, giro, brazos, aire: x < 1 };
+    }
+    const u = t - T0 - CAIDA, n = Math.floor(u / (L + ESPERA)), f = u - n * (L + ESPERA);
+    if (n >= P.saltos) return { y: 0, sy: 1, giro: 0, brazos: 0, saluda: k(t, T0 + CAIDA + P.saltos * (L + ESPERA), T0 + CAIDA + P.saltos * (L + ESPERA) + 0.5) };
+    const h = P.altura * (n === 1 ? 1.25 : 1);
+    if (f < 0.18) { const a = f / 0.18; sy = 1 - 0.22 * C.salidaCubica(a); }                         // anticipación (se agacha)
+    else if (f < 0.88) { const a = (f - 0.18) / 0.7; y = 4 * h * a * (1 - a);                       // vuelo: parábola real
+      sy = 1 + 0.16 * Math.max(0, 1 - a * 3) - 0.06 * Math.max(0, a * 3 - 2); brazos = Math.sin(Math.PI * a);
+      if (n === 1) giro = C.entradaSalidaQuint(a) * Math.PI * 2; }                                    // el segundo, con giro
+    else { const a = (f - 0.88) / (L - 0.88); sy = 1 - 0.26 * (1 - C.rebote(a)) * 1.0 - 0.18 * Math.sin(Math.PI * Math.min(1, a * 2)) * (1 - a); }
+    return { y, sy, giro, brazos, aire: f >= 0.18 && f < 0.88 };
+  }
+  const tmp = new THREE.Vector3();
+  return (t) => {
+    const s = estado(t);
+    masc.position.y = s.y; masc.scale.set(1 / Math.sqrt(Math.max(0.4, s.sy)), Math.max(0.4, s.sy), 1 / Math.sqrt(Math.max(0.4, s.sy)));
+    masc.rotation.y = s.giro + Math.sin(t * 0.9) * 0.12; masc.visible = t >= T0;
+    masc.brazosArriba(s.brazos * 0.8);
+    if (s.saluda) masc.saludar(C.salidaQuint(s.saluda), t);
+    masc.parpadear(Math.max(0, 1 - Math.abs((t % 2.3) - 1.15) / 0.07));
+    const alto = cl(s.y / 3); sombra.scale.setScalar(lerp(1, 0.45, alto)); sombra.material.opacity = lerp(1, 0.25, alto) * (t >= T0 ? 1 : 0);
+    // plataforma: entra con rebote; el anillo late con cada aterrizaje
+    const ep = C.rebote(k(t, 0, 0.9)); plat.scale.setScalar(Math.max(0.001, ep)); plat.rotation.y = t * 0.15;
+    anillo.material.color.setRGB(0.91, 0.64, 0.54).multiplyScalar(1 + (s.y < 0.02 && t > T0 ? 0.8 : 0) * (1 - s.sy) * 6);
+    // cámara baja: órbita continua + dolly suave
+    const ang = lerp(-28, 22, t / D) * Math.PI / 180, R = dist * lerp(1.04, 0.94, t / D);
+    camara.position.set(Math.sin(ang) * R, VERT ? 1.6 : 1.3, Math.cos(ang) * R); camara.lookAt(0, VERT ? 1.25 : 0.9, 0);
+    bk.flota(t);
+    lente.enfocar(masc.getWorldPosition(tmp).setY(0.6));
+    let e = MG.entra(tit, t, 1.0, { d: 0.75, dy: -80, curva: 'salidaExpo', escala0: 0.92 }); MG.pon(tit, 0, yTit + e.y, e.s);
+    e = MG.entra(sub, t, 1.2, { d: 0.7, dy: -50, curva: 'salidaExpo' }); MG.pon(sub, 0, ySub + e.y, e.s);
+    if (P.salida) { const x = C.entradaCubica(k(t, D - 0.5, D)); if (x > 0) [tit, sub].forEach((el, i) => { el.style.opacity = 1 - x; MG.desenfoca(el, 0, x * 16); MG.pon(el, 0, (i ? ySub : yTit) - x * 110); }); }
+  };
+});
+</script>
+</body></html>

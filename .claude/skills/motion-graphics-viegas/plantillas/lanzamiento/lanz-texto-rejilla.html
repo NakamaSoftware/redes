@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-texto-rejilla» · Viegas IA · Motion Lab
+     Tipografía cinética de estilo suizo: una rejilla modular se dibuja y cada celda se llena con una palabra que entra por una
+     máscara deslizando desde una dirección distinta (izquierda, arriba, derecha, abajo…), con desenfoque de movimiento.
+     Bloques de color barren las celdas y las invierten (texto en el color del fondo sobre el acento); después la rejilla se
+     REORDENA (cada celda viaja a otra casilla con su propia curva) y la cámara entra en la palabra clave con «zoom a través»
+     hasta el cierre con frase y logo.
+     Cambia "palabras" (hasta 8; *palabra* = la clave en acento), "etiqueta" (texto pequeño de arriba), "cierre"
+     (*palabra* = acento), "marca", "logo" (ruta o "" = inicial), colores "fondo", "fondo2", "tinta", "acento" y "duracion".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.chip{ font:600 30px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:16px 30px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.08); }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+.celda{ overflow:hidden; border-radius:22px; border:1.5px solid rgba(var(--tintaRgb),.13); background:rgba(var(--tintaRgb),.03); }
+.celda .bloque{ position:absolute; inset:0; background:var(--acento); transform:scaleX(0); }
+.celda .in{ position:absolute; inset:0; display:flex; align-items:flex-end; padding:0 0 .14em .2em; }
+.celda .num{ position:absolute; left:24px; top:20px; font:600 24px var(--fuente); letter-spacing:.1em; color:rgba(var(--tintaRgb),.45); }
+.pal{ display:inline-block; font:800 100px/.9 var(--fuente); letter-spacing:-.05em; color:var(--tinta); white-space:nowrap; text-transform:uppercase; }
+.celda.clave .pal{ color:var(--acento); }
+.celda.inv .pal, .celda.inv .num{ color:var(--fondo); }
+.guia{ background:rgba(var(--halo),.6); }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "etiqueta": "Nuevo lanzamiento",
+  "palabras": ["Diseña", "Graba", "Edita", "*Crea*", "Publica", "Mide", "Aprende", "Repite"],
+  "cierre": "Todo en un *lugar*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+// cierre común: logo con muelle, frase por palabras con curvas alternas y marca que desliza
+function cierre(MG) {
+  const anchoTit = VERT ? W - 180 : 1500, logo = MG.el(logoHTML());
+  const cie = MG.texto(md(P.cierre), 'tit'); cie.style.width = anchoTit + 'px'; cie.style.fontSize = (VERT ? 120 : 130) + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+  return (t, tC) => {
+    const C = MG.curvas, k = MG.k, vis = t >= tC - .05 ? 1 : 0;
+    [logo, cie, marca].forEach((e) => { e.style.visibility = vis ? 'visible' : 'hidden'; });
+    const bloque = 150 + 60 + cie.offsetHeight + 50 + 60, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-20 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - anchoTit) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + cie.trozos.length * .08, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+}
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'rejilla', tamano: 60, intensidad: .3 }, halo: { fuerza: .2, x: 50, y: 70 } }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const lista = (Array.isArray(P.palabras) ? P.palabras : String(P.palabras).split(',')).slice(0, 8);
+  const N = lista.length, iK = Math.max(0, lista.findIndex((w) => /\*/.test(w)));
+  // rejilla: 2×4 en vertical (dentro de la zona segura) · 4×2 en horizontal
+  const cols = VERT ? 2 : 4, filas = Math.ceil(N / cols), gap = VERT ? 22 : 26;
+  const X0 = VERT ? 70 : 150, Y0 = VERT ? 420 : 260, AW = VERT ? W - 140 : W - 300, AH = VERT ? 1020 : 620;
+  const cw = (AW - gap * (cols - 1)) / cols, ch = (AH - gap * (filas - 1)) / filas;
+  const slot = (j) => ({ x: X0 + (j % cols) * (cw + gap), y: Y0 + Math.floor(j / cols) * (ch + gap) });
+  // nueva casilla de cada celda al reordenar (permutación fija)
+  const perm = [5, 2, 7, 0, 6, 3, 1, 4].filter((x) => x < N); while (perm.length < N) perm.push(perm.length);
+  const etq = MG.el(`<div class="chip">${esc(P.etiqueta)}</div>`);
+  const gx = [...Array(cols + 1)].map((_, j) => j === 0 ? X0 : j === cols ? X0 + AW : X0 + j * (cw + gap) - gap / 2);
+  const gy = [...Array(filas + 1)].map((_, j) => j === 0 ? Y0 : j === filas ? Y0 + AH : Y0 + j * (ch + gap) - gap / 2);
+  const guias = [...gx.map((x) => ({ v: 1, p: x })), ...gy.map((y) => ({ v: 0, p: y }))].map((g) => ({ ...g, el: MG.el(`<div class="guia"></div>`) }));
+  const celdas = lista.map((w, i) => {
+    const c = MG.el(`<div class="celda${i === iK ? ' clave' : ''}"><div class="bloque"></div><span class="num">${String(i + 1).padStart(2, '0')}</span><div class="in"><span class="pal">${esc(w.replace(/\*/g, ''))}</span></div></div>`);
+    c.style.width = cw + 'px'; c.style.height = ch + 'px';
+    return { c, b: c.querySelector('.bloque'), pal: c.querySelector('.pal'), num: c.querySelector('.num') };
+  });
+  const fin = cierre(MG);
+  const dirs = [[-1, 0], [0, -1], [1, 0], [0, 1]];
+  const tR = 4.6, tZ = D - 2.8, tC = tZ + .7;
+  let listo = false;
+  return (t) => {
+    if (!listo) { const f = Math.min(ch * .5, ...celdas.map((o) => (cw - 70) / o.pal.offsetWidth * 100)); celdas.forEach((o) => { o.pal.style.fontSize = f + 'px'; }); listo = true; }
+    // posición de cada celda (reordenación: cada una con su curva y su retraso)
+    const pos = (i, u) => { const a = slot(i), b = slot(perm[i]), cv = [C.afterEffects75, C.entradaSalidaQuint, C.reboteSuave][i % 3];
+      const e = cv(k(u, tR + i * .06, tR + .95 + i * .06)); return { x: lerp(a.x, b.x, e), y: lerp(a.y, b.y, e) }; };
+    const pK = pos(iK, t), kx = pK.x + cw / 2, ky = pK.y + ch / 2;
+    // cámara: zoom continuo + deriva; «zoom a través» de la celda clave
+    const zt = C.entradaCubica(k(t, tZ, tC)), zc = C.salidaQuint(k(t, tC - .05, tC + 1.3));
+    const z = t < tC ? lerp(1.0, 1.08, k(t, 0, tZ)) * (1 + 9 * zt) : lerp(1.25, 1, zc) * lerp(1, 1.04, k(t, tC, D));
+    const fo = C.salidaCubica(k(t, tZ - 1, tZ + .2));
+    const ox = t < tC ? lerp(W / 2, kx, fo) : W / 2, oy = t < tC ? lerp(H / 2, ky, fo) : H / 2;
+    MG.vista.style.transformOrigin = `${ox}px ${oy}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .5) * 10}px, ${Math.cos(t * .37) * 8}px) rotate(${Math.sin(t * .3) * .5}deg)`;
+    MG.halo(50 + Math.sin(t * .4) * 14, 70 + Math.cos(t * .3) * 10);
+    const vis = 1 - C.salidaCubica(k(t, tZ + .25, tC));
+
+    const ee = MG.entra(etq, t, .1, { d: .6, dy: -50, curva: 'salidaQuint', base: 4 });
+    MG.pon(etq, X0 + ee.x, Y0 - 110 + ee.y, 1); etq.style.opacity = ee.p * vis;
+    // guías de la rejilla: se dibujan rápido y frenan; se recogen al revés cuando las celdas ya están
+    guias.forEach((g, j) => {
+      const e = C.salidaExpo(k(t, .05 + j * .05, .7 + j * .05)), s = C.entradaCubica(k(t, 1.6 + j * .04, 2.1 + j * .04));
+      const el = g.el;
+      if (g.v) { el.style.width = '2px'; el.style.height = AH + 'px'; el.style.transformOrigin = s > 0 ? '50% 100%' : '50% 0';
+        el.style.transform = `translate(${g.p - 1}px,${Y0}px) scaleY(${s > 0 ? 1 - s : e})`; }
+      else { el.style.height = '2px'; el.style.width = AW + 'px'; el.style.transformOrigin = s > 0 ? '100% 50%' : '0 50%';
+        el.style.transform = `translate(${X0}px,${g.p - 1}px) scaleX(${s > 0 ? 1 - s : e})`; }
+      el.style.opacity = (e > 0 && s < 1) ? .9 : 0;
+    });
+
+    celdas.forEach((o, i) => {
+      const t0 = .45 + i * .14, p = pos(i, t), pq = pos(i, t - DT);
+      const a = C.rebote(k(t, t0, t0 + .65)), mv = Math.sin(Math.PI * k(t, tR + i * .06, tR + .95 + i * .06)), s = lerp(.86, 1, a) * (1 - .14 * mv);
+      MG.pon(o.c, p.x + cw * (1 - s) / 2, p.y + ch * (1 - s) / 2, s);
+      o.c.style.transformOrigin = '0 0';
+      o.c.style.opacity = Math.min(1, k(t, t0, t0 + .25)) * (i === iK ? 1 : vis);
+      MG.desenfoca(o.c, Math.abs(p.x - pq.x) / DT * MB * .8, Math.abs(p.y - pq.y) / DT * MB * .8);
+      // la palabra entra por su máscara: rápida y frena (curva distinta por celda)
+      const [dx, dy] = dirs[i % 4], cv = i % 2 ? C.salidaExpo : C.salidaQuint;
+      const f = (u) => 1 - cv(k(u, t0 + .12, t0 + .85)), off = f(t), offq = f(t - DT), L = dx ? cw : ch;
+      o.pal.style.transform = `translate(${dx * off * L}px,${dy * off * L}px)`;
+      MG.desenfoca(o.pal, dx ? Math.abs(off - offq) * L / DT * MB : 0, dy ? Math.abs(off - offq) * L / DT * MB : 0);
+      o.num.style.opacity = C.suave(k(t, t0 + .5, t0 + .9));
+      // bloques de color que barren e invierten (la clave se queda invertida)
+      if (i === iK || i % 3 === 1) {
+        const tb = 2.2 + (i % 4) * .17 + (i > 3 ? .3 : 0);
+        const en = C.salidaCubica(k(t, tb, tb + .45)), sa = i === iK ? 0 : C.entradaCubica(k(t, tb + 1.3, tb + 1.75)), izq = i % 2 === 0;
+        o.b.style.transformOrigin = sa > 0 ? (izq ? '100% 50%' : '0 50%') : (izq ? '0 50%' : '100% 50%');
+        o.b.style.transform = `scaleX(${sa > 0 ? 1 - sa : en})`;
+        o.c.classList.toggle('inv', en > .5 && sa < .5);
+      }
+      if (t > tC) o.c.style.opacity = 0;
+    });
+    fin(t, tC);
+  };
+});
+</script>
+</body></html>

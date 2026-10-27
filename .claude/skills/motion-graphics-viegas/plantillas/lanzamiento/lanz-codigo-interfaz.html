@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-codigo-interfaz» · Viegas IA · Motion Lab
+     Código → interfaz: un editor escribe el código con resaltado de sintaxis y, a cada línea terminada, un bloque sale de
+     esa línea y se transforma (posición, tamaño y radio con desenfoque de movimiento) en su pieza de la interfaz: tarjeta,
+     imagen, título, texto y botón. Un cursor pulsa el botón, «zoom a través» del botón y cierre con titular y logo.
+     Cambia "archivo" (nombre de la pestaña), "codigo" (líneas; las 5 piezas salen de las líneas indicadas en "piezas":
+     [tarjeta, imagen, título, texto, botón]), "app" ({titulo, texto, boton, imagen: ruta o "" = degradado}), "etiqueta",
+     "titular" (*palabra* = acento), "marca", "logo" (ruta o "" = inicial), colores "fondo", "fondo2", "tinta", "acento".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=JetBrains+Mono:wght@400;600&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif; --mono:'JetBrains Mono',Consolas,monospace;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.chip{ font:600 30px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--acento); white-space:nowrap;
+  padding:16px 30px; border-radius:99px; border:1.5px solid rgba(var(--halo),.5); background:rgba(var(--halo),.08); }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+
+.editor{ border-radius:28px; overflow:hidden; background:#1B1816; border:1.5px solid rgba(var(--tintaRgb),.1);
+  box-shadow:0 50px 120px rgba(0,0,0,.55), inset 0 1px 0 rgba(var(--tintaRgb),.08); }
+.barra{ height:64px; display:flex; align-items:center; gap:12px; padding:0 26px; background:rgba(var(--tintaRgb),.04); border-bottom:1.5px solid rgba(var(--tintaRgb),.07); }
+.barra i{ width:16px; height:16px; border-radius:50%; background:rgba(var(--tintaRgb),.18); }
+.barra i:first-child{ background:var(--acento); }
+.barra span{ margin-left:18px; font:500 24px var(--mono); color:rgba(var(--tintaRgb),.6); padding:8px 18px; border-radius:10px; background:rgba(var(--tintaRgb),.06); }
+.cuerpo{ position:relative; padding:26px 30px; }
+.lin{ position:relative; display:flex; white-space:pre; font-family:var(--mono); color:rgba(var(--tintaRgb),.85); }
+.lin b{ font-weight:400; width:2.4ch; color:rgba(var(--tintaRgb),.22); flex:none; }
+.lin .txt{ overflow:hidden; display:inline-block; }
+.lin.act{ background:rgba(var(--halo),.07); }
+.k{ color:#E8A07F; } .s{ color:#B9D98C; } .g{ color:#8FB8E8; } .n{ color:#E9C46A; } .c{ color:rgba(var(--tintaRgb),.38); font-style:italic; } .p{ color:rgba(var(--tintaRgb),.5); }
+.caret{ position:absolute; width:3px; background:var(--acento); box-shadow:0 0 12px var(--acento); }
+
+.pieza{ position:absolute; overflow:hidden; }
+.pz-tarjeta{ background:linear-gradient(180deg, rgba(var(--tintaRgb),.1), rgba(var(--tintaRgb),.05)); border:1.5px solid rgba(var(--tintaRgb),.14);
+  box-shadow:0 40px 100px rgba(0,0,0,.45), inset 0 1px 0 rgba(var(--tintaRgb),.14); }
+.pz-imagen{ background:radial-gradient(80% 120% at 20% 0%, rgba(255,255,255,.35), transparent 50%), linear-gradient(135deg, var(--acento), #8C3B22 70%, #3A1A10); }
+.pz-imagen img{ width:100%; height:100%; object-fit:cover; display:block; }
+.pz-titulo{ color:var(--tinta); font-weight:700; letter-spacing:-.03em; white-space:nowrap; display:flex; align-items:center; }
+.pz-texto{ color:rgba(var(--tintaRgb),.62); font-weight:500; white-space:nowrap; display:flex; align-items:center; }
+.pz-boton{ background:var(--acento); color:var(--fondo); font-weight:700; display:grid; place-items:center; white-space:nowrap; box-shadow:0 18px 50px rgba(var(--halo),.45); }
+.fantasma{ background:rgba(var(--halo),.28); border:2px solid var(--acento); }
+.pieza .dentro{ width:100%; height:100%; }
+.cursor{ width:56px; height:56px; z-index:20; filter:drop-shadow(0 6px 14px rgba(0,0,0,.5)); }
+.onda{ width:40px; height:40px; border-radius:50%; border:3px solid var(--tinta); }
+.cierre{ position:absolute; left:0; top:0; width:var(--ancho); height:var(--alto); z-index:30; }
+.cierre > *{ position:absolute; left:0; top:0; }
+.velo{ position:absolute; left:0; top:0; width:var(--ancho); height:var(--alto); z-index:29; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "etiqueta": "Del código a la app",
+  "archivo": "App.jsx",
+  "codigo": [
+    "export function App() {",
+    "  return (",
+    "    <Tarjeta>",
+    "      <Imagen src=\"portada.jpg\" />",
+    "      <Titulo>Tu nueva app</Titulo>",
+    "      <Texto>Diseña, prueba, publica.</Texto>",
+    "      <Boton>Empezar ahora</Boton>",
+    "    </Tarjeta>",
+    "  );",
+    "}"
+  ],
+  "piezas": [2, 3, 4, 5, 6],
+  "app": { "titulo": "Tu nueva app", "texto": "Diseña, prueba, publica.", "boton": "Empezar ahora", "imagen": "" },
+  "titular": "De una idea *a tu app* en minutos",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+// resaltado de sintaxis sencillo (JSX/JS)
+const resalta = (s) => {
+  let o = '', m; const re = /(\/\/.*$)|("[^"]*"|'[^']*')|(<\/?[A-Za-z][\w.]*|\/?>)|\b(export|function|return|const|let|import|from|default|if|else|await|async)\b|(\b\d+(?:\.\d+)?\b)|([(){};=,])/g;
+  let i = 0;
+  while ((m = re.exec(s))) {
+    o += esc(s.slice(i, m.index)); const t = esc(m[0]);
+    o += m[1] ? `<span class="c">${t}</span>` : m[2] ? `<span class="s">${t}</span>` : m[3] ? `<span class="g">${t}</span>` : m[4] ? `<span class="k">${t}</span>` : m[5] ? `<span class="n">${t}</span>` : `<span class="p">${t}</span>`;
+    i = m.index + m[0].length;
+  }
+  return o + esc(s.slice(i));
+};
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const codigo = P.codigo, NL = codigo.length;
+  const FS = VERT ? 27 : 26, LH = Math.round(FS * 1.62);
+  // geometría: editor y tarjeta de la app
+  const ED = VERT ? { x: 90, y: 290, w: 900 } : { x: 110, y: 170, w: 900 };
+  const CA = VERT ? { x: 150, y: ED.y + 64 + 52 + NL * LH + 70, w: 780 } : { x: 1110, y: 180, w: 700 };
+  const IMH = VERT ? 210 : 270;
+  const ed = MG.el(`<div class="editor" style="width:${ED.w}px"><div class="barra"><i></i><i></i><i></i><span>${esc(P.archivo)}</span></div><div class="cuerpo">${codigo.map((l, i) =>
+    `<div class="lin" style="font-size:${FS}px;height:${LH}px;line-height:${LH}px"><b>${i + 1}</b><span class="txt" style="width:0ch">${resalta(l)}</span></div>`).join('')}<div class="caret" style="height:${LH * .72}px"></div></div></div>`);
+  const lins = [...ed.querySelectorAll('.lin')], txts = lins.map((l) => l.querySelector('.txt')), caret = ed.querySelector('.caret');
+  const chip = MG.el(`<div class="chip">${esc(P.etiqueta)}</div>`);
+
+  // piezas de la interfaz
+  const A = P.app || {}, PAD = 40;
+  const geo = {
+    tarjeta: { x: CA.x, y: CA.y, w: CA.w, h: PAD + IMH + 34 + 66 + 12 + 46 + 34 + 92 + PAD, r: 40 },
+    imagen: { x: CA.x + PAD, y: CA.y + PAD, w: CA.w - 2 * PAD, h: IMH, r: 24 },
+    titulo: { x: CA.x + PAD, y: CA.y + PAD + IMH + 34, w: CA.w - 2 * PAD, h: 66, r: 8 },
+    texto: { x: CA.x + PAD, y: CA.y + PAD + IMH + 34 + 66 + 12, w: CA.w - 2 * PAD, h: 46, r: 8 },
+    boton: { x: CA.x + PAD, y: CA.y + PAD + IMH + 34 + 66 + 12 + 46 + 34, w: CA.w - 2 * PAD, h: 92, r: 46 },
+  };
+  if (!VERT) { const dy = (H - geo.tarjeta.h) / 2 - CA.y + 30; for (const g of Object.values(geo)) g.y += dy; }
+  const orden = ['tarjeta', 'imagen', 'titulo', 'texto', 'boton'];
+  const contenido = { tarjeta: '', imagen: A.imagen ? `<img src="${A.imagen}">` : '', titulo: `<span style="font-size:56px">${esc(A.titulo)}</span>`,
+    texto: `<span style="font-size:36px">${esc(A.texto)}</span>`, boton: `<span style="font-size:38px">${esc(A.boton)} →</span>` };
+  const piezas = orden.map((n) => { const el = MG.el(`<div class="pieza pz-${n}"><div class="dentro" style="display:flex;align-items:center;${n === 'boton' ? 'justify-content:center' : ''}">${contenido[n]}</div></div>`);
+    const fa = MG.el(`<div class="pieza fantasma"></div>`); return { n, el, fa, dentro: el.querySelector('.dentro') }; });
+  const cursor = MG.el(`<svg class="cursor" viewBox="0 0 24 24"><path d="M4 2 L4 19 L8.6 14.8 L11.6 21.6 L14.6 20.3 L11.7 13.6 L18 13.6 Z" fill="#fff" stroke="#111" stroke-width="1.3" stroke-linejoin="round"/></svg>`);
+  const onda = MG.el(`<div class="onda"></div>`);
+
+  // cierre (fuera de la cámara)
+  const velo = MG.el(`<div class="velo"></div>`, document.body), cie = MG.el(`<div class="cierre"></div>`, document.body);
+  const logo = MG.el(logoHTML(), cie), anchoTit = VERT ? W - 180 : 1500;
+  const tit = MG.texto(md(P.titular), 'tit'); cie.appendChild(tit); tit.style.width = anchoTit + 'px'; tit.style.fontSize = (VERT ? 112 : 124) + 'px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`, cie);
+
+  // tiempos de escritura: cada línea arranca tras la anterior (con pausa), velocidad por carácter
+  const tA = .75, porCar = Math.min(.03, 3.6 / codigo.reduce((a, l) => a + l.trim().length, 0));
+  const ini = [], fin = []; let tt = tA;
+  codigo.forEach((l) => { const ind = l.length - l.trimStart().length; ini.push(tt); tt += Math.max(.06, l.trim().length * porCar); fin.push(tt); tt += .08; });
+  const tEsc = tt, tCur = Math.max(tEsc + .25, fin[P.piezas[4]] + .85), tClic = tCur + .85, tZ = tClic + .3, tC = tZ + .55;
+  const largo = (i, t) => { const l = codigo[i], ind = l.length - l.trimStart().length; if (t <= ini[i]) return 0; if (t >= fin[i]) return l.length;
+    return ind + Math.floor((l.length - ind) * k(t, ini[i], fin[i])); };
+
+  let chW = 0;
+  return (t) => {
+    if (!chW) chW = txts[0].scrollWidth / Math.max(1, codigo[0].length) || FS * .6;
+    // cámara: deriva continua y empuje lento; después zoom a través del botón
+    const gb = geo.boton, bx = gb.x + gb.w / 2, by = gb.y + gb.h / 2;
+    const zt = C.entradaCubica(k(t, tZ, tC));
+    const foco = C.afterEffects75(k(t, tCur - .4, tClic));
+    const ox = lerp(W / 2, bx, foco), oy = lerp(H / 2, by, foco);
+    const z = lerp(1.0, 1.07, t / D) * lerp(1, 1.12, foco) * (1 + 22 * zt * zt);
+    MG.vista.style.transformOrigin = `${ox}px ${oy}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .55) * 9 * (1 - zt)}px, ${Math.cos(t * .4) * 7 * (1 - zt)}px) rotate(${Math.sin(t * .3) * .5 * (1 - zt)}deg)`;
+    MG.desenfoca(MG.vista, zt * 10, zt * 10); MG.vista.style.opacity = t > tC ? 0 : 1;
+    velo.style.background = `rgba(${hexRgb(getComputedStyle(document.documentElement).getPropertyValue('--acento').trim() || '#D97757')},${C.salidaCubica(k(t, tZ + .25, tC))})`;
+    velo.style.opacity = 1 - C.salidaCubica(k(t, tC, tC + .7));
+    velo.style.display = t > tZ ? 'block' : 'none';
+
+    // chip y editor
+    const ec = MG.entra(chip, t, .1, { d: .55, dy: -50, curva: 'salidaQuint', base: 6 });
+    if (VERT) MG.pon(chip, (W - chip.offsetWidth) / 2, 170 + ec.y); else MG.pon(chip, ED.x, 70 + ec.y);
+    const ee = MG.entra(ed, t, .05, { d: .7, dy: 160, escala0: .9, curva: 'rebote', base: 8 });
+    MG.pon(ed, ED.x, ED.y + 30 + ee.y, ee.s);
+
+    // escritura + cursor de texto
+    let act = -1;
+    txts.forEach((s, i) => { const n = largo(i, t); s.style.width = n + 'ch'; if (t >= ini[i] && (t < (ini[i + 1] ?? 1e9))) act = i; lins[i].classList.toggle('act', i === act && t < tEsc + .3); });
+    if (act < 0) act = 0;
+    const cx = 30 + FS * 1.44 + largo(act, t) * chW + 2, cyy = 26 + act * LH + LH * .14;
+    caret.style.transform = `translate(${cx}px, ${cyy}px)`; caret.style.opacity = t > tEsc + .4 ? (Math.sin(t * 9) > 0 ? .9 : 0) : 1;
+
+    // piezas: un bloque sale de su línea y se transforma en la pieza
+    const edY = ED.y + 30 + ee.y;
+    piezas.forEach((p, i) => {
+      const li = P.piezas[i], g = geo[p.n], t0 = fin[li] - .05, d = i === 0 ? .8 : .62;
+      const cv = ['salidaQuint', 'salidaExpo', 'afterEffects75', 'salidaCubica', 'salidaQuint'][i];
+      const u = C[cv](k(t, t0, t0 + d)), uq = C[cv](k(t - DT, t0, t0 + d));
+      const ind = codigo[li].length - codigo[li].trimStart().length;
+      const L = { x: ED.x + 30 + FS * 1.44 + ind * chW - 6, y: edY + 64 + 26 + li * LH, w: (codigo[li].trimEnd().length - ind) * chW + 12, h: LH, r: 8 };
+      const gx = lerp(L.x, g.x, u), gy = lerp(L.y, g.y, u) - Math.sin(u * Math.PI) * (VERT ? 60 : 90), gw = lerp(L.w, g.w, u), gh = lerp(L.h, g.h, u), gr = lerp(L.r, g.r, u);
+      const vx = (gx - lerp(L.x, g.x, uq)) / DT, vy = (gy - (lerp(L.y, g.y, uq) - Math.sin(uq * Math.PI) * (VERT ? 60 : 90))) / DT;
+      const vis = t >= t0 ? 1 : 0;
+      // fantasma (el bloque en vuelo)
+      Object.assign(p.fa.style, { left: gx + 'px', top: gy + 'px', width: gw + 'px', height: gh + 'px', borderRadius: gr + 'px' });
+      p.fa.style.opacity = vis * (1 - C.salidaCubica(k(u, .7, 1))) * .95;
+      MG.desenfoca(p.fa, Math.abs(vx) * MB * .9, Math.abs(vy) * MB * .9);
+      // pieza real: aparece al final del vuelo con un pequeño rebote
+      const r = C.rebote(k(t, t0 + d * .65, t0 + d * .65 + .7)), sc = lerp(.92, 1, r);
+      Object.assign(p.el.style, { left: g.x + 'px', top: g.y + 'px', width: g.w + 'px', height: g.h + 'px', borderRadius: g.r + 'px' });
+      p.el.style.transformOrigin = '50% 50%'; p.el.style.transform = `scale(${sc})`;
+      p.el.style.opacity = Math.min(1, k(t, t0 + d * .6, t0 + d * .9) * 1.2);
+      p.dentro.style.transform = `translateY(${(1 - C.salidaQuint(k(t, t0 + d * .7, t0 + d + .3))) * 26}px)`;
+      p.dentro.style.opacity = k(t, t0 + d * .7, t0 + d + .1);
+    });
+    // clic en el botón
+    const bot = piezas[4].el, pc = C.rebote(k(t, tClic, tClic + .5));
+    if (t > tClic) bot.style.transform = `scale(${1 - .06 * Math.sin(Math.min(1, k(t, tClic, tClic + .35)) * Math.PI)})`;
+    const cm = C.afterEffects75(k(t, tCur, tClic - .05));
+    const c0 = VERT ? [W - 120, H - 520] : [W - 150, H - 100];
+    const cxp = lerp(c0[0], bx + 70, cm) + Math.sin(cm * Math.PI) * -60, cyp = lerp(c0[1], by + 12, cm);
+    cursor.style.opacity = k(t, tCur - .1, tCur + .15) * (1 - zt * 3);
+    MG.pon(cursor, cxp, cyp, t > tClic && t < tClic + .3 ? .86 : 1);
+    MG.desenfoca(cursor, 0, 0);
+    const po = k(t, tClic, tClic + .6); MG.pon(onda, bx + 70 - 20, by + 12 - 20, 1 + po * 4); onda.style.opacity = t > tClic ? (1 - po) * .8 : 0;
+
+    // cierre
+    cie.style.opacity = t > tC - .05 ? 1 : 0;
+    const zc = C.salidaQuint(k(t, tC - .05, tC + 1.2));
+    cie.style.transformOrigin = `${W / 2}px ${H / 2}px`; cie.style.transform = `scale(${lerp(1.25, 1, zc) * lerp(1, 1.05, k(t, tC, D))})`;
+    const bloque = 150 + 60 + tit.offsetHeight + 60 + 50, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(tit, (W - anchoTit) / 2, y0 + 210);
+    tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .07, { d: .6, dy: 90, escala0: 1, curva: 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + tit.trozos.length * .07, { d: .6, dy: 40, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 210 + tit.offsetHeight + 60 + em.y);
+  };
+});
+</script>
+</body></html>

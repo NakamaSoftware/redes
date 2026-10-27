@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «legal-sabias» · Abogado / asesor · Viegas IA · Motion Lab
+     «¿Sabías que…?»: la interrogación gigante cae con rebote fuerte y se balancea, la pregunta se escribe, el dato entra por
+     palabras con la cifra clave en acento dentro de una píldora que se infla, y la fuente legal aparece abajo en mono.
+     Cambia "pregunta", "dato" (*palabras* = acento), "fuente", "marca". Comprueba siempre el dato legal antes de publicar.
+     Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.inte{ font:400 560px/1 var(--serif); font-style:italic; color:var(--acento); text-shadow:0 0 120px rgba(var(--halo),.55); transform-origin:50% 90%; }
+.preg{ font:600 92px var(--fuente); letter-spacing:-.035em; color:var(--texto); text-align:center; white-space:nowrap; }
+.dato{ font:600 76px/1.14 var(--fuente); letter-spacing:-.03em; color:var(--texto); text-align:center; }
+.fuente{ font:500 26px/1.4 var(--mono); color:var(--mute); text-align:center; letter-spacing:.04em; }
+.sello{ display:inline-flex; align-items:center; gap:14px; font:500 28px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--texto); }
+.sello svg{ width:44px; height:44px; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Derecho del consumidor",
+  "pregunta": "¿Sabías que…",
+  "dato": "tienes *14 días naturales* para devolver una compra online sin dar explicaciones?",
+  "fuente": "Real Decreto Legislativo 1/2007, art. 102 y 104 (España)",
+  "marca": "Ortega Abogados",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 140 : 220);
+  const sello = MG.el(`<div class="sello"><svg viewBox="0 0 24 24" fill="none" stroke="var(--acento)" stroke-width="1.8" stroke-linecap="round"><path d="M12 3v18M5 7h14M7 7l-3 7a3 3 0 006 0zM17 7l-3 7a3 3 0 006 0zM8 21h8"/></svg>${P.etiqueta}</div>`);
+  const inte = MG.el(`<div class="inte">?</div>`);
+  const preg = MG.el(`<div class="preg"></div>`);
+  const dato = N.frase(P.dato, 'dato', cw);
+  const fuente = MG.el(`<div class="fuente" style="width:${cw}px">${P.fuente}</div>`);
+  const marca = MG.el(N.marca(.85));
+  let L;
+  return (t) => {
+    if (!L) { preg.textContent = P.pregunta; const wp = preg.offsetWidth; L = { wp, hD: dato.offsetHeight, y: H * (VERT ? .40 : .36) }; }
+    N.vivo(t, 1, 1.08);
+    N.es(sello, t, .05, fin, { x: N.cx(sello), y: L.y - (VERT ? 700 : 470), dy: -60, curva: 'salidaQuint', oy: -60 });
+    // la interrogación cae y se balancea (muelle), luego se aparta hacia arriba
+    const pi = N.pop(t, .15, .8, 'rebote'), bal = Math.sin(t * 2.1) * 4;
+    N.es(inte, t, .15, fin + .05, { x: N.cx(inte), y: L.y - (VERT ? 560 : 430), dy: -420, curva: 'reboteFuerte', d: .7, oy: -200, s1: 1.2 });
+    inte.style.rotate = `${bal + (1 - Math.min(1, pi)) * 30}deg`;
+    N.escribe(preg, P.pregunta, t, .7, 1.4);
+    N.es(preg, t, .7, fin + .1, { x: (W - L.wp) / 2, y: L.y, dy: 40, d: .4, curva: 'salidaQuint', oy: -100 });
+    MG.pon(dato, (W - cw) / 2, L.y + 150);
+    if (t < fin + .2) MG.animaTexto(dato, t, 1.6, { paso: .06, dy: 60 }); else N.es(dato, t, 0, fin + .2, { x: (W - cw) / 2, y: L.y + 150, oy: -110 });
+    N.es(fuente, t, 3.6, fin + .3, { x: (W - cw) / 2, y: L.y + 150 + L.hD + 60, dy: 40, curva: 'salidaQuint', oy: -50 });
+    N.es(marca, t, 3.9, fin + .38, { x: N.cx(marca), y: H - (VERT ? 330 : 140), dy: 60, oy: -50 });
+  };
+});
+</script>
+</body></html>

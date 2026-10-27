@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-dispositivo-color» · Viegas IA · Motion Lab
+     Dispositivo sobre color (lenguaje de los vídeos de lanzamiento de producto): fondo de color saturado con degradado sutil,
+     una ventana de ordenador y un teléfono en 3D ligera que entran y giran suave; dentro, tu captura o tu vídeo (o una interfaz
+     de ejemplo dibujada). Titular al lado/encima, la cámara se acerca a un detalle con una etiqueta, «zoom a través» y cierre con logo.
+     Cambia "titulares" (1-2; *palabra* = cursiva destacada), "subtitulo", "detalle" (etiqueta del acercamiento), "fondo", "fondo2"
+     (vacío = el fondo oscurecido), "tinta" (color del texto), "acento", "media" (ruta a imagen o vídeo para la ventana; vacío = interfaz
+     de ejemplo), "mediaMovil" (lo mismo para el teléfono), "foco" ([x, y] del detalle en la pantalla, 0-1; solo con media propia),
+     "dispositivos" ("ambos" | "ventana" | "telefono"), "marca", "logo" (ruta; vacío = inicial), "lema", "duracion" (8-12 s).
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?clave=valor en la dirección para textos y colores. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root { --fuente: 'Inter Tight', 'Inter', 'Segoe UI', system-ui, sans-serif; --serif: 'Instrument Serif', Georgia, serif; }
+.mg-mundo > * { position: absolute; left: 0; top: 0; }
+.capa { position: absolute; left: 0; top: 0; width: var(--ancho); height: var(--alto); }
+.bg { overflow: hidden; }
+.luz { position: absolute; border-radius: 50%; filter: blur(110px); pointer-events: none; }
+.cam { position: absolute; left: 0; top: 0; width: var(--ancho); height: var(--alto); transform-origin: 0 0; perspective: 2400px; }
+.disp { position: absolute; left: 0; top: 0; transform-origin: 50% 50%; }
+.sombra { position: absolute; left: 0; top: 0; border-radius: 50%; background: rgba(0,0,0,.38); filter: blur(40px); }
+/* ventana de ordenador */
+.ven { border-radius: 22px; overflow: hidden; background: #fff; box-shadow: 0 60px 120px rgba(0,0,0,.35), 0 0 0 1px rgba(255,255,255,.25); }
+.ven .barra { height: 46px; display: flex; align-items: center; gap: 10px; padding: 0 20px; background: #F1F1F4; border-bottom: 1px solid #E4E4EA; }
+.ven .barra i { width: 14px; height: 14px; border-radius: 50%; display: block; }
+.ven .barra .url { margin-left: 18px; flex: 1; max-width: 46%; height: 26px; border-radius: 8px; background: #E4E4EA; }
+.pant { position: absolute; left: 0; right: 0; bottom: 0; overflow: hidden; background: #FAFAFC; }
+.pant > img, .pant > video, .pant .mg-tarjeta { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; border-radius: 0; box-shadow: none; }
+/* interfaz de ejemplo (ventana) */
+.ui { position: absolute; inset: 0; display: flex; font-family: var(--fuente); color: #17171C; }
+.ui .lat { width: 22%; background: #F3F3F7; border-right: 1px solid #E7E7EE; padding: 26px 18px; }
+.ui .lat .lg { width: 38px; height: 38px; border-radius: 11px; background: var(--acento); margin-bottom: 26px; }
+.ui .lat p { height: 14px; border-radius: 7px; background: #DCDCE6; margin: 0 0 20px; }
+.ui .lat p.on { background: var(--acento); opacity: .55; }
+.ui .cuerpo { flex: 1; padding: 30px 30px; }
+.ui h4 { font: 600 30px var(--fuente); letter-spacing: -.02em; margin-bottom: 6px; }
+.ui .gr { font: 500 16px var(--fuente); color: #8A8A99; margin-bottom: 24px; }
+.ui .fila { display: flex; gap: 16px; margin-bottom: 20px; }
+.ui .stat { flex: 1; border-radius: 16px; background: #fff; border: 1px solid #E7E7EE; padding: 18px 18px; box-shadow: 0 8px 22px rgba(20,20,40,.05); }
+.ui .stat small { display: block; font: 500 14px var(--fuente); color: #8A8A99; margin-bottom: 8px; }
+.ui .stat b { font: 600 34px var(--fuente); letter-spacing: -.03em; }
+.ui .stat.foco { border: 2px solid var(--acento); box-shadow: 0 10px 30px rgba(0,0,0,.08), 0 0 0 6px color-mix(in srgb, var(--acento) 16%, transparent); }
+.ui .stat.foco b { color: var(--acento); }
+.ui .graf { height: 170px; border-radius: 16px; background: #fff; border: 1px solid #E7E7EE; display: flex; align-items: flex-end; gap: 12px; padding: 20px 22px; }
+.ui .graf span { flex: 1; border-radius: 6px 6px 3px 3px; background: #E2E2EC; transform-origin: 50% 100%; }
+.ui .graf span.on { background: var(--acento); }
+/* teléfono */
+.tel { border-radius: 58px; background: #0E0E12; padding: 12px; box-shadow: 0 60px 120px rgba(0,0,0,.4), inset 0 0 0 2px rgba(255,255,255,.14); }
+.tel .pant { left: 12px; right: 12px; top: 12px; bottom: 12px; border-radius: 46px; }
+.tel .isla { position: absolute; left: 50%; top: 26px; width: 96px; height: 28px; margin-left: -48px; border-radius: 20px; background: #0E0E12; z-index: 3; }
+.uim { position: absolute; inset: 0; padding: 64px 22px 22px; font-family: var(--fuente); color: #17171C; background: #FAFAFC; }
+.uim h5 { font: 600 30px var(--fuente); letter-spacing: -.02em; margin: 6px 0 18px; }
+.uim .it { display: flex; align-items: center; gap: 12px; padding: 13px; border-radius: 16px; background: #fff; border: 1px solid #ECECF2; margin-bottom: 11px; }
+.uim .it i { width: 38px; height: 38px; border-radius: 12px; background: #E6E6EF; flex: none; }
+.uim .it i.on { background: var(--acento); }
+.uim .it p { flex: 1; height: 11px; border-radius: 6px; background: #DCDCE6; }
+.uim .bt { margin-top: 18px; height: 54px; border-radius: 27px; background: var(--acento); }
+/* textos */
+.tit { position: absolute; font: 600 var(--tam) / 1.04 var(--fuente); letter-spacing: -.035em; color: var(--tinta); }
+.tit em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.01em; }
+.tit .w, .sub .w { display: inline-block; }
+.sub { position: absolute; font: 500 var(--tamSub) / 1.3 var(--fuente); color: var(--tinta); opacity: .78; }
+.chip { position: absolute; display: inline-flex; align-items: center; gap: 14px; padding: 18px 30px; border-radius: 99px; white-space: nowrap;
+  font: 600 38px var(--fuente); letter-spacing: -.01em; color: #17171C; background: #fff; box-shadow: 0 24px 60px rgba(0,0,0,.28); }
+.chip i { width: 16px; height: 16px; border-radius: 50%; background: var(--acento); }
+.cierre { position: absolute; left: 0; top: 0; width: var(--ancho); display: flex; flex-direction: column; align-items: center; color: var(--tinta); }
+.cierre .lg { width: 190px; height: 190px; border-radius: 50px; display: grid; place-items: center; overflow: hidden; background: var(--tinta);
+  color: var(--fondo); font: 700 110px var(--fuente); box-shadow: 0 40px 90px rgba(0,0,0,.3); }
+.cierre .lg img { width: 100%; height: 100%; object-fit: contain; }
+.cierre .nom { margin-top: 44px; font: 600 86px var(--fuente); letter-spacing: -.035em; }
+.cierre .lema { margin-top: 26px; padding: 14px 30px; border-radius: 99px; border: 1.5px solid color-mix(in srgb, var(--tinta) 45%, transparent);
+  font: 500 34px var(--fuente); letter-spacing: .01em; white-space: nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "titulares": ["Todo tu trabajo, *en un solo sitio*", "Diseñado para que vayas *más rápido*"],
+  "subtitulo": "Tu panel, tus clientes y tus cifras. En el ordenador y en el móvil.",
+  "detalle": "+38 % de ventas este mes",
+  "fondo": "#5B45FF",
+  "fondo2": "",
+  "tinta": "#FFFFFF",
+  "acento": "#5B45FF",
+  "media": "",
+  "mediaMovil": "",
+  "foco": [0.3, 0.3],
+  "dispositivos": "ambos",
+  "marca": "Viegas Estudio",
+  "logo": "",
+  "lema": "Ya disponible"
+}
+</script>
+<script>
+// ---------------------------------------------------------------- parámetros y formato (bloque params + ?clave=valor + #hash)
+const P = Object.assign(JSON.parse(document.getElementById('params').textContent), window.PARAMS || {});
+new URLSearchParams(location.search).forEach((v, c) => { if (c in P && typeof P[c] !== 'object') P[c] = typeof P[c] === 'number' ? +v : v; });
+P.duracion = Math.min(12, Math.max(8, +P.duracion || 10));
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+// colores: el fondo2 por defecto es el fondo oscurecido un 38 %
+const mezcla = (hex, con, a) => { const n = (h) => parseInt(h.replace('#', ''), 16), A = n(hex), B = n(con);
+  const c = (s) => Math.round(((A >> s) & 255) * (1 - a) + ((B >> s) & 255) * a); return `rgb(${c(16)},${c(8)},${c(0)})`; };
+const R = document.documentElement.style;
+R.setProperty('--fondo', P.fondo); R.setProperty('--tinta', P.tinta); R.setProperty('--acento', P.acento || P.fondo);
+const FONDO2 = P.fondo2 || mezcla(P.fondo, '#000000', .38), CLARO = mezcla(P.fondo, '#FFFFFF', .28);
+const esVideo = (s) => /\.(mp4|webm|mov)(\?|$)/i.test(s || '');
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'liso' }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB, desenfoca } = MG;
+  const S = P.duracion / 10, T = (x) => x * S;           // el guion está escrito para 10 s y se reparte en la duración elegida
+  const D = P.dispositivos || 'ambos', conVen = D !== 'telefono', conTel = D !== 'ventana';
+
+  // ------------------------------------------------ guion (segundos para 10 s)
+  const G = { t1: T(.15), t1fuera: T(3.0), t2: T(3.35), t2fuera: T(5.0), zoom0: T(5.0), zoom1: T(6.6), chip: T(5.9), chipFuera: T(7.35),
+    traves0: T(7.45), traves1: T(8.25), cierre: T(7.95) };
+
+  // ------------------------------------------------ fondo: color sólido + degradado sutil + dos luces suaves que derivan
+  const bg = MG.el(`<div class="capa bg" style="background:radial-gradient(120% 80% at 20% 0%, ${CLARO} 0%, transparent 55%), linear-gradient(160deg, ${P.fondo} 30%, ${FONDO2} 100%)"></div>`);
+  const luces = [[.15, .2, 900, 'rgba(255,255,255,.22)'], [.9, .85, 1100, FONDO2]].map(([x, y, r, c]) => {
+    const l = MG.el(`<div class="luz" style="width:${r}px;height:${r}px;background:radial-gradient(circle, ${c}, transparent 65%)"></div>`, bg); l._o = { x: x * W - r / 2, y: y * H - r / 2 }; return l; });
+
+  // ------------------------------------------------ dispositivos (posiciones en px del lienzo)
+  const L = VERT
+    ? { ven: { w: 940, h: 700, cx: 520, cy: 1200 }, tel: { w: 330, h: 690, cx: conVen ? 850 : 540, cy: conVen ? 1420 : 1200 },
+        tit: { x: 90, y: 270, w: 900, tam: 100, al: 'center' }, sub: 40 }
+    : { ven: { w: 940, h: 620, cx: 1250, cy: 545 }, tel: { w: 285, h: 590, cx: conVen ? 1665 : 1350, cy: conVen ? 700 : 540 },
+        tit: { x: 140, y: 0, w: 640, tam: 92, al: 'left' }, sub: 36 };
+  const escen = MG.el(`<div class="capa"></div>`), cam = MG.el(`<div class="cam"></div>`, escen);
+  const sombraV = conVen && MG.el(`<div class="sombra" style="width:${L.ven.w * .9}px;height:120px"></div>`, cam);
+  const sombraT = conTel && MG.el(`<div class="sombra" style="width:${L.tel.w * .9}px;height:80px"></div>`, cam);
+
+  const UI_VEN = `<div class="ui"><div class="lat"><div class="lg"></div><p style="width:80%"></p><p class="on" style="width:66%"></p><p style="width:74%"></p><p style="width:58%"></p><p style="width:70%"></p></div>
+    <div class="cuerpo"><h4>Resumen</h4><div class="gr">Hoy · actualizado hace 1 min</div>
+    <div class="fila"><div class="stat foco"><small>Ventas</small><b>+38 %</b></div><div class="stat"><small>Clientes</small><b>1.284</b></div><div class="stat"><small>Pedidos</small><b>312</b></div></div>
+    <div class="graf">${[38, 52, 44, 61, 57, 72, 66, 84, 79, 96].map((h, i) => `<span class="${i > 6 ? 'on' : ''}" style="height:${h}%"></span>`).join('')}</div></div></div>`;
+  const UI_TEL = `<div class="uim"><h5>Hoy</h5>${[1, 0, 0, 1, 0].map((on, i) => `<div class="it"><i class="${on ? 'on' : ''}"></i><p style="max-width:${[80, 64, 72, 56, 68][i]}%"></p></div>`).join('')}<div class="bt"></div></div>`;
+  const pantalla = (padre, src, ejemplo) => {
+    if (!src) { padre.innerHTML = ejemplo; return; }
+    if (esVideo(src)) { const v = MG.tarjeta(src, 10, 10, 0, { padre, desde: 0 }); v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%'; return; }
+    padre.innerHTML = `<img src="${src}" alt="">`;
+  };
+  let ven, tel;
+  if (conVen) {
+    ven = MG.el(`<div class="disp ven" style="width:${L.ven.w}px;height:${L.ven.h}px"><div class="barra"><i style="background:#FF5F57"></i><i style="background:#FEBC2E"></i><i style="background:#28C840"></i><span class="url"></span></div><div class="pant" style="top:46px"></div></div>`, cam);
+    ven.style.left = L.ven.cx - L.ven.w / 2 + 'px'; ven.style.top = L.ven.cy - L.ven.h / 2 + 'px';
+    pantalla(ven.querySelector('.pant'), P.media, UI_VEN);
+  }
+  if (conTel) {
+    tel = MG.el(`<div class="disp tel" style="width:${L.tel.w}px;height:${L.tel.h}px"><div class="isla"></div><div class="pant"></div></div>`, cam);
+    tel.style.left = L.tel.cx - L.tel.w / 2 + 'px'; tel.style.top = L.tel.cy - L.tel.h / 2 + 'px';
+    pantalla(tel.querySelector('.pant'), P.mediaMovil, UI_TEL);
+  }
+  const barras = ven && !P.media ? [...ven.querySelectorAll('.graf span')] : [];
+
+  // ------------------------------------------------ textos: palabras separadas (con su espacio) que se revelan de desenfocadas a nítidas
+  const palabras = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => '\u0001' + w).join(' '))
+    .split(' ').filter(Boolean).map((w) => w[0] === '\u0001' ? `<span class="w"><em>${w.slice(1)}</em></span>` : `<span class="w">${w}</span>`).join(' ');
+  const textos = MG.el(`<div class="capa"></div>`);
+  const titulares = (P.titulares || []).slice(0, 2).map((s, i) => {
+    const el = MG.el(`<div class="tit" style="--tam:${L.tit.tam}px;width:${L.tit.w}px;text-align:${L.tit.al}">${palabras(s)}</div>`, textos);
+    el._w = [...el.querySelectorAll('.w')]; return el; });
+  const sub = P.subtitulo ? MG.el(`<div class="sub" style="--tamSub:${L.sub}px;width:${L.tit.w}px;text-align:${L.tit.al}">${palabras(P.subtitulo)}</div>`, textos) : null;
+  if (sub) sub._w = [...sub.querySelectorAll('.w')];
+  const chip = P.detalle ? MG.el(`<div class="chip"><i></i>${P.detalle}</div>`, textos) : null;
+  const ini = (P.marca || '·').trim()[0].toUpperCase();
+  const cierre = MG.el(`<div class="cierre"><div class="lg">${P.logo ? `<img src="${P.logo}" alt="">` : ini}</div><div class="nom">${P.marca || ''}</div>${P.lema ? `<div class="lema">${P.lema}</div>` : ''}</div>`, textos);
+  const [cLg, cNom, cLema] = [cierre.querySelector('.lg'), cierre.querySelector('.nom'), cierre.querySelector('.lema')];
+
+  // revela palabra a palabra: entrada rápida que frena suave (salidaQuint) con desenfoque de movimiento; salida inversa (acelera y se va)
+  function revela(el, t, t0, t1, o = {}) {
+    const paso = o.paso ?? .07, d = o.d ?? .75, dy = o.dy ?? 70, B = o.blur ?? 16;
+    el._w.forEach((s, i) => {
+      const a = t0 + i * paso, f = (u) => C.salidaQuint(k(u, a, a + d));
+      let p = f(t), q = f(t - DT), y = (1 - p) * dy, op = Math.min(1, p * 1.6), bl = (1 - p) * B, vy = dy * (p - q) / DT;
+      if (t1 != null && t >= t1) {
+        const b = t1 + i * paso * .4, g = (u) => C.entradaCubica(k(u, b, b + .42)), r = g(t), r0 = g(t - DT);
+        y = -r * 80; op = 1 - r; bl = r * B * .7; vy = 80 * (r - r0) / DT;
+      }
+      s.style.opacity = op; s.style.transform = `translateY(${y.toFixed(2)}px)`;
+      desenfoca(s, bl, bl + Math.abs(vy) * MB);
+    });
+  }
+
+  // mueve un elemento con una función del tiempo y le pone desenfoque de movimiento según su velocidad real
+  function mueve(el, f, t) {
+    const a = f(t), b = f(t - DT), vx = (a.x - b.x) / DT, vy = (a.y - b.y) / DT;
+    el.style.transform = `translate(${a.x.toFixed(2)}px,${a.y.toFixed(2)}px) rotateX(${(a.rx || 0).toFixed(3)}deg) rotateY(${(a.ry || 0).toFixed(3)}deg) rotateZ(${(a.rz || 0).toFixed(3)}deg) scale(${(a.s ?? 1).toFixed(4)})`;
+    el.style.opacity = a.o ?? 1;
+    desenfoca(el, Math.abs(vx) * MB + (a.b || 0), Math.abs(vy) * MB + (a.b || 0));
+    return a;
+  }
+
+  // punto de detalle (en coordenadas de la cámara): la tarjeta destacada de la interfaz de ejemplo, o "foco" sobre tu captura
+  let foco = null;
+  const calculaFoco = () => {
+    if (conVen) {
+      const pant = ven.querySelector('.pant'), st = ven.querySelector('.stat.foco');
+      if (st && !P.media) { let x = st.offsetWidth / 2, y = st.offsetHeight / 2, n = st; while (n !== ven) { x += n.offsetLeft; y += n.offsetTop; n = n.offsetParent; }
+        return { x: L.ven.cx - L.ven.w / 2 + x, y: L.ven.cy - L.ven.h / 2 + y }; }
+      return { x: L.ven.cx - L.ven.w / 2 + P.foco[0] * L.ven.w, y: L.ven.cy - L.ven.h / 2 + 46 + P.foco[1] * pant.offsetHeight };
+    }
+    return { x: L.tel.cx - L.tel.w / 2 + P.foco[0] * L.tel.w, y: L.tel.cy - L.tel.h / 2 + P.foco[1] * L.tel.h };
+  };
+
+  return (t) => {
+    if (!foco) foco = calculaFoco();
+    // fondo vivo
+    luces.forEach((l, i) => MG.pon(l, l._o.x + Math.sin(t * .35 + i * 2) * 120, l._o.y + Math.cos(t * .28 + i) * 90));
+
+    // ---------------- dispositivos: entran rápido desde abajo/derecha y frenan suave; giro lento que nunca se para
+    const giro = (u) => ({ ry: Math.sin(u * .55) * 3.2, rx: Math.sin(u * .4 + 1) * 1.6, y: Math.sin(u * .7) * 10 });
+    const plano = (u) => C.afterEffects75(k(u, G.zoom0 - .2, G.zoom1));                 // se ponen de frente al acercarse
+    const fuera = (u) => C.entradaCubica(k(u, G.traves0, G.traves1));                     // «zoom a través»: acelera y se va
+    if (ven) {
+      const fv = (u) => { const p = C.salidaQuint(k(u, T(.35), T(.35) + 1.25)), g = giro(u), fl = 1 - .85 * plano(u), z = fuera(u);
+        return { x: 0, y: (1 - p) * 900 + g.y, rx: lerp(42, VERT ? 9 : 7, p) * fl + g.rx * fl, ry: (lerp(-24, VERT ? -8 : -14, p) + g.ry) * fl, rz: lerp(-6, 0, p),
+          s: lerp(.86, 1, p), o: Math.min(1, p * 2) * (1 - z), b: (1 - p) * 6 + z * 18 }; };
+      mueve(ven, fv, t);
+      if (sombraV) { const p = C.salidaQuint(k(t, T(.35), T(.35) + 1.25)); MG.pon(sombraV, L.ven.cx - L.ven.w * .45, L.ven.cy + L.ven.h / 2 - 20 + (1 - p) * 900);
+        sombraV.style.opacity = p * .9 * (1 - fuera(t)); }
+    }
+    if (tel) {
+      const d0 = conVen ? T(.75) : T(.35);
+      const ft = (u) => { const p = C.salidaQuint(k(u, d0, d0 + 1.2)), g = giro(u + 1.7), fl = 1 - .85 * plano(u), z = fuera(u);
+        return { x: (1 - p) * (VERT ? 700 : 900), y: (1 - p) * 260 - g.y, rx: (lerp(10, 4, p) + g.rx) * fl, ry: (lerp(-48, -16, p) - g.ry) * fl, rz: lerp(14, 2, p) * fl,
+          s: lerp(.9, 1, p), o: Math.min(1, p * 2) * (1 - z), b: (1 - p) * 6 + z * 18 }; };
+      mueve(tel, ft, t);
+      if (sombraT) { const p = C.salidaQuint(k(t, d0, d0 + 1.2)); MG.pon(sombraT, L.tel.cx - L.tel.w * .45 + (1 - p) * 700, L.tel.cy + L.tel.h / 2 - 10);
+        sombraT.style.opacity = p * .8 * (1 - fuera(t)); }
+    }
+    // la gráfica de ejemplo crece barra a barra (rebote)
+    barras.forEach((b, i) => { b.style.transform = `scaleY(${Math.max(0, C.rebote(k(t, T(1.2) + i * .06, T(1.2) + i * .06 + .9))).toFixed(3)})`; });
+
+    // ---------------- cámara: deriva lenta siempre + acercamiento al detalle + «zoom a través»
+    const centro = { x: VERT ? W / 2 : L.ven.cx - 60, y: VERT ? L.ven.cy - 20 : H / 2 };
+    const camF = (u) => {
+      const e = C.afterEffects75(k(u, G.zoom0, G.zoom1)), deriva = 1 + .05 * (u / P.duracion), z = fuera(u);
+      const zoom = deriva * lerp(1, 1.85, e) * (1 + 2.6 * z);
+      const F = { x: lerp(centro.x, foco.x, e), y: lerp(centro.y, foco.y, e) }, Tg = { x: lerp(centro.x, W / 2, e), y: lerp(centro.y, VERT ? H * .5 : H * .47, e) };
+      return { x: Tg.x - F.x * zoom, y: Tg.y - F.y * zoom, s: zoom };
+    };
+    const c0 = camF(t), c1 = camF(t - DT);
+    cam.style.transform = `translate(${c0.x.toFixed(2)}px,${c0.y.toFixed(2)}px) scale(${c0.s.toFixed(4)})`;
+    // desenfoque de la cámara: proporcional a lo que se mueve el centro de la imagen por fotograma
+    const vel = Math.hypot((c0.x + W / 2 * c0.s) - (c1.x + W / 2 * c1.s), (c0.y + H / 2 * c0.s) - (c1.y + H / 2 * c1.s)) / DT;
+    desenfoca(cam, Math.min(24, vel * MB * .6), Math.min(24, vel * MB * .6));
+
+    // ---------------- textos
+    const altoTit = (el) => el.offsetHeight;
+    titulares.forEach((el, i) => {
+      const [a, b] = i === 0 ? [G.t1, G.t1fuera] : [G.t2, G.t2fuera];
+      const y = VERT ? L.tit.y : (H - altoTit(el) - (sub && i === 1 ? 160 : 0)) / 2;
+      el.style.left = L.tit.x + 'px'; el.style.top = y + 'px';
+      el.style.display = t > b + 1.2 || t < a - .1 ? 'none' : '';
+      revela(el, t, a, b);
+    });
+    if (sub) {
+      const t2 = titulares[1] || titulares[0];
+      sub.style.left = L.tit.x + 'px';
+      sub.style.top = (VERT ? L.tit.y : (H - altoTit(t2) - 160) / 2) + altoTit(t2) + (VERT ? 36 : 40) + 'px';
+      sub.style.display = t > G.t2fuera + 1 ? 'none' : '';
+      revela(sub, t, G.t2 + .45, G.t2fuera - .05, { paso: .035, dy: 40, blur: 10 });
+    }
+    if (chip) {   // etiqueta del detalle: aparece con rebote junto al punto de foco (que la cámara ha llevado al centro)
+      const tx = W / 2, ty = VERT ? H * .5 : H * .47, cw = chip.offsetWidth;
+      mueve(chip, (u) => { const p = C.rebote(k(u, G.chip, G.chip + 1)), r = C.entradaCubica(k(u, G.chipFuera, G.chipFuera + .35));
+        return { x: tx - cw / 2, y: ty + (VERT ? 150 : 120) + (1 - p) * 90 - r * 60, s: lerp(.8, 1, Math.min(1.1, p)) * (1 + r * .3), o: Math.min(1, Math.max(0, p) * 2) * (1 - r), b: r * 10 }; }, t);
+    }
+    // ---------------- cierre: el logo llega desde lejos (sigue el «zoom a través»), luego el nombre y el lema
+    const hC = cierre.offsetHeight;
+    cierre.style.top = (H - hC) / 2 + 'px';
+    cierre.style.display = t < G.cierre - .05 ? 'none' : '';
+    mueve(cLg, (u) => { const p = C.salidaQuint(k(u, G.cierre, G.cierre + 1.1)); return { x: 0, y: 0, s: lerp(.25, 1, p) * (1 + .03 * k(u, G.cierre, P.duracion)), o: Math.min(1, p * 2.2), b: (1 - p) * 22 }; }, t);
+    mueve(cNom, (u) => { const p = C.salidaQuint(k(u, G.cierre + .35, G.cierre + 1.2)); return { x: 0, y: (1 - p) * 60, o: Math.min(1, p * 1.8), b: (1 - p) * 14 }; }, t);
+    if (cLema) mueve(cLema, (u) => { const p = C.rebote(k(u, G.cierre + .7, G.cierre + 1.8)); return { x: 0, y: (1 - p) * 50, s: lerp(.9, 1, p), o: Math.min(1, Math.max(0, p) * 2), b: Math.max(0, 1 - p) * 10 }; }, t);
+  };
+});
+</script>
+</body></html>

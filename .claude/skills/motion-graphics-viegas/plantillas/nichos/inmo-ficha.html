@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «inmo-ficha» · Inmobiliaria · Viegas IA · Motion Lab
+     Ficha de propiedad: la foto sube con rebote suave y hace Ken Burns; las fotos se cambian con una cortinilla en diagonal
+     (entradaSalidaQuint), el precio estalla como etiqueta con rebote fuerte y los datos (m², habitaciones, baños) entran
+     escalonados. Cierre con el botón de visita y la marca.
+     Cambia "fotos" (2–4, tuyas), "tipo", "zona", "precio", "datos", "boton", "marca", "logo". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.marco{ border-radius:40px; overflow:hidden; box-shadow:0 50px 110px rgba(var(--sombra),.55); background:var(--superficie); }
+.marco .capa{ position:absolute; inset:0; }
+.marco img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.precio{ font:700 84px var(--fuente); letter-spacing:-.04em; color:#fff; background:var(--acento); padding:18px 36px; border-radius:26px; box-shadow:0 24px 60px rgba(var(--halo),.5); transform-origin:0 100%; }
+.tipo{ font:600 74px/1.05 var(--fuente); letter-spacing:-.035em; color:var(--texto); }
+.zona{ display:flex; align-items:center; gap:12px; font:500 36px var(--fuente); color:var(--mute); margin-top:12px; }
+.zona svg{ width:36px; height:36px; }
+.datos{ display:flex; gap:16px; }
+.dato{ flex:1; padding:26px 20px; text-align:center; }
+.dato b{ display:block; font:600 58px var(--fuente); color:var(--texto); letter-spacing:-.03em; }
+.dato small{ display:block; font:500 24px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute); margin-top:4px; }
+.contador{ font:500 24px var(--mono); color:#fff; background:rgba(0,0,0,.45); padding:8px 16px; border-radius:99px; letter-spacing:.1em; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Nuevo en venta",
+  "fotos": ["fotos/casa-fachada.jpg", "fotos/casa-salon.jpg", "fotos/casa-dormitorio.jpg"],
+  "tipo": "Ático con piscina y vistas",
+  "zona": "Benimaclet, Valencia",
+  "precio": "389.000 €",
+  "datos": [["120", "m²"], ["3", "habitaciones"], ["2", "baños"]],
+  "boton": "Reserva tu visita",
+  "marca": "Casa Norte Inmobiliaria",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 220);
+  const fh = VERT ? 860 : 560;
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const marco = MG.el(`<div class="marco" style="width:${cw}px;height:${fh}px">${P.fotos.map((f) => `<div class="capa"><img src="${f}" alt=""></div>`).join('')}<div class="contador" style="position:absolute;right:24px;top:24px"></div></div>`);
+  const capas = [...marco.querySelectorAll('.capa')], cont = marco.querySelector('.contador');
+  const precio = MG.el(`<div class="precio">${P.precio}</div>`);
+  const info = MG.el(`<div style="width:${cw}px"><div class="tipo">${P.tipo}</div><div class="zona"><svg viewBox="0 0 24 24" fill="var(--acento)"><path d="M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/></svg>${P.zona}</div></div>`);
+  const datos = MG.el(`<div class="datos" style="width:${cw}px">${P.datos.map(([v, u]) => `<div class="n-card dato"><b>${v}</b><small>${u}</small></div>`).join('')}</div>`);
+  const boton = MG.el(`<div class="n-btn">${P.boton} →</div>`);
+  const marca = MG.el(N.marca(.8));
+  const nf = capas.length, tCambio = (i) => 1.6 + i * 1.7;
+  let L;
+  return (t) => {
+    if (!L) { const tot = 90 + fh + 60 + info.offsetHeight + 40 + datos.offsetHeight + 60 + boton.offsetHeight; L = { y: Math.max(VERT ? 150 : 40, (H - tot) / 2) }; }
+    N.vivo(t);
+    const x0 = (W - cw) / 2, ym = L.y + 90;
+    N.es(chip, t, .05, fin, { x: x0, y: L.y, dx: -80, dy: 0, curva: 'salidaQuint', oy: -60 });
+    N.es(marco, t, .15, fin + .05, { x: x0, y: ym, dy: 420, s0: .88, curva: 'reboteSuave', d: .9, oy: -160 });
+    // cortinilla diagonal entre fotos + Ken Burns en cada una
+    let actual = 0;
+    capas.forEach((c, i) => {
+      const a = i === 0 ? -1 : tCambio(i - 1), p = i === 0 ? 1 : C.entradaSalidaQuint(k(t, a, a + .8));
+      const r = lerp(-30, 130, p); c.style.clipPath = i === 0 ? 'none' : `polygon(${r - 30}% 0, 200% 0, 200% 100%, ${r - 30 - 0}% 100%)`;
+      c.style.clipPath = i === 0 ? 'none' : `polygon(${130 - r}% 0, 100% 0, 100% 100%, ${100 - r}% 100%)`;
+      c.style.opacity = p > 0 ? 1 : 0; if (p > .5) actual = i;
+      c.firstChild.style.transform = `scale(${lerp(1.16, 1.02, k(t, a < 0 ? 0 : a, (a < 0 ? 0 : a) + 3.4))})`;
+    });
+    cont.textContent = `${actual + 1}/${nf}`;
+    const pp = N.pop(t, 1.0, .6);
+    N.es(precio, t, 1.0, fin + .1, { x: x0 + 34, y: ym + fh - 70, dy: 0, s0: 1, d: .3, curva: 'salidaQuint', oy: -60 });
+    precio.style.scale = pp; precio.style.rotate = `${(1 - Math.min(1, pp)) * -12}deg`;
+    const yi = ym + fh + 90;
+    N.es(info, t, 1.3, fin + .15, { x: x0, y: yi, dy: 90, oy: -80 });
+    const yd = yi + info.offsetHeight + 40;
+    [...datos.children].forEach((d, i) => { const e = MG.entra(d, t, 1.8 + i * .14, { dy: 120, curva: 'rebote', d: .6 }); d.style.transform = `translateY(${e.y}px) scale(${e.s})`; });
+    N.es(datos, t, 0, fin + .22, { x: x0, y: yd, dy: 0, oy: -70 }); if (t < fin + .22) datos.style.opacity = 1;
+    N.es(boton, t, 3.0, fin + .3, { x: N.cx(boton), y: yd + datos.offsetHeight + 60, dy: 90, curva: 'reboteFuerte', oy: -60 });
+    N.es(marca, t, 3.3, fin + .38, { x: N.cx(marca), y: yd + datos.offsetHeight + 60 + boton.offsetHeight + 50, dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

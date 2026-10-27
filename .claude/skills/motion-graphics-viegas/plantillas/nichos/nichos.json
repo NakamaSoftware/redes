@@ -1,0 +1,867 @@
+{
+ "version": 1,
+ "sectores": {
+  "coach": "Coach / formador",
+  "legal": "Abogado / asesor / finanzas",
+  "inmo": "Inmobiliaria",
+  "resto": "Restaurante / comida",
+  "fit": "Fitness / salud",
+  "shop": "E-commerce / tienda",
+  "foto": "Fotógrafo / creativo",
+  "edu": "Educación / infoproducto",
+  "local": "Eventos / negocio local",
+  "gen": "Genérica (cualquier creador)"
+ },
+ "plantillas": [
+  {
+   "id": "coach-antes-despues",
+   "sector": "coach",
+   "sectorNombre": "Coach / formador",
+   "nombre": "Antes / después de un cliente",
+   "descripcion": "Filas «antes → después»: el valor viejo se tacha y el nuevo cuenta hasta su cifra.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "cliente",
+    "plazo",
+    "filas",
+    "frase",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/coach-antes-despues.html",
+   "muestra": {
+    "mp4": "coach-antes-despues.mp4",
+    "poster": "coach-antes-despues.jpg",
+    "gif": "coach-antes-despues.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla coach-antes-despues para mi mentoría (con el caso de mi clienta …: antes …, después …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "coach-cita",
+   "sector": "coach",
+   "sectorNombre": "Coach / formador",
+   "nombre": "Frase-cita animada",
+   "descripcion": "Las comillas caen con rebote, la frase entra palabra a palabra y la palabra clave se subraya.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "frase",
+    "autor",
+    "rol",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/coach-cita.html",
+   "muestra": {
+    "mp4": "coach-cita.mp4",
+    "poster": "coach-cita.jpg",
+    "gif": "coach-cita.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla coach-cita para mi programa de coaching (con la frase «…» y mi nombre). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "coach-errores",
+   "sector": "coach",
+   "sectorNombre": "Coach / formador",
+   "nombre": "«3 errores que…»",
+   "descripcion": "Errores en tarjetas que llegan desde la derecha; cada uno se tacha con una ✕ que estalla.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "titulo",
+    "errores",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/coach-errores.html",
+   "muestra": {
+    "mp4": "coach-errores.mp4",
+    "poster": "coach-errores.jpg",
+    "gif": "coach-errores.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla coach-errores para mi negocio de formación (con estos 3 errores: …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "edu-lanzamiento",
+   "sector": "edu",
+   "sectorNombre": "Educación / infoproducto",
+   "nombre": "Lanzamiento con cuenta atrás",
+   "descripcion": "«Abrimos inscripciones» letra a letra, el nombre del curso y un contador real de días, horas, minutos y segundos.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "kicker",
+    "curso",
+    "dias",
+    "horas",
+    "minutos",
+    "segundos",
+    "fecha",
+    "boton",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/edu-lanzamiento.html",
+   "muestra": {
+    "mp4": "edu-lanzamiento.mp4",
+    "poster": "edu-lanzamiento.jpg",
+    "gif": "edu-lanzamiento.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla edu-lanzamiento para mi curso online (para el lanzamiento de … el …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "edu-modulos",
+   "sector": "edu",
+   "sectorNombre": "Educación / infoproducto",
+   "nombre": "Módulos del curso",
+   "descripcion": "Una línea se dibuja, los nodos se encienden y las tarjetas de cada módulo entran escalonadas.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "titulo",
+    "modulos",
+    "resumen",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/edu-modulos.html",
+   "muestra": {
+    "mp4": "edu-modulos.mp4",
+    "poster": "edu-modulos.jpg",
+    "gif": "edu-modulos.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla edu-modulos para mi curso (con estos módulos: …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "edu-testimonio",
+   "sector": "edu",
+   "sectorNombre": "Educación / infoproducto",
+   "nombre": "Testimonios de alumnos",
+   "descripcion": "Carrusel de tarjetas con el resultado de cada alumno: la que sale acelera, la que entra frena.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 10,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "titulo",
+    "testimonios",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/edu-testimonio.html",
+   "muestra": {
+    "mp4": "edu-testimonio.mp4",
+    "poster": "edu-testimonio.jpg",
+    "gif": "edu-testimonio.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla edu-testimonio para mi formación (con estos testimonios reales: …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "evento-invitacion",
+   "sector": "local",
+   "sectorNombre": "Eventos / negocio local",
+   "nombre": "Invitación con fecha, lugar y QR",
+   "descripcion": "La entrada sube girando, el día cae con rebote, el lugar entra y un QR real se dibuja módulo a módulo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "evento",
+    "dia",
+    "mes",
+    "diaSemana",
+    "hora",
+    "lugar",
+    "direccion",
+    "url",
+    "qrTexto",
+    "qrNota",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/evento-invitacion.html",
+   "muestra": {
+    "mp4": "evento-invitacion.mp4",
+    "poster": "evento-invitacion.jpg",
+    "gif": "evento-invitacion.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla evento-invitacion para mi evento (el … a las … en …, con el QR a …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "fit-progreso",
+   "sector": "fit",
+   "sectorNombre": "Fitness / salud",
+   "nombre": "Progreso en barras y kg",
+   "descripcion": "Barras por semana que crecen con rebote, línea de tendencia y la mejora total que cuenta.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "titulo",
+    "ejercicio",
+    "valores",
+    "unidad",
+    "pie",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/fit-progreso.html",
+   "muestra": {
+    "mp4": "fit-progreso.mp4",
+    "poster": "fit-progreso.jpg",
+    "gif": "fit-progreso.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla fit-progreso para mi negocio de entrenador personal (con el progreso de …: de … kg a … kg). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "fit-rutina",
+   "sector": "fit",
+   "sectorNombre": "Fitness / salud",
+   "nombre": "Rutina con temporizador",
+   "descripcion": "Temporizador que corre de verdad, repeticiones que suben con un golpe y la lista con el ejercicio actual.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "foto",
+    "ronda",
+    "ejercicios",
+    "actual",
+    "segundos",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/fit-rutina.html",
+   "muestra": {
+    "mp4": "fit-rutina.mp4",
+    "poster": "fit-rutina.jpg",
+    "gif": "fit-rutina.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla fit-rutina para mi centro de entrenamiento (con esta rutina: …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "foto-antes-despues",
+   "sector": "foto",
+   "sectorNombre": "Fotógrafo / creativo",
+   "nombre": "Antes / después con deslizador",
+   "descripcion": "Un tirador barre la foto de lado a lado, con curvas distintas, entre el original y la edición.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "titulo",
+    "antes",
+    "despues",
+    "etiquetas",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/foto-antes-despues.html",
+   "muestra": {
+    "mp4": "foto-antes-despues.mp4",
+    "poster": "foto-antes-despues.jpg",
+    "gif": "foto-antes-despues.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla foto-antes-despues para mi trabajo de edición (con estas dos fotos (antes y después)). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "foto-portfolio",
+   "sector": "foto",
+   "sectorNombre": "Fotógrafo / creativo",
+   "nombre": "Portfolio en cuadrícula",
+   "descripcion": "Las fotos llegan apiladas y se reparten a la cuadrícula con rebote; firma y botón de reserva.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "fotos",
+    "nombre",
+    "especialidad",
+    "boton",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/foto-portfolio.html",
+   "muestra": {
+    "mp4": "foto-portfolio.mp4",
+    "poster": "foto-portfolio.jpg",
+    "gif": "foto-portfolio.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla foto-portfolio para mi estudio de fotografía (con estas 6 fotos mías). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "gen-encuesta",
+   "sector": "gen",
+   "sectorNombre": "Genérica (cualquier creador)",
+   "nombre": "Encuesta para comentarios",
+   "descripcion": "Pregunta por palabras, opciones con su curva, un cursor que toca y barras de porcentaje que se llenan.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "pregunta",
+    "opciones",
+    "elegida",
+    "cierre",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/gen-encuesta.html",
+   "muestra": {
+    "mp4": "gen-encuesta.mp4",
+    "poster": "gen-encuesta.jpg",
+    "gif": "gen-encuesta.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla gen-encuesta para mi cuenta (con la pregunta «…» y estas opciones: …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "gen-guarda",
+   "sector": "gen",
+   "sectorNombre": "Genérica (cualquier creador)",
+   "nombre": "«Guarda este post»",
+   "descripcion": "El icono de guardar cae, se rellena con chispas y el texto entra por palabras. Para el final de un reel o un carrusel.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 6,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "transparente",
+    "titulo",
+    "razon",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/gen-guarda.html",
+   "muestra": {
+    "mp4": "gen-guarda.mp4",
+    "poster": "gen-guarda.jpg",
+    "gif": "gen-guarda.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla gen-guarda para mi cuenta (con la razón «…»). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "gen-intro-logo",
+   "sector": "gen",
+   "sectorNombre": "Genérica (cualquier creador)",
+   "nombre": "Intro de marca con tu logo",
+   "descripcion": "Anillos de luz que se cierran, tu logo con rebote, el nombre letra a letra y salida «zoom a través».",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "16x9",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 5,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "logo",
+    "marca",
+    "lema"
+   ],
+   "archivo": "plantillas/nichos/gen-intro-logo.html",
+   "muestra": {
+    "mp4": "gen-intro-logo.mp4",
+    "poster": "gen-intro-logo.jpg",
+    "gif": "gen-intro-logo.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla gen-intro-logo para mi marca (con mi logo (te lo paso) y el lema …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "gen-lower-third",
+   "sector": "gen",
+   "sectorNombre": "Genérica (cualquier creador)",
+   "nombre": "Lower third: nombre y profesión",
+   "descripcion": "Rótulo con fondo transparente para tu vídeo: punto que estalla, barra, placa de cristal y textos escalonados.",
+   "formato": "16x9",
+   "formatos": [
+    "16x9",
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 6,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "transparente",
+    "verMuestra",
+    "nombre",
+    "profesion",
+    "detalle",
+    "posicion"
+   ],
+   "archivo": "plantillas/nichos/gen-lower-third.html",
+   "muestra": {
+    "mp4": "gen-lower-third.mp4",
+    "poster": "gen-lower-third.jpg",
+    "gif": "gen-lower-third.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla gen-lower-third para mi canal (con mi nombre … y mi profesión …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "inmo-ficha",
+   "sector": "inmo",
+   "sectorNombre": "Inmobiliaria",
+   "nombre": "Ficha de propiedad",
+   "descripcion": "Fotos con cortinilla diagonal y Ken Burns, precio que estalla, m², habitaciones y baños escalonados.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "fotos",
+    "tipo",
+    "zona",
+    "precio",
+    "datos",
+    "boton",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/inmo-ficha.html",
+   "muestra": {
+    "mp4": "inmo-ficha.mp4",
+    "poster": "inmo-ficha.jpg",
+    "gif": "inmo-ficha.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla inmo-ficha para mi inmobiliaria (con estas fotos, precio …, … m² y … habitaciones). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "inmo-mapa",
+   "sector": "inmo",
+   "sectorNombre": "Inmobiliaria",
+   "nombre": "Mapa con pin de ubicación",
+   "descripcion": "Plano dibujado en código con zoom continuo, pin que cae con rebote y ondas, y tarjeta con lo que hay cerca.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "direccion",
+    "zona",
+    "cercanias",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/inmo-mapa.html",
+   "muestra": {
+    "mp4": "inmo-mapa.mp4",
+    "poster": "inmo-mapa.jpg",
+    "gif": "inmo-mapa.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla inmo-mapa para mi inmobiliaria (con la dirección … y lo que hay cerca). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "legal-checklist",
+   "sector": "legal",
+   "sectorNombre": "Abogado / asesor / finanzas",
+   "nombre": "Checklist de documentos",
+   "descripcion": "Hoja de documentos que se marcan uno a uno con un trazo que se dibuja y el contador 5/5.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "titulo",
+    "documentos",
+    "nota",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/legal-checklist.html",
+   "muestra": {
+    "mp4": "legal-checklist.mp4",
+    "poster": "legal-checklist.jpg",
+    "gif": "legal-checklist.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla legal-checklist para mi gestoría (con los documentos para …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "legal-cifra",
+   "sector": "legal",
+   "sectorNombre": "Abogado / asesor / finanzas",
+   "nombre": "Cifra que cuenta",
+   "descripcion": "Un anillo se llena mientras la cifra (ahorro, plazo, devolución) cuenta y da un golpe al llegar.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "titulo",
+    "cifra",
+    "prefijo",
+    "sufijo",
+    "contexto",
+    "claves",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/legal-cifra.html",
+   "muestra": {
+    "mp4": "legal-cifra.mp4",
+    "poster": "legal-cifra.jpg",
+    "gif": "legal-cifra.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla legal-cifra para mi asesoría fiscal (con la cifra … € que ahorró un cliente). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "legal-sabias",
+   "sector": "legal",
+   "sectorNombre": "Abogado / asesor / finanzas",
+   "nombre": "«¿Sabías que…?» con dato legal",
+   "descripcion": "La interrogación cae y se balancea; el dato entra por palabras con la cifra en acento y la fuente legal abajo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "pregunta",
+    "dato",
+    "fuente",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/legal-sabias.html",
+   "muestra": {
+    "mp4": "legal-sabias.mp4",
+    "poster": "legal-sabias.jpg",
+    "gif": "legal-sabias.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla legal-sabias para mi despacho de abogados (con este dato: … (fuente: …)). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "local-google",
+   "sector": "local",
+   "sectorNombre": "Eventos / negocio local",
+   "nombre": "Reseñas de Google",
+   "descripcion": "Ficha con el logo oficial de Google, nota que cuenta, estrellas con rebote y una reseña que se escribe.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "negocio",
+    "categoria",
+    "nota",
+    "resenas",
+    "destacada",
+    "autor",
+    "cta",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/local-google.html",
+   "muestra": {
+    "mp4": "local-google.mp4",
+    "poster": "local-google.jpg",
+    "gif": "local-google.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla local-google para mi negocio local (con mi nota … y esta reseña real: …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "resto-horario",
+   "sector": "resto",
+   "sectorNombre": "Restaurante / comida",
+   "nombre": "Horario y reserva",
+   "descripcion": "Foto del local desenfocada, horario con la barra que se posa en «hoy» y botón de WhatsApp.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "titulo",
+    "foto",
+    "horario",
+    "hoy",
+    "reserva",
+    "telefono",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/resto-horario.html",
+   "muestra": {
+    "mp4": "resto-horario.mp4",
+    "poster": "resto-horario.jpg",
+    "gif": "resto-horario.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla resto-horario para mi restaurante (con mi horario y mi WhatsApp …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "resto-plato",
+   "sector": "resto",
+   "sectorNombre": "Restaurante / comida",
+   "nombre": "Plato del día con precio",
+   "descripcion": "Foto del plato en círculo que gira, sello de precio con rebote fuerte y qué incluye el menú.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "foto",
+    "plato",
+    "descripcion",
+    "precio",
+    "precioNota",
+    "incluye",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/resto-plato.html",
+   "muestra": {
+    "mp4": "resto-plato.mp4",
+    "poster": "resto-plato.jpg",
+    "gif": "resto-plato.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla resto-plato para mi restaurante (con el plato …, precio … y esta foto). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "shop-envio",
+   "sector": "shop",
+   "sectorNombre": "E-commerce / tienda",
+   "nombre": "«Envío gratis» con cuenta atrás",
+   "descripcion": "Furgoneta que entra con desenfoque de movimiento y frena, reloj HH:MM:SS real y código de descuento.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5",
+    "1x1"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "titulo",
+    "condicion",
+    "horas",
+    "minutos",
+    "segundos",
+    "codigo",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/shop-envio.html",
+   "muestra": {
+    "mp4": "shop-envio.mp4",
+    "poster": "shop-envio.jpg",
+    "gif": "shop-envio.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla shop-envio para mi tienda online (con el código … y … horas de oferta). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "shop-oferta",
+   "sector": "shop",
+   "sectorNombre": "E-commerce / tienda",
+   "nombre": "Producto en oferta",
+   "descripcion": "Foto del producto, sello «−30 %», precio tachado y el nuevo que cuenta hacia abajo.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 8,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "urgencia",
+    "foto",
+    "producto",
+    "antes",
+    "ahora",
+    "moneda",
+    "boton",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/shop-oferta.html",
+   "muestra": {
+    "mp4": "shop-oferta.mp4",
+    "poster": "shop-oferta.jpg",
+    "gif": "shop-oferta.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla shop-oferta para mi tienda online (con el producto …, antes … €, ahora … €). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  },
+  {
+   "id": "shop-resenas",
+   "sector": "shop",
+   "sectorNombre": "E-commerce / tienda",
+   "nombre": "Reseñas con estrellas",
+   "descripcion": "La nota media cuenta, las estrellas se llenan una a una y suben tres reseñas reales.",
+   "formato": "9x16",
+   "formatos": [
+    "9x16",
+    "4x5"
+   ],
+   "duracion": 9,
+   "fps": 30,
+   "parametros": [
+    "paleta",
+    "acento",
+    "etiqueta",
+    "nota",
+    "total",
+    "resenas",
+    "marca",
+    "logo"
+   ],
+   "archivo": "plantillas/nichos/shop-resenas.html",
+   "muestra": {
+    "mp4": "shop-resenas.mp4",
+    "poster": "shop-resenas.jpg",
+    "gif": "shop-resenas.gif"
+   },
+   "frase": "Usa la skill motion-graphics-viegas y hazme la plantilla shop-resenas para mi tienda (con mis reseñas reales: …). Formato 9:16, paleta noche azul (o clara) y mi color de marca …"
+  }
+ ]
+}

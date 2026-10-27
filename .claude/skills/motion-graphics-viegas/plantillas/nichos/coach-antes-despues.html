@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «coach-antes-despues» · Coach / formador · Viegas IA · Motion Lab
+     Resultado de un cliente: tarjeta con el nombre y el plazo, y filas «antes → después» donde el valor de antes se apaga y se
+     tacha, la flecha se dibuja y el de después cuenta hasta su cifra con rebote. Cierre con la frase del cliente.
+     Cambia "cliente", "plazo", "filas" ([etiqueta, antes, después, sufijo, decimales]), "frase", "marca". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.cab{ display:flex; align-items:center; gap:26px; }
+.cab b{ display:block; font:600 52px var(--fuente); letter-spacing:-.02em; color:var(--texto); }
+.cab small{ display:block; font:500 30px var(--mono); color:var(--mute); letter-spacing:.06em; margin-top:6px; }
+.fila{ padding:30px 40px; }
+.fila .et{ font:500 28px var(--mono); letter-spacing:.12em; text-transform:uppercase; color:var(--mute); }
+.fila .vs{ display:flex; align-items:center; gap:26px; margin-top:12px; }
+.fila .a{ font:600 64px var(--fuente); color:var(--mute); position:relative; letter-spacing:-.03em; white-space:nowrap; }
+.fila .a s{ position:absolute; left:-4px; right:-4px; top:50%; height:5px; background:var(--mute); border-radius:5px; transform-origin:0 50%; }
+.fila .d{ font:600 84px var(--fuente); color:var(--texto); letter-spacing:-.04em; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.fila svg{ width:90px; height:40px; overflow:visible; }
+.dicho{ font:400 58px/1.15 var(--serif); font-style:italic; color:var(--texto); text-align:center; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Caso real",
+  "cliente": "Marta, diseñadora freelance",
+  "plazo": "8 semanas de mentoría",
+  "filas": [["Horas de trabajo a la semana", 60, 38, " h", 0], ["Facturación mensual", 2400, 6900, " €", 0], ["Nivel de estrés", 9, 4, "/10", 0]],
+  "frase": "«Por fin trabajo menos y gano más»",
+  "marca": "Método Foco",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 200);
+  const fmt = (v, d) => v.toLocaleString('de-DE', { minimumFractionDigits: d, maximumFractionDigits: d });
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const ini = P.cliente.trim()[0].toUpperCase();
+  const cab = MG.el(`<div class="cab"><span class="n-av">${ini}</span><div><b>${P.cliente}</b><small>${P.plazo}</small></div></div>`);
+  const filas = P.filas.map(([et, a, d, suf, dec]) => {
+    const f = MG.el(`<div class="n-card fila" style="width:${cw}px"><div class="et">${et}</div><div class="vs"><span class="a">${fmt(a, dec)}${suf}<s></s></span>
+      <svg viewBox="0 0 90 40"><path d="M4 20 H80 M64 6 L82 20 L64 34" fill="none" stroke="var(--acento)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" pathLength="1" stroke-dasharray="1" /></svg><span class="d"></span></div></div>`);
+    f._d = [a, d, suf, dec]; return f;
+  });
+  const dicho = MG.el(`<div class="dicho" style="width:${cw}px">${P.frase}</div>`);
+  const marca = MG.el(N.marca(.85));
+  let L;
+  return (t) => {
+    if (!L) { const hf = filas[0].offsetHeight, g = 26, tot = 120 + cab.offsetHeight + 50 + filas.length * (hf + g) + 40 + dicho.offsetHeight; L = { y: (H - tot) / 2 + 40, hf, g }; }
+    N.vivo(t);
+    N.es(chip, t, .05, fin, { x: N.cx(chip), y: L.y, dy: -60, curva: 'salidaQuint', oy: -70 });
+    N.es(cab, t, .25, fin + .05, { x: N.cx(cab), y: L.y + 100, dy: 90, oy: -80 });
+    const y0 = L.y + 100 + cab.offsetHeight + 50;
+    filas.forEach((f, i) => {
+      const t0 = .9 + i * .75, [a, d, suf, dec] = f._d;
+      N.es(f, t, t0, fin + .1 + i * .07, { x: (W - cw) / 2, y: y0 + i * (L.hf + L.g), dy: 160, s0: .9, oy: -90 });
+      const ta = t0 + .55;
+      f.querySelector('s').style.transform = `scaleX(${C.salidaQuint(k(t, ta, ta + .45))})`;
+      f.querySelector('.a').style.opacity = 1 - .5 * k(t, ta, ta + .4);
+      f.querySelector('path').style.strokeDashoffset = 1 - C.salidaCubica(k(t, ta + .1, ta + .5));
+      const p = C.salidaQuint(k(t, ta + .3, ta + 1.4)), dd = f.querySelector('.d');
+      dd.textContent = fmt(lerp(a, d, p), dec) + suf; dd.style.opacity = k(t, ta + .3, ta + .5);
+      const s = 1 + .14 * Math.sin(Math.PI * k(t, ta + 1.2, ta + 1.6)); dd.style.transform = `scale(${s})`; dd.style.color = p > .98 ? 'var(--brillo, var(--acento))' : '';
+    });
+    N.es(dicho, t, .9 + filas.length * .75 + 1, fin + .35, { x: (W - cw) / 2, y: y0 + filas.length * (L.hf + L.g) + 30, dy: 70, curva: 'reboteSuave', oy: -60 });
+    N.es(marca, t, .9 + filas.length * .75 + 1.2, fin + .4, { x: N.cx(marca), y: H - (VERT ? 320 : 130), dy: 60, oy: -50 });
+  };
+});
+</script>
+</body></html>

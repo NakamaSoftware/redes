@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «chat-claude» · Motion Graphics Viegas. Recreación de un chat con Claude Code: opciones, cursor que hace clic, preguntas, respuesta escrita, brief y pasos.
+     Sacado del vídeo de YouTube «Carruseles animados con Claude Code» (Viegas Estudio, 22-10-2026).
+     Cambia textos, tarjetas (vid/…) y tiempos; la curva, el desenfoque y la cámara ya siguen la guía de estilo. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="ejemplos.css">
+<script src="../motor/motor.js"></script>
+</head><body>
+<script>
+escena({ duracion: 17.9, ancho: 1920, alto: 1080, fondo: 'marca' }, (MG) => {
+  // --- compatibilidad con las funciones del vídeo original (mismos nombres, sobre el motor) ---
+  const M = MG.mundo, V = MG.vista, DT = MG.DT, MB = MG.MB, SVGNS = 'http://www.w3.org/2000/svg';
+  const { k, lerp, cl, desenfoca, pon, camara: camara0 } = MG;
+  const C = MG.curvas, quint = C.salidaQuint, inOut = C.entradaSalidaQuint, suave = C.suave, back = (x) => C.atras(x), rebote = C.rebote, reboteSuave = C.reboteSuave;
+  const $ = (h) => { const d = document.createElement('div'); d.innerHTML = h.trim(); return d.firstChild; };
+  const entra = (el, t, t0, d = .7, dx = 0, dy = 220, s0 = .94, base = 3, extra = 0) => MG.entra(el, t, t0, { d, dx, dy, escala0: s0, base, extra });
+  const camara = (t, z0, z1, ox = 960, oy = 540) => camara0(t, z0, z1, ox, oy);
+  const VID = (e, n) => `vid/${String(e).padStart(2, '0')}-${n}.mp4`;
+  const VIDS = { push: (o) => MG.registrar(o.v, o) };
+  function tarjeta(src, w, h, t0, off = .8, bucle = false) { return MG.tarjeta(src, w, h, t0, { desde: off, bucle: true }); }
+  function logoClaude(tam) {
+    const w = $(`<div class="abs" style="width:${tam}px;height:${tam}px"><div class="logo abs" style="width:100%;height:100%;filter:drop-shadow(0 0 40px rgba(var(--halo),.55))"></div><div class="barrido abs" style="width:100%;height:100%"></div></div>`);
+    w.barre = (x) => { w.children[1].style.backgroundPosition = `${lerp(110, -10, x)}% 0`; w.children[1].style.opacity = x > 0 && x < 1 ? 1 : 0; };
+    return w;
+  }
+  
+  let pinta = () => {}; let DUR = 17.9;
+  DUR = 17.9;
+  const win = $(`<div class="cwin abs">
+    <div class="cside"><div class="csl"><span class="logo" style="display:inline-block;width:30px;height:30px"></span><b>Claude Code</b></div>
+      <div class="csi">＋ Nueva sesión</div><div class="csi">Skills</div><div class="csi on">carrusel-animado <em>✓</em></div><div class="csi">Proyectos</div></div>
+    <div class="ctop"><span>carruseles · Claude Code</span><span class="cmod">Opus 5.5</span></div>
+    <div class="cchat"></div>
+    <div class="cin"><span class="ctx"></span><span class="ccur">▌</span><span class="csend">↑</span></div>
+    <svg class="cursor abs" width="34" height="44" viewBox="0 0 34 44"><path d="M2 2 L2 36 L11 27 L17 41 L23 38 L17 25 L30 25 Z" fill="#fff" stroke="#111" stroke-width="2.5" stroke-linejoin="round"/></svg>
+  </div>`);
+  M.appendChild(win);
+  const chat = win.querySelector('.cchat'), ctx = win.querySelector('.ctx'), cur = win.querySelector('.cursor');
+  const MSG = [];
+  const palabras = (txt) => txt.split(' ').map((p) => `<span class="pw">${p}</span>`).join(' ');
+  function msg(ta, html, tipo) {   // tipo: 'u' usuario · 'a' Claude · 't' herramienta
+    const o = $(`<div class="msg"><div class="inn"></div></div>`), inn = o.querySelector('.inn');
+    if (tipo === 'u') inn.innerHTML = `<div class="mu">${html}</div>`;
+    else if (tipo === 'a') inn.innerHTML = `<div class="ma"><span class="logo av"></span><div class="mt">${html}</div></div>`;
+    else inn.innerHTML = `<div class="tool"><span class="st"></span><span class="tt">${html}</span></div>`;
+    chat.appendChild(o); const m = {o, inn, ta, tipo}; MSG.push(m); return m;
+  }
+  msg(-9, 'Instala la skill de carruseles animados', 'u');
+  const t1 = msg(-9, 'Analizando tu computadora…', 't'); t1.fin = 0.6;
+  const t2 = msg(0.4, 'Instalando carrusel-animado…', 't'); t2.fin = 1.6; t2.txtFin = 'carrusel-animado ya estaba instalada';
+  const a1 = msg(2.6, palabras('Ya tienes la skill <b>carrusel-animado</b> instalada. ¿Qué quieres hacer?') +
+    '<div><span class="opt o1">1 · Crear un carrusel nuevo</span><span class="opt">2 · Revisar uno que ya tengo</span></div>', 'a');
+  msg(4.5, 'Crear un carrusel nuevo', 'u');
+  const a2 = msg(5.2, palabras('¡Vamos! Solo tres preguntas:') +
+    '<div class="q q1">1. ¿De qué tema es el carrusel?</div><div class="q q2">2. ¿Sales tú en la portada?</div><div class="q q3">3. ¿Tienes alguna referencia visual?</div>', 'a');
+  const RESP = 'Editar Reels con Claude · Sí · No';
+  msg(9.2, RESP, 'u');
+  const a3 = msg(9.8, palabras('Perfecto. Este es el brief:') +
+    '<div class="brief"><i>Objetivo</i><span>enseñar</span><i>Formato</i><span>Pasos</span><i>Slides</i><span>8</span><i>Estilo</i><span>Sistema · con tu foto en la portada</span></div>' +
+    '<div class="pq">¿Le doy?</div>', 'a');
+  msg(12.6, '¡Sí, adelante!', 'u');
+  const a4 = msg(13.3, '<div class="pasos"><span class="ps p1">Estrategia</span><span class="ps p2">Copy</span><span class="ps p3">Storyboard</span><span class="ps p4">Diseñando los slides…</span></div><div class="mini"></div>', 'a');
+  const mini = a4.inn.querySelector('.mini');
+  const minis = [1, 2, 3, 4].map((n, i) => { const c = $(`<div class="card" style="width:132px;height:165px;display:inline-block;margin-right:14px"><video muted playsinline preload="auto" src="vid/mc-${n}.mp4"></video></div>`);
+    mini.appendChild(c); VIDS.push({v: c.firstChild, t0: 15.3 + i * .16, off: .6, bucle: true}); return c; });
+  // alturas reales (con todo el contenido visible) para que el chat suba suave a medida que entra cada mensaje
+  MSG.forEach((m) => { m.h = m.inn.offsetHeight; });
+  const GIRA = '◐◓◑◒';
+  pinta = (t) => {
+    camara(t, 1.0, 1.06, 960, 540);
+    const ew = entra(win, t, .25, .8, 0, 120, .94, 4); pon(win, 180 + ew.x, 80 + ew.y, ew.s);
+    MSG.forEach((m) => {
+      const g = m.ta < 0 ? 1 : suave(k(t, m.ta, m.ta + .35));
+      m.o.style.height = (m.h * g) + 'px';
+      const e = m.ta < 0 ? {x: 0, y: 0, s: 1, p: 1} : entra(m.inn, t, m.ta, .55, 0, 46, .96, 3);
+      if (m.ta >= 0) pon(m.inn, e.x, e.y, e.s); m.inn.style.transformOrigin = m.tipo === 'u' ? '100% 100%' : '0 100%';
+      if (m.tipo === 't') {
+        const hecho = t >= m.fin, st = m.inn.querySelector('.st'), tt = m.inn.querySelector('.tt');
+        st.textContent = hecho ? '✓' : GIRA[Math.floor(t * 10) % 4]; st.style.color = hecho ? 'var(--acento)' : 'var(--mute)';
+        if (m.txtFin) tt.textContent = hecho ? m.txtFin : 'Instalando carrusel-animado…';
+      }
+      const ws = m.inn.querySelectorAll('.pw');   // Claude «escribe» palabra a palabra
+      ws.forEach((w, i) => { w.style.opacity = t >= m.ta + .15 + i * .05 ? 1 : 0; });
+    });
+    // opciones: el cursor va a «Crear un carrusel nuevo» y hace clic
+    const o1 = a1.inn.querySelector('.o1'); o1.classList.toggle('on', t >= 4.15);
+    o1.style.transform = `scale(${t >= 4.15 && t < 4.35 ? .94 : 1})`;
+    const cv = suave(k(t, 3.4, 4.1)), cvis = t > 3.2 && t < 4.9;
+    cur.style.opacity = cvis ? 1 : 0; pon(cur, lerp(1100, 560, cv), lerp(880, 752, cv));
+    // las tres preguntas, una tras otra
+    ['.q1', '.q2', '.q3'].forEach((q, i) => { const el = a2.inn.querySelector(q), p = rebote(k(t, 5.6 + i * .4, 6.2 + i * .4));
+      el.style.opacity = Math.min(1, Math.max(0, p) * 1.8); el.style.transform = `translateX(${(1 - p) * 40}px)`; });
+    // la respuesta se escribe en la caja y se envía
+    const n = Math.floor(RESP.length * k(t, 7.3, 9.0));
+    ctx.textContent = t < 9.2 ? RESP.slice(0, n) : '';
+    win.querySelector('.ccur').style.opacity = (t % .9 < .45) ? 1 : 0;
+    win.querySelector('.csend').classList.toggle('on', t > 7.3 && t < 9.2);
+    // brief y «¿Le doy?»
+    a3.inn.querySelector('.brief').style.opacity = k(t, 10.2, 10.6); a3.inn.querySelector('.pq').style.opacity = k(t, 11.4, 11.7);
+    // pasos con su ✓ y los slides animados que van saliendo
+    [['.p1', 13.8], ['.p2', 14.3], ['.p3', 14.8]].forEach(([s, tc]) => { a4.inn.querySelector(s).classList.toggle('ok', t >= tc); });
+    minis.forEach((c, i) => { const p = rebote(k(t, 15.3 + i * .16, 16.0 + i * .16)); c.style.opacity = Math.min(1, Math.max(0, p) * 1.8);
+      c.style.transform = `translateY(${(1 - p) * 60}px) scale(${lerp(.8, 1, p)})`; desenfoca(c, 0, Math.abs(1 - Math.min(1, p)) * 6); });
+  };
+  return pinta;
+});
+</script>
+</body></html>

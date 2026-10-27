@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «local-google» · Negocio local (restaurante, clínica, taller, peluquería…) · Viegas IA · Motion Lab
+     Reseñas de Google: la ficha del negocio sube con el logo oficial de Google (svgl), la nota cuenta hasta 4,8 y las estrellas se
+     llenan con rebote; luego una reseña destacada se escribe dentro de su tarjeta y el contador de reseñas sube.
+     Usa solo tu nota y reseñas reales de tu ficha. Cambia "negocio", "categoria", "nota", "resenas", "destacada", "autor", "cta".
+     Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.ficha{ padding:44px 48px; }
+.ficha .g{ display:flex; align-items:center; gap:16px; font:500 30px var(--fuente); color:var(--mute); }
+.ficha .g img{ width:52px; height:52px; }
+.ficha h2{ font:600 66px/1.08 var(--fuente); letter-spacing:-.03em; color:var(--texto); margin-top:24px; }
+.ficha .cat{ font:500 32px var(--fuente); color:var(--mute); margin-top:6px; }
+.nota{ display:flex; align-items:center; gap:24px; margin-top:30px; }
+.nota b{ font:600 110px/1 var(--fuente); letter-spacing:-.05em; color:var(--texto); font-variant-numeric:tabular-nums; }
+.nota .n-estrellas svg{ width:60px; height:60px; }
+.nota small{ display:block; font:500 30px var(--fuente); color:var(--mute); margin-top:6px; }
+.dest{ padding:40px 44px; }
+.dest p{ font:500 44px/1.35 var(--fuente); color:var(--texto); min-height:3.9em; }
+.dest .a{ display:flex; align-items:center; gap:18px; margin-top:24px; font:600 34px var(--fuente); color:var(--texto); }
+.dest .a .n-estrellas svg{ width:32px; height:32px; }
+.dest .n-av{ width:70px; height:70px; font-size:30px; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "negocio": "Clínica Dental Sonríe",
+  "categoria": "Dentista en Sevilla",
+  "nota": 4.8,
+  "resenas": 312,
+  "destacada": "«Me quitaron el miedo al dentista. Explican todo y no duele nada.»",
+  "autor": "Rocío T.",
+  "cta": "¿Ya nos conoces? Déjanos tu reseña",
+  "marca": "Clínica Dental Sonríe",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 260);
+  const ficha = MG.el(`<div class="n-card ficha" style="width:${cw}px"><div class="g"><img src="_nichos/google.svg" alt="Google">Reseñas de Google</div><h2>${P.negocio}</h2><div class="cat">${P.categoria}</div>
+    <div class="nota"><b>0,0</b><div><span class="n-estrellas">${[0, 1, 2, 3, 4].map((i) => `<span style="display:inline-block">${N.estrella(Math.max(0, Math.min(1, P.nota - i)), 'gg' + i)}</span>`).join('')}</span><small>0 reseñas</small></div></div></div>`);
+  const nb = ficha.querySelector('.nota b'), nr = ficha.querySelector('.nota small'), est = [...ficha.querySelectorAll('.n-estrellas > span')];
+  const dest = MG.el(`<div class="n-card dest" style="width:${cw}px"><p></p><div class="a"><span class="n-av">${P.autor[0]}</span>${P.autor}<span class="n-estrellas" style="margin-left:auto">${[0, 1, 2, 3, 4].map((i) => N.estrella(1, 'dd' + i)).join('')}</span></div></div>`);
+  const pp = dest.querySelector('p');
+  const cta = MG.el(`<div class="n-sub" style="width:${W}px;color:var(--texto)">${P.cta} ⭐</div>`);
+  let L;
+  return (t) => {
+    if (!L) { pp.textContent = P.destacada; const tot = ficha.offsetHeight + 40 + dest.offsetHeight + 60 + 60; L = { y: (H - tot) / 2, hf: ficha.offsetHeight }; }
+    N.vivo(t);
+    N.es(ficha, t, .1, fin, { x: (W - cw) / 2, y: L.y, dy: 500, s0: .9, curva: 'reboteSuave', d: .85, oy: -160 });
+    MG.contador(nb, t, .6, 2.0, 0, P.nota, { decimales: 1 });
+    MG.contador(nr, t, .6, 2.6, 0, P.resenas, { sufijo: ' reseñas', idioma: 'de-DE' });
+    est.forEach((s, i) => { const p = N.pop(t, 1.0 + i * .13, .5); s.style.transform = `scale(${p}) rotate(${(1 - Math.min(1, p)) * 60}deg)`; });
+    const yd = L.y + L.hf + 40;
+    N.es(dest, t, 2.0, fin + .1, { x: (W - cw) / 2, y: yd, dx: 0, dy: 300, s0: .92, curva: 'rebote', d: .7, oy: -140 });
+    N.escribe(pp, P.destacada, t, 2.6, 4.6);
+    N.es(cta, t, 4.7, fin + .2, { y: yd + dest.offsetHeight + 60, dy: 60, curva: 'reboteSuave', oy: -60 });
+  };
+});
+</script>
+</body></html>

@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «shop-resenas» · E-commerce / cualquier negocio · Viegas IA · Motion Lab
+     Reseñas con estrellas: la nota media cuenta hasta 4,9, las cinco estrellas se llenan una a una con rebote fuerte (la última,
+     parcial) y tres reseñas suben como un feed, cada una con su curva, empujando a la anterior. Usa solo reseñas reales.
+     Cambia "nota", "total", "resenas" ([nombre, estrellas, texto]), "marca". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.nota{ font:600 230px/1 var(--fuente); letter-spacing:-.06em; color:var(--texto); text-align:center; font-variant-numeric:tabular-nums; }
+.est{ display:flex; gap:14px; justify-content:center; }
+.est span{ width:86px; height:86px; display:block; }
+.est svg{ width:100%; height:100%; }
+.total{ font:500 34px var(--fuente); color:var(--mute); text-align:center; }
+.res{ padding:32px 36px; }
+.res .c{ display:flex; align-items:center; gap:20px; }
+.res .c b{ font:600 38px var(--fuente); color:var(--texto); }
+.res .mini{ display:flex; gap:4px; margin-left:auto; }
+.res .mini svg{ width:34px; height:34px; }
+.res p{ font:500 36px/1.35 var(--fuente); color:var(--texto); margin-top:18px; opacity:.9; }
+.res .n-av{ width:72px; height:72px; font-size:30px; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Lo que dicen nuestros clientes",
+  "nota": 4.9,
+  "total": "1.248 reseñas verificadas",
+  "resenas": [["Carmen R.", 5, "Llegó en 24 horas y la calidad es mejor de lo que esperaba."], ["Iván P.", 5, "Atención de diez: me cambiaron la talla sin coste."], ["Sofía M.", 4, "Muy cómodas. Repetiré seguro en el próximo pedido."]],
+  "marca": "Sonora Store",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 220);
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const nota = MG.el(`<div class="nota" style="width:${W}px">0,0</div>`);
+  const est = MG.el(`<div class="est" style="width:${W}px">${[0, 1, 2, 3, 4].map((i) => `<span>${N.estrella(Math.max(0, Math.min(1, P.nota - i)), 'g' + i)}</span>`).join('')}</div>`);
+  const total = MG.el(`<div class="total" style="width:${W}px">${P.total}</div>`);
+  const res = P.resenas.map(([n, s, tx], i) => MG.el(`<div class="n-card res" style="width:${cw}px"><div class="c"><span class="n-av">${n[0]}</span><b>${n}</b><span class="mini">${[0, 1, 2, 3, 4].map((j) => N.estrella(j < s ? 1 : 0, `r${i}${j}`)).join('')}</span></div><p>${tx}</p></div>`));
+  const marca = MG.el(N.marca(.8));
+  const curvas = ['rebote', 'reboteSuave', 'salidaQuint'];
+  return (t) => {
+    N.vivo(t);
+    const y0 = VERT ? 230 : 60;
+    N.es(chip, t, .05, fin, { x: N.cx(chip), y: y0, dy: -60, curva: 'salidaQuint', oy: -60 });
+    MG.contador(nota, t, .3, 1.8, 0, P.nota, { decimales: 1 });
+    N.es(nota, t, .3, fin + .05, { x: 0, y: y0 + 90, dy: 80, s0: .7, oy: -120 });
+    [...est.children].forEach((s, i) => { const p = N.pop(t, .9 + i * .14, .5); s.style.transform = `scale(${p}) rotate(${(1 - Math.min(1, p)) * -70}deg)`; });
+    N.es(est, t, 0, fin + .1, { x: 0, y: y0 + 340, dy: 0, oy: -100 }); if (t < fin + .1) est.style.opacity = 1;
+    N.es(total, t, 1.8, fin + .15, { x: 0, y: y0 + 450, dy: 40, curva: 'salidaQuint', oy: -80 });
+    // cada reseña sube a su sitio con su propia curva y un leve giro que se endereza
+    const yF = y0 + 560, hR = res[0].offsetHeight + 24;
+    res.forEach((r, i) => {
+      const t0 = 2.3 + i * .9;
+      N.es(r, t, t0, fin + .2 + i * .05, { x: (W - cw) / 2, y: yF + i * hR, dy: 260, s0: .9, curva: curvas[i % 3], d: .7, oy: -100 });
+      r.style.rotate = `${(i % 2 ? 1 : -1) * 2 * (1 - C.rebote(k(t, t0, t0 + 1)))}deg`;
+    });
+    N.es(marca, t, 4.8, fin + .35, { x: N.cx(marca), y: H - (VERT ? 200 : 70), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

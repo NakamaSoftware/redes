@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Pieza «3d-telefono» · 3D con three.js · Viegas IA · Motion Lab
+     Un teléfono 3D (marco de metal, isla, botones, cristal con reflejo que barre) entra girando de espaldas y se planta
+     de cara a la cámara con frenada suave y rebote; en su pantalla se reproduce TU reel (vídeo como textura, fotograma a
+     fotograma). Debajo, la llamada a la acción y la píldora con tu usuario. Para CTA, portadas y «mira el reel completo».
+     "red": instagram · tiktok · youtube (logo real en la píldora) · "video": ruta a tu reel 9:16 (relativa a la escena; mejor con -g 1 para que se coloque rápido).
+     Formato: #9x16 (por defecto) · #16x9 · #1x1 · #4x5 · Fondo transparente: ?fondo=transparente · Tema: noche-azul. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+<style>
+.tit{ position:absolute; left:0; text-align:center; font:600 92px var(--fuente); letter-spacing:-.04em; color:var(--texto); white-space:nowrap; }
+.tit em{ font-family:var(--serif); font-style:italic; font-weight:400; color:#E8A38A; }
+.pil{ position:absolute; display:flex; align-items:center; gap:18px; padding:20px 38px 20px 22px; border-radius:99px; background:#D97757; color:#14100E; font:600 44px var(--fuente); letter-spacing:-.02em; white-space:nowrap; box-shadow:0 18px 60px rgba(217,119,87,.45); }
+.pil i{ width:62px; height:62px; border-radius:50%; background:#14100E; display:grid; place-items:center; }
+.pil i{ background:#fff; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 7,
+  "video": "vid/reel-muestra.mp4",
+  "titular": "Mira el reel <em>completo</em>",
+  "usuario": "@viegasestudio",
+  "red": "instagram",
+  "marco": "#2A2D35",
+  "salida": true,
+  "fondo": "marca"
+}
+</script>
+<script type="module">
+import { pieza3d, THREE } from '../motor/piezas3d.js';
+pieza3d({ duracion: 7, profundidad: { apertura: 12, max: 20 }, movimiento: { muestras: 8, obturador: 0.5 }, nieblaCerca: 14, nieblaLejos: 40 },
+  ({ P, W, H, VERT, MG, scene, camara, obj, mat, lente, encuadre, bokeh, texVideo, rect, luces }) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion;
+  const PW = 2.0, PH = PW * 2.07, PD = 0.2;
+  const tel = new THREE.Group(); scene.add(tel);
+  const marcoCol = parseInt(String(P.marco).replace('#', ''), 16);
+  const cuerpo = obj.cajaRedonda(PW, PH, PD, new THREE.MeshPhysicalMaterial({ color: marcoCol, metalness: 0.9, roughness: 0.28, clearcoat: 0.6 }), 0.09); tel.add(cuerpo);
+  // pantalla: vídeo en una forma con esquinas redondeadas
+  const SW = PW - 0.12, SH = PH - 0.12, forma = rect(SW, SH, 0.24), geo = new THREE.ShapeGeometry(forma, 24);
+  const uv = geo.attributes.uv, pos = geo.attributes.position;
+  for (let i = 0; i < uv.count; i++) uv.setXY(i, (pos.getX(i) + SW / 2) / SW, (pos.getY(i) + SH / 2) / SH);
+  const marcoNegro = new THREE.Mesh(new THREE.ShapeGeometry(rect(PW - 0.05, PH - 0.05, 0.27), 24), new THREE.MeshBasicMaterial({ color: 0x030304 })); marcoNegro.position.z = PD / 2 + 0.001; tel.add(marcoNegro);
+  const tx = texVideo(P.video, 0, { desde: 0, bucle: true });
+  const pantalla = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: tx, toneMapped: false })); pantalla.position.z = PD / 2 + 0.003; tel.add(pantalla);
+  // isla dinámica y botones
+  const isla = new THREE.Mesh(new THREE.CapsuleGeometry(0.07, 0.34, 6, 16), new THREE.MeshBasicMaterial({ color: 0x000000 })); isla.rotation.z = Math.PI / 2; isla.position.set(0, SH / 2 - 0.14, PD / 2 + 0.006); tel.add(isla);
+  [[PW / 2 + 0.012, 0.55, 0.42], [-PW / 2 - 0.012, 0.75, 0.22], [-PW / 2 - 0.012, 0.35, 0.36]].forEach(([x, y, h]) => { const b = obj.cajaRedonda(0.04, h, 0.07, cuerpo.material, 0.018); b.position.set(x, y, 0); tel.add(b); });
+  // cristal: reflejo que barre la pantalla (degradado aditivo)
+  const cs = document.createElement('canvas'); cs.width = 512; cs.height = 64; const g = cs.getContext('2d'), gr = g.createLinearGradient(0, 0, 512, 0);
+  gr.addColorStop(0, 'rgba(255,255,255,0)'); gr.addColorStop(.45, 'rgba(255,255,255,.0)'); gr.addColorStop(.5, 'rgba(255,255,255,.22)'); gr.addColorStop(.55, 'rgba(255,255,255,0)'); gr.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gr; g.fillRect(0, 0, 512, 64);
+  const brillo = new THREE.CanvasTexture(cs); brillo.wrapS = THREE.RepeatWrapping;
+  const cristal = new THREE.Mesh(geo, new THREE.MeshBasicMaterial({ map: brillo, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false })); cristal.position.z = PD / 2 + 0.008; tel.add(cristal);
+  const suelo = obj.suelo(new THREE.ShadowMaterial({ opacity: 0.35 })); suelo.position.y = -PH / 2 - 0.6;
+  const bk = bokeh(30, { radio: 9, alto: 12, z: -10, fondo: 6, tam: 0.09 }); scene.add(bk);
+  luces.clave.intensity = 1.6;
+  const dist = encuadre(PW * 1.6, PH * (VERT ? 1.9 : 1.3));
+  const tit = MG.el(`<div class="tit">${P.titular}</div>`); tit.style.width = W + 'px';
+    const pil = MG.el(`<div class="pil"><i><img src="../motor/logos/${P.red}.svg" alt="" style="width:38px"></i>${P.usuario}</div>`);
+  const tmp = new THREE.Vector3();
+  return (t) => {
+    // entrada: de espaldas y abajo → de cara, rápida con frenada (salidaExpo) y asentado con rebote
+    const p = C.salidaExpo(k(t, 0.1, 1.5)), r = C.reboteSuave(k(t, 0.6, 2.2));
+    tel.position.set(0, lerp(-7, 0, p) + Math.sin(t * 1.1) * 0.06 + (VERT ? 0.45 : 0), 0);
+    tel.rotation.set(lerp(-0.5, 0, r) + Math.sin(t * 0.9) * 0.03, lerp(Math.PI * 1.15, 0, Math.min(1.05, r)) + Math.sin(t * 0.7) * 0.12, lerp(0.25, 0, p) + Math.sin(t * 0.6) * 0.015);
+    brillo.offset.x = -0.6 + k(t, 1.6, 3.2) * 1.1 + Math.max(0, k(t, 5, 6.4)) * 1.1;
+    if (P.salida) { const x = C.entradaCubica(k(t, D - 0.7, D)); if (x > 0) { tel.position.y += x * 9; tel.rotation.x -= x * 0.5; } }
+    const ang = lerp(-10, 12, t / D) * Math.PI / 180, R = dist * lerp(0.92, 1.0, C.salidaQuint(k(t, 0, 3)));
+    camara.position.set(Math.sin(ang) * R, lerp(0.4, -0.2, t / D), Math.cos(ang) * R); camara.lookAt(0, VERT ? -0.95 : 0, 0);
+    bk.flota(t);
+    lente.enfocar(tel.getWorldPosition(tmp));
+    const yT = VERT ? H * 0.76 : H * 0.8;
+    let e = MG.entra(tit, t, 1.7, { d: 0.75, dy: 90, curva: 'salidaExpo', escala0: 0.94 }); MG.pon(tit, 0, yT + e.y, e.s);
+    e = MG.entra(pil, t, 2.1, { d: 0.6, dy: 60, curva: 'rebote', escala0: 0.6 }); MG.pon(pil, (W - pil.offsetWidth) / 2, yT + 140 + e.y, e.s);
+    if (P.salida) { const x = C.entradaCubica(k(t, D - 0.55, D)); if (x > 0) [tit, pil].forEach((el, i) => { el.style.opacity = 1 - x; MG.desenfoca(el, 0, x * 16); MG.pon(el, i ? (W - pil.offsetWidth) / 2 : 0, yT + i * 140 + x * 120); }); }
+  };
+});
+</script>
+</body></html>

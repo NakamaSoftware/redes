@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «tarjetas-3d» · 3D real (three.js): pasillo de tarjetas con vídeo (carruseles animados) flotando en el espacio;
+     la cámara hace un recorrido real entre ellas (curva Catmull-Rom con entrada-salida suave) y termina mirando al título. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+</head><body>
+<script type="module">
+import { escena3d } from '../motor/motor3d.js';
+escena3d({ duracion: 7, ancho: 1920, alto: 1080, fondo: 'marca', nieblaCerca: 8, nieblaLejos: 30 }, ({ THREE, MG, scene, camara, obj, rig }) => {
+  const vids = ['01-1', '03-1', '05-1', '06-1', '09-1', '10-1', '02-1', '04-1', '07-1', '08-1', 'mc-1', 'mc-2'];
+  const tarjetas = vids.map((v, i) => {
+    const c = obj.tarjeta(`vid/${v}.mp4`, 1.6, 2.0, 0, { desde: 0.6 + i * 0.3 });
+    const lado = i % 2 ? 1 : -1; c.position.set(lado * MG.lerp(1.6, 2.4, (i % 4) / 3), Math.sin(i * 1.7) * 0.8, -i * 2.2);
+    c.rotation.y = -lado * 0.45; scene.add(c); return c;
+  });
+  const tit = MG.el(`<div class="mg-abs" style="width:1920px;display:flex;justify-content:center"><div class="mg-cristal mg-titulo" style="font-size:88px;padding:26px 56px;border-radius:999px;backdrop-filter:blur(18px)">Tus carruseles, <em>en 3D</em></div></div>`);
+  return (t) => {
+    rig.recorrido(t, [[0, 0.4, 8], [0.7, 0.3, 0], [-0.5, 0.6, -5], [0, 1.0, -7.5]], { curva: 'entradaSalidaQuint', mirarA: [0, 0, -30] });
+    rig.temblor(t, 0.025);                                                  // cámara en mano, muy sutil
+    tarjetas.forEach((c, i) => { c.position.y = Math.sin(i * 1.7) * 0.8 + Math.sin(t * 1.2 + i) * 0.08; c.rotation.z = Math.sin(t * 0.8 + i) * 0.04;
+      // las tarjetas que la cámara deja muy cerca se desvanecen: nada tapa el título
+      const o = Math.min(MG.cl((camara.position.z - c.position.z - 1.2) / 2.2), MG.lerp(1, 0.28, MG.curvas.salidaCubica(MG.k(t, 4.5, 5.3))));   // y al llegar el título, el fondo se apaga
+      c.traverse((m) => { if (m.material) { m.material.transparent = true; m.material.opacity = o; } }); c.visible = o > 0.01; });
+    const e = MG.entra(tit, t, 4.8, { dy: 90 }); MG.pon(tit, e.x, 470 + e.y, e.s);
+  };
+});
+</script>
+</body></html>

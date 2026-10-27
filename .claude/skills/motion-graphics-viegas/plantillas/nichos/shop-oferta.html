@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «shop-oferta» · E-commerce / tienda · Viegas IA · Motion Lab
+     Producto en oferta: la foto sube con rebote suave y Ken Burns, el sello «−30 %» estalla girado, el precio anterior se tacha
+     con un trazo y el nuevo cuenta hacia abajo hasta el precio final con un golpe al llegar. Urgencia arriba y botón de compra.
+     Cambia "foto", "producto", "antes", "ahora" (números), "urgencia", "boton", "marca". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.dto{ width:230px; height:230px; border-radius:50%; background:#EF4444; color:#fff; display:grid; place-items:center; font:700 72px var(--fuente); letter-spacing:-.04em; box-shadow:0 24px 60px rgba(239,68,68,.45); }
+.prod{ font:600 74px/1.05 var(--fuente); letter-spacing:-.035em; color:var(--texto); text-align:center; }
+.precios{ display:flex; align-items:baseline; gap:30px; justify-content:center; }
+.precios .a{ position:relative; font:500 58px var(--fuente); color:var(--mute); }
+.precios .a s{ position:absolute; left:-6px; right:-6px; top:52%; height:6px; background:#EF4444; border-radius:6px; transform-origin:0 50%; transform:rotate(-8deg); }
+.precios .n{ font:700 150px/1 var(--fuente); letter-spacing:-.05em; color:var(--texto); font-variant-numeric:tabular-nums; }
+.urg{ display:inline-flex; align-items:center; gap:12px; font:600 30px var(--fuente); color:#fff; background:rgba(239,68,68,.9); padding:14px 26px; border-radius:99px; }
+.urg i{ width:12px; height:12px; border-radius:50%; background:#fff; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "urgencia": "Solo hasta el domingo",
+  "foto": "fotos/producto-auriculares.jpg",
+  "producto": "Auriculares Pulse Pro",
+  "antes": 89,
+  "ahora": 62.3,
+  "moneda": "€",
+  "boton": "Comprar ahora",
+  "marca": "Sonora Store",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 140 : 220), fh = VERT ? 760 : 470;
+  const f2 = (v) => v.toLocaleString('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const pct = Math.round((1 - P.ahora / P.antes) * 100);
+  const urg = MG.el(`<div class="urg"><i></i>${P.urgencia}</div>`);
+  const foto = N.foto(P.foto, cw, fh);
+  const dto = MG.el(`<div class="dto">−${pct}%</div>`);
+  const prod = MG.el(`<div class="prod" style="width:${cw}px">${P.producto}</div>`);
+  const precios = MG.el(`<div class="precios" style="width:${cw}px"><span class="a">${f2(P.antes)} ${P.moneda}<s></s></span><span class="n"></span></div>`);
+  const nn = precios.querySelector('.n'), ss = precios.querySelector('s');
+  const boton = MG.el(`<div class="n-btn">${P.boton} →</div>`);
+  const marca = MG.el(N.marca(.8));
+  return (t) => {
+    N.vivo(t);
+    const x0 = (W - cw) / 2, y0 = VERT ? 250 : 70;
+    if (t > .3 && t < fin) urg.querySelector('i').style.opacity = .4 + .6 * Math.abs(Math.sin(t * 4));
+    N.es(urg, t, .05, fin, { x: N.cx(urg), y: y0 - 110, dy: -70, curva: 'salidaQuint', oy: -60 });
+    N.es(foto, t, .1, fin + .05, { x: x0, y: y0, dy: 500, s0: .9, curva: 'reboteSuave', d: .9, oy: -180 }); N.kb(foto, t, 1.15, 1.02);
+    const pd = N.pop(t, 1.0, .6);
+    N.es(dto, t, 1.0, fin + .1, { x: x0 + cw - 200, y: y0 - 40, dy: 0, d: .3, curva: 'salidaQuint', oy: -80 });
+    dto.style.scale = pd; dto.style.rotate = `${12 - (1 - Math.min(1, pd)) * 90}deg`;
+    const yp = y0 + fh + (VERT ? 60 : 30);
+    N.es(prod, t, 1.2, fin + .15, { x: x0, y: yp, dy: 80, oy: -80 });
+    const yq = yp + prod.offsetHeight + 20;
+    ss.style.transform = `rotate(-8deg) scaleX(${C.salidaQuint(k(t, 2.0, 2.4))})`;
+    const pv = C.salidaQuint(k(t, 2.2, 3.4)); nn.textContent = f2(lerp(P.antes, P.ahora, pv)) + ' ' + P.moneda;
+    nn.style.scale = 1 + .1 * Math.sin(Math.PI * k(t, 3.3, 3.8)); nn.style.color = pv > .99 ? 'var(--brillo, var(--acento))' : '';
+    N.es(precios, t, 1.6, fin + .2, { x: x0, y: yq, dy: 90, oy: -80 });
+    N.es(boton, t, 3.4, fin + .28, { x: N.cx(boton), y: yq + precios.offsetHeight + 50, dy: 100, curva: 'reboteFuerte', oy: -60 });
+    N.es(marca, t, 3.6, fin + .35, { x: N.cx(marca), y: H - (VERT ? 200 : 70), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

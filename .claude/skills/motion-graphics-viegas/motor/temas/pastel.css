@@ -1,0 +1,3 @@
+/* Tema «pastel»: crema, rosa y lila */
+:root { --fondo:#FFF4EC; --fondo-rgb:255,244,236; --rejilla:#F8E6DA; --halo:255,143,171; --acento:#E9668A; --acento2:#7C6CF2; --texto:#3A2E4A; --mute:#8B7E99;
+  --tarjeta:#FFFFFF; --tarjeta2:#FFF9F5; --superficie:#F3E4EE; --tinta:#FFFFFF; --claro:58,46,74; --sombra:124,108,242; --radio:28px; }

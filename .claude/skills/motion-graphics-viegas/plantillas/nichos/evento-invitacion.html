@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «evento-invitacion» · Eventos / negocio local · Viegas IA · Motion Lab
+     Invitación con fecha, lugar y QR: la tarjeta-entrada sube girando un poco (rebote suave), la fecha grande se monta con el día
+     cayendo con rebote fuerte, el lugar entra desde la izquierda y el QR (real, de la URL que pongas) se dibuja módulo a módulo
+     en diagonal. La línea troquelada se dibuja entre las dos partes.
+     Cambia "evento", "dia", "mes", "diaSemana", "hora", "lugar", "direccion", "url", "boton", "marca". Formato: #9x16 · #4x5 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.ticket{ padding:56px 56px 50px; }
+.ev{ font:600 84px/1.04 var(--fuente); letter-spacing:-.035em; color:var(--texto); }
+.fecha{ display:flex; align-items:center; gap:30px; margin-top:40px; }
+.fecha .d{ font:600 190px/1 var(--fuente); letter-spacing:-.06em; color:var(--brillo, var(--acento)); }
+.fecha .m b{ display:block; font:600 52px var(--fuente); color:var(--texto); text-transform:capitalize; }
+.fecha .m small{ display:block; font:500 32px var(--mono); color:var(--mute); margin-top:6px; letter-spacing:.06em; }
+.lugar{ display:flex; gap:18px; align-items:flex-start; margin-top:30px; font:500 38px/1.3 var(--fuente); color:var(--texto); }
+.lugar small{ display:block; color:var(--mute); font-size:30px; }
+.lugar svg{ width:44px; height:44px; flex:none; margin-top:4px; }
+.corte{ height:0; border-top:4px dashed rgba(var(--claro),.25); margin:44px -56px 40px; transform-origin:0 50%; }
+.abajo{ display:flex; align-items:center; gap:36px; }
+.qr{ width:260px; height:260px; padding:16px; background:#fff; border-radius:22px; flex:none; }
+.qr canvas{ width:100%; height:100%; image-rendering:pixelated; }
+.abajo p{ font:500 34px/1.35 var(--fuente); color:var(--mute); }
+.abajo p b{ display:block; color:var(--texto); font-size:40px; margin-bottom:8px; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Estás invitado",
+  "evento": "Noche de *jazz* y vinos naturales",
+  "dia": "14",
+  "mes": "noviembre",
+  "diaSemana": "Viernes",
+  "hora": "20:30 h",
+  "lugar": "La Bodega de Rosa",
+  "direccion": "Calle del Turia, 18 · Valencia",
+  "url": "https://example.com/entradas",
+  "qrTexto": "Escanea y reserva tu plaza",
+  "qrNota": "Aforo limitado: 60 personas",
+  "marca": "La Bodega de Rosa",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script src="_nichos/qrcode.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 120 : 260);
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const tk = MG.el(`<div class="n-card ticket" style="width:${cw}px"><div class="ev">${N.md(P.evento)}</div>
+    <div class="fecha"><span class="d">${P.dia}</span><span class="m"><b>${P.mes}</b><small>${P.diaSemana} · ${P.hora}</small></span></div>
+    <div class="lugar"><svg viewBox="0 0 24 24" fill="var(--acento)"><path d="M12 2a7 7 0 00-7 7c0 5 7 13 7 13s7-8 7-13a7 7 0 00-7-7zm0 9.5A2.5 2.5 0 1112 6a2.5 2.5 0 010 5.5z"/></svg><div>${P.lugar}<small>${P.direccion}</small></div></div>
+    <div class="corte"></div><div class="abajo"><div class="qr"><canvas></canvas></div><p><b>${P.qrTexto}</b>${P.qrNota}</p></div></div>`);
+  // QR real de la URL: se pinta módulo a módulo según t
+  const q = qrcode(0, 'M'); q.addData(P.url); q.make(); const nq = q.getModuleCount();
+  const cv = tk.querySelector('canvas'); cv.width = cv.height = nq * 10; const g = cv.getContext('2d');
+  const partes = { ev: tk.querySelector('.ev'), d: tk.querySelector('.fecha .d'), m: tk.querySelector('.fecha .m'), lugar: tk.querySelector('.lugar'), corte: tk.querySelector('.corte'), abajo: tk.querySelector('.abajo') };
+  const marca = MG.el(N.marca(.8));
+  let L;
+  return (t) => {
+    if (!L) L = { y: (H - tk.offsetHeight) / 2 + (VERT ? 30 : 20) };
+    N.vivo(t);
+    N.es(chip, t, .05, fin, { x: N.cx(chip), y: L.y - 110, dy: -60, curva: 'salidaQuint', oy: -60 });
+    N.es(tk, t, .2, fin + .05, { x: (W - cw) / 2, y: L.y, dy: 700, s0: .9, curva: 'reboteSuave', d: .9, oy: -160, rot: -6 });
+    let e = MG.entra(partes.ev, t, .7, { dy: 50, curva: 'salidaQuint', d: .6 }); partes.ev.style.transform = `translateY(${e.y}px)`;
+    const pd = N.pop(t, 1.1, .6); partes.d.style.display = 'inline-block'; partes.d.style.transform = `translateY(${(1 - Math.min(1, pd)) * -120}px) scale(${pd})`; partes.d.style.opacity = k(t, 1.1, 1.2);
+    e = MG.entra(partes.m, t, 1.35, { dx: 60, dy: 0, curva: 'rebote', d: .6 }); partes.m.style.transform = `translateX(${e.x}px)`;
+    e = MG.entra(partes.lugar, t, 1.7, { dx: -80, dy: 0, curva: 'salidaQuint', d: .6 }); partes.lugar.style.transform = `translateX(${e.x}px)`;
+    partes.corte.style.transform = `scaleX(${C.entradaSalidaQuint(k(t, 2.0, 2.7))})`;
+    e = MG.entra(partes.abajo, t, 2.4, { dy: 60, curva: 'rebote', d: .6 }); partes.abajo.style.transform = `translateY(${e.y}px)`;
+    const pq = C.salidaCubica(k(t, 2.6, 3.8));
+    g.clearRect(0, 0, cv.width, cv.height); g.fillStyle = '#0B0D12';
+    for (let r = 0; r < nq; r++) for (let c = 0; c < nq; c++) if (q.isDark(r, c) && (r + c) / (2 * nq - 2) <= pq * 1.02) g.fillRect(c * 10, r * 10, 10, 10);
+    N.es(marca, t, 3.0, fin + .3, { x: N.cx(marca), y: H - (VERT ? 180 : 60), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

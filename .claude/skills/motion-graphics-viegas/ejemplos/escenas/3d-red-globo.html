@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Pieza «3d-red-globo» · 3D con three.js · Viegas IA · Motion Lab
+     Un globo de puntos gira detrás; delante, el logo de Claude (coral) es el centro y las integraciones (logos reales de svgl:
+     YouTube, Instagram, TikTok, Gmail…) aparecen alrededor con rebote. Arcos de luz se trazan desde Claude a cada una y
+     pulsos viajan por ellos. Cámara en órbita + dolly, profundidad de campo y desenfoque de movimiento.
+     Logos: claude · claude-code · youtube · instagram · tiktok · gmail (motor/logos/) o la ruta a tu SVG/PNG.
+     Formato: #9x16 (por defecto) · #16x9 · #1x1 · #4x5 · Fondo transparente: ?fondo=transparente · Tema: noche-azul. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+<style>
+.tit{ position:absolute; left:0; text-align:center; font:600 100px var(--fuente); letter-spacing:-.04em; color:var(--texto); white-space:nowrap; }
+.tit em{ font-family:var(--serif); font-style:italic; font-weight:400; color:#E8A38A; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 7,
+  "titular": "Claude, <em>conectado a todo</em>",
+  "centro": "claude",
+  "logos": ["youtube", "instagram", "tiktok", "gmail"],
+  "salida": true,
+  "fondo": "marca"
+}
+</script>
+<script type="module">
+import { pieza3d, THREE } from '../motor/piezas3d.js';
+pieza3d({ duracion: 7, profundidad: { apertura: 14, max: 22 }, movimiento: { muestras: 6, obturador: 0.5 }, nieblaCerca: 10, nieblaLejos: 30 },
+  ({ P, W, H, VERT, MG, scene, camara, lente, encuadre, texLogo, placa, bokeh, mat }) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion;
+  // ---- globo de puntos (esfera de Fibonacci) con un velo de cristal
+  const R = 2.6, NP = 1400, globo = new THREE.Group(); globo.position.z = -2.2; scene.add(globo);
+  const pts = new Float32Array(NP * 3);
+  for (let i = 0; i < NP; i++) { const y = 1 - (i / (NP - 1)) * 2, r = Math.sqrt(1 - y * y), a = i * 2.39996; pts.set([Math.cos(a) * r * R, y * R, Math.sin(a) * r * R], i * 3); }
+  const geoP = new THREE.BufferGeometry(); geoP.setAttribute('position', new THREE.BufferAttribute(pts, 3));
+  const puntos = new THREE.Points(geoP, new THREE.PointsMaterial({ color: 0x60A5FA, size: 0.045, transparent: true, opacity: 0.85, toneMapped: false }));
+  globo.add(puntos);
+  const velo = new THREE.Mesh(new THREE.SphereGeometry(R * 0.985, 64, 48), new THREE.MeshPhysicalMaterial({ color: 0x0B1530, roughness: 0.35, metalness: 0.2, envMapIntensity: 0.25, transparent: true, opacity: 0.85 })); globo.add(velo);
+  const aro = new THREE.Mesh(new THREE.TorusGeometry(R * 1.12, 0.008, 8, 200), new THREE.MeshBasicMaterial({ color: 0x93C5FD, transparent: true, opacity: 0.5, toneMapped: false })); aro.rotation.x = Math.PI / 2.3; globo.add(aro);
+  // ---- logos: placas con el logo real; Claude en el centro, más grande
+  const tile = (n, s) => placa(texLogo(n, { fondo: '#11141B', margen: 0.22 }), s, s, { radio: s * 0.22, grosor: 0.08, canto: mat.oscuro({ color: 0x1A2033, roughness: 0.3, metalness: 0.6 }) });
+  const hub = tile(P.centro, 1.25); hub.position.z = 0.8; scene.add(hub);
+  const M = P.logos.length, RX = VERT ? 1.75 : 3.2, RY = VERT ? 2.6 : 1.7;
+  const nodos = P.logos.map((n, i) => { const t = tile(n, 0.9), a = Math.PI / 2 + Math.PI / M + (i / M) * Math.PI * 2;
+    const p = new THREE.Vector3(Math.cos(a) * RX, Math.sin(a) * RY, 0.2 + (i % 2) * 0.5); scene.add(t);
+    // arco: curva que sale del hub, se eleva hacia la cámara y llega al logo
+    const curva = new THREE.QuadraticBezierCurve3(new THREE.Vector3(Math.cos(a) * 0.78, Math.sin(a) * 0.78, 0.85), new THREE.Vector3(p.x * 0.5, p.y * 0.5, 1.9), p.clone());
+    const tubo = new THREE.Mesh(new THREE.TubeGeometry(curva, 80, 0.018, 8), new THREE.MeshBasicMaterial({ color: 0x93C5FD, toneMapped: false, transparent: true, opacity: 0.9 }));
+    tubo.geometry.setDrawRange(0, 0); scene.add(tubo);
+    const pulsos = [0, 1].map(() => { const s = new THREE.Mesh(new THREE.SphereGeometry(0.055, 16, 12), new THREE.MeshBasicMaterial({ color: 0xF2B9A3, toneMapped: false })); scene.add(s); return s; });
+    return { t, p, curva, tubo, pulsos, t0: 0.9 + i * 0.16 };
+  });
+  const bk = bokeh(30, { radio: 9, alto: 12, z: -9, fondo: 6, tam: 0.08 }); scene.add(bk);
+  const dist = encuadre(RX * 2 + 1.4, RY * 2 + (VERT ? 3.2 : 1.6));
+  const tit = MG.el(`<div class="tit">${P.titular}</div>`); tit.style.width = W + 'px'; if (VERT) tit.style.fontSize = '84px';
+  const yTit = VERT ? H * 0.08 : H * 0.05;
+  const idx = (tubo) => tubo.geometry.index ? tubo.geometry.index.count : tubo.geometry.attributes.position.count;
+  const tmp = new THREE.Vector3();
+  return (t) => {
+    const ang = lerp(-16, 16, t / D) * Math.PI / 180, Rc = dist * lerp(0.9, 1.0, C.salidaQuint(k(t, 0, 2.5)));
+    camara.position.set(Math.sin(ang) * Rc, Math.sin(t * 0.4) * 0.3 + (VERT ? -0.6 : 0), Math.cos(ang) * Rc); camara.lookAt(0, VERT ? 0.5 : 0.2, 0);
+    globo.rotation.y = t * 0.22; globo.rotation.x = 0.25;
+    const eg = C.salidaExpo(k(t, 0, 1.2)); globo.scale.setScalar(lerp(0.6, 1, eg)); puntos.material.opacity = 0.85 * eg; velo.material.opacity = 0.85 * eg;
+    const eh = C.rebote(k(t, 0.25, 1.15)); hub.scale.setScalar(Math.max(0.001, eh)); hub.rotation.y = (1 - Math.min(1, eh)) * 1.6 + Math.sin(t * 0.8) * 0.12; hub.rotation.x = Math.sin(t * 0.6) * 0.06;
+    const salida = P.salida ? C.entradaCubica(k(t, D - 0.6, D)) : 0;
+    nodos.forEach((n, i) => {
+      const p = C.salidaQuint(k(t, n.t0, n.t0 + 0.7));                                           // el arco se traza rápido y frena
+      n.tubo.geometry.setDrawRange(0, Math.floor(idx(n.tubo) * p / 3) * 3);
+      const e = C.rebote(k(t, n.t0 + 0.45, n.t0 + 1.3));                                         // el logo llega con rebote
+      n.t.position.copy(n.p).multiplyScalar(lerp(0.4, 1, Math.min(1, e))); n.t.position.y += Math.sin(t * 1.1 + i) * 0.06;
+      n.t.scale.setScalar(Math.max(0.001, e) * (1 - salida)); n.t.rotation.y = (1 - Math.min(1, e)) * -1.2 + Math.sin(t * 0.7 + i) * 0.15;
+      n.tubo.material.opacity = 0.9 * (1 - salida);
+      n.pulsos.forEach((s, j) => { const u = ((t - n.t0 - 0.7) * 0.55 + j * 0.5) % 1; s.visible = t > n.t0 + 0.7 && salida < 0.5; if (u >= 0) s.position.copy(n.curva.getPoint(u)); });
+    });
+    hub.scale.multiplyScalar(1 - salida * 0.9); globo.scale.multiplyScalar(1 - salida * 0.3);
+    bk.flota(t);
+    lente.enfocar(hub.getWorldPosition(tmp));
+    const e = MG.entra(tit, t, 1.6, { d: 0.75, dy: -80, curva: 'salidaExpo', escala0: 0.94 }); MG.pon(tit, 0, yTit + e.y, e.s);
+    if (salida > 0) { tit.style.opacity = 1 - salida; MG.desenfoca(tit, 0, salida * 16); MG.pon(tit, 0, yTit - salida * 110); }
+  };
+});
+</script>
+</body></html>

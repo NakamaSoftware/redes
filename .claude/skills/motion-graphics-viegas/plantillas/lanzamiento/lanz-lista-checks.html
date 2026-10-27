@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-lista-checks» · Viegas IA · Motion Lab
+     Lista numerada (3–6 pasos) que entra en cascada; en cada paso el círculo se dibuja, la marca de «hecho» se traza con un
+     golpe y el texto se tacha (modo "tachar") o se enciende (modo "encender"); arriba, un contador «3/5» y una barra de
+     progreso que avanza con cada check; al completar, «zoom a través» del último check hacia el cierre con logo.
+     Cambia "titulo" (*palabra* = acento), "etiqueta", "items" (lista de textos), "modo" ("tachar" | "encender"),
+     colores ("fondo", "tinta", "acento"), "marca", "lema" y "logo" (ruta o "" = inicial).
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif;
+  --fondo:#141210; --tinta:#F3EDE4; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(110% 70% at 80% 10%, color-mix(in srgb, var(--fondo) 82%, #fff) 0%, var(--fondo) 62%); }
+.mg-fondo::after{ content:''; position:absolute; inset:0; background-image:linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px); background-size:100% 64px; }
+.mancha{ position:absolute; border-radius:50%; filter:blur(150px); pointer-events:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.grupo{ width:var(--ancho); height:var(--alto); }
+.grupo > *{ position:absolute; left:0; top:0; }
+em{ font-family:var(--serif); font-style:italic; font-weight:400; color:var(--acento); letter-spacing:-.01em; }
+.etq{ font:700 28px var(--fuente); letter-spacing:.18em; text-transform:uppercase; color:var(--acento); white-space:nowrap; }
+.tit{ font:700 96px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); }
+.tit span{ display:inline-block; }
+.prog{ display:flex; align-items:center; gap:24px; color:var(--tinta); }
+.prog b{ font:800 56px var(--fuente); letter-spacing:-.03em; font-variant-numeric:tabular-nums; min-width:120px; }
+.prog .pista{ flex:1; height:14px; border-radius:99px; background:rgba(255,255,255,.1); overflow:hidden; }
+.prog .lleno{ height:100%; width:0; border-radius:99px; background:linear-gradient(90deg, color-mix(in srgb, var(--acento) 60%, #fff), var(--acento)); box-shadow:0 0 24px rgba(var(--halo),.7); }
+.item{ display:flex; align-items:center; gap:30px; padding:26px 34px 26px 26px; border-radius:32px; background:rgba(255,255,255,.045); border:1.5px solid rgba(255,255,255,.08); }
+.item.hecho{ background:rgba(var(--halo),.1); border-color:rgba(var(--halo),.35); }
+.num{ font:700 30px var(--fuente); color:color-mix(in srgb, var(--tinta) 40%, transparent); letter-spacing:.04em; width:46px; font-variant-numeric:tabular-nums; }
+.item.hecho .num{ color:var(--acento); }
+.chk{ width:76px; height:76px; flex:none; }
+.chk circle{ fill:none; stroke:rgba(255,255,255,.2); stroke-width:4; }
+.chk .r{ stroke:var(--acento); stroke-linecap:round; }
+.chk .f{ fill:var(--acento); stroke:none; }
+.chk path{ fill:none; stroke:#fff; stroke-width:7; stroke-linecap:round; stroke-linejoin:round; }
+.txt{ position:relative; font:600 46px/1.15 var(--fuente); letter-spacing:-.02em; color:var(--tinta); }
+.txt .raya{ position:absolute; left:-4px; top:54%; height:5px; border-radius:4px; background:var(--acento); width:0; }
+.logo{ width:190px; height:190px; border-radius:52px; display:grid; place-items:center; overflow:hidden; color:#fff; font:800 104px var(--fuente);
+  background:linear-gradient(160deg, color-mix(in srgb, var(--acento) 60%, #fff), var(--acento)); box-shadow:0 40px 100px rgba(var(--halo),.45); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:800 128px/1 var(--fuente); letter-spacing:-.05em; color:var(--tinta); white-space:nowrap; }
+.lema{ font:500 42px var(--fuente); color:color-mix(in srgb, var(--tinta) 60%, transparent); white-space:nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 9,
+  "fondo": "#141210",
+  "tinta": "#F3EDE4",
+  "acento": "#D97757",
+  "etiqueta": "Checklist",
+  "titulo": "Antes de publicar, *revisa*",
+  "items": ["Cortes sin silencios", "Subtítulos con keywords", "Música a −14 LUFS", "Gancho en 2 segundos", "Portada legible"],
+  "modo": "tachar",
+  "marca": "Viegas Estudio",
+  "lema": "Edita con Claude Code",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+['fondo', 'tinta', 'acento'].forEach((c) => P[c] && raiz.setProperty('--' + c, P[c]));
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const palabras = (s) => esc(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `\u0001${w}`).join(' '))
+  .split(' ').map((w) => w.startsWith('\u0001') ? `<span><em>${w.slice(1)}</em></span>` : `<span>${w}</span>`).join(' ');
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const manchas = [[.9, .15, 860, .2], [.05, .85, 760, .13]].map(([x, y, r, a], i) => {
+    const m = MG.el(`<div class="mancha" style="width:${r}px;height:${r}px;background:var(--acento);opacity:${a}"></div>`); m._m = { x: x * W - r / 2, y: y * H - r / 2, f: .22 + i * .06 }; return m; });
+  const grupo = MG.el('<div class="grupo"></div>');
+  const items = (P.items || []).slice(0, 6), n = items.length;
+  const encender = P.modo === 'encender';
+
+  // ---- cabecera
+  const etq = MG.el(`<div class="etq">${esc(P.etiqueta || '')}</div>`, grupo);
+  const tit = MG.el(`<div class="tit">${palabras(P.titulo)}</div>`, grupo);
+  const TW = VERT ? W - 160 : 680; tit.style.fontSize = (VERT ? 104 : 104) + "px"; tit.style.width = TW + 'px';
+  const trozos = [...tit.querySelectorAll(':scope > span')];
+  const prog = MG.el(`<div class="prog" style="width:${VERT ? W - 160 : 640}px"><b>0/${n}</b><div class="pista"><div class="lleno"></div></div></div>`, grupo);
+  const cont = prog.querySelector('b'), lleno = prog.querySelector('.lleno');
+
+  // ---- lista
+  const IW = VERT ? W - 140 : 960;
+  const filas = items.map((s, i) => MG.el(`<div class="item" style="width:${IW}px"><div class="num">${String(i + 1).padStart(2, '0')}</div>
+    <svg class="chk" viewBox="0 0 76 76"><circle cx="38" cy="38" r="34"/><circle class="f" cx="38" cy="38" r="34"/><circle class="r" cx="38" cy="38" r="34" transform="rotate(-90 38 38)"/>
+    <path d="M23 39 L34 50 L54 28"/></svg><div class="txt" style="font-size:${VERT ? 54 : 48}px">${esc(s)}<div class="raya"></div></div></div>`, grupo));
+  const partes = filas.map((f) => { const r = f.querySelector('.r'), pa = f.querySelector('path'), fi = f.querySelector('.f');
+    const Lr = 2 * Math.PI * 34, Lp = pa.getTotalLength(); r.style.strokeDasharray = Lr; pa.style.strokeDasharray = Lp;
+    return { r, pa, fi, Lr, Lp, raya: f.querySelector('.raya'), txt: f.querySelector('.txt') }; });
+
+  // ---- cierre
+  const ini = (P.marca || '·').trim()[0].toUpperCase();
+  const logo = MG.el(`<div class="logo">${P.logo ? `<img src="${P.logo}" alt="">` : ini}</div>`);
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`), lema = MG.el(`<div class="lema">${esc(P.lema)}</div>`);
+
+  // ---- tiempos: las filas entran en cascada y los checks se aceleran (ritmo)
+  const tIn = .9, tChk0 = tIn + n * .1 + .5;
+  const tChk = items.map((_, i) => tChk0 + i * (.82 - i * .06));
+  const tZ = Math.max(tChk[n - 1] + 1.0, D - 2.7), tC = tZ + .45;
+
+  let L = null;
+  return (t) => {
+    if (!L) {
+      const hs = filas.map((f) => f.offsetHeight), gap = VERT ? 22 : 18, lh = hs.reduce((a, b) => a + b, 0) + gap * (n - 1);
+      const cab = 34 + 20 + tit.offsetHeight + 40 + prog.offsetHeight;
+      let cx, cy, lx, ly;
+      if (VERT) { cx = 80; cy = Math.max(270, (1480 + 260 - cab - 60 - lh) / 2); lx = (W - IW) / 2; ly = cy + cab + 60; }
+      else { cx = 130; cy = (H - cab) / 2; lx = W - IW - 130; ly = (H - lh) / 2; }
+      L = { hs, gap, cx, cy, lx, ly, th: tit.offsetHeight, lw: marca.offsetWidth, lmw: lema.offsetWidth };
+    }
+    // ---- cámara: deriva hacia la fila activa, zoom continuo
+    const act = tChk.reduce((a, b, i) => t > b - .4 ? i : a, 0);
+    const yAct = L.ly + L.hs.slice(0, act).reduce((a, b) => a + b + L.gap, 0);
+    const z = lerp(1.0, 1.08, C.suave(t / D));
+    MG.vista.style.transformOrigin = `${W / 2}px ${lerp(H / 2, yAct, .35)}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .45) * 10}px, ${Math.cos(t * .33) * 12}px)`;
+    manchas.forEach((m, i) => { const o = m._m; MG.pon(m, o.x + Math.sin(t * o.f + i) * 130, o.y + Math.cos(t * o.f * .8 + i * 2) * 110); });
+
+    // ---- zoom a través del último check
+    const ult = filas[n - 1], cxz = L.lx + 26 + 46 + 30 + 38, cyz = L.ly + L.hs.slice(0, n - 1).reduce((a, b) => a + b + L.gap, 0) + L.hs[n - 1] / 2;
+    const pz = C.entradaCubica(k(t, tZ, tZ + .75));
+    grupo.style.transformOrigin = `${cxz}px ${cyz}px`; grupo.style.transform = `scale(${1 + 10 * pz})`;
+    grupo.style.opacity = 1 - C.entradaCubica(k(t, tZ + .35, tZ + .75)); MG.desenfoca(grupo, pz * 12, pz * 12);
+
+    // ---- cabecera
+    const e0 = MG.entra(etq, t, .1, { d: .5, dx: -80, dy: 0, escala0: 1, curva: 'salidaExpo', base: 4 });
+    MG.pon(etq, L.cx + e0.x, L.cy);
+    MG.pon(tit, L.cx, L.cy + 54);
+    trozos.forEach((s, i) => { const e = MG.entra(s, t, .2 + i * .07, { d: .6, dy: 80, escala0: 1, curva: i % 2 ? 'salidaQuint' : 'salidaExpo', base: 6 }); s.style.transform = `translateY(${e.y}px)`; });
+    const ep = MG.entra(prog, t, .6, { d: .6, dy: 40, escala0: 1, curva: 'salidaCubica', base: 3 });
+    MG.pon(prog, L.cx, L.cy + 54 + L.th + 40 + ep.y);
+    let hechos = 0; tChk.forEach((a) => { hechos += C.salidaQuint(k(t, a, a + .5)); });
+    lleno.style.width = (100 * hechos / n) + '%';
+    cont.textContent = `${tChk.filter((a) => t >= a + .15).length}/${n}`;
+
+    // ---- filas
+    let y = L.ly;
+    filas.forEach((f, i) => {
+      const e = MG.entra(f, t, tIn + i * .1, { d: .7, dx: VERT ? 0 : 200, dy: VERT ? 140 : 0, escala0: .96, curva: i % 2 ? 'salidaExpo' : 'salidaQuint', base: 5 });
+      const a = tChk[i], pr = C.salidaQuint(k(t, a, a + .45)), pc = C.salidaCubica(k(t, a + .25, a + .5)), pp = C.reboteFuerte(k(t, a + .2, a + .2 + .45 * 1.5));
+      const pt = C.afterEffects75(k(t, a + .35, a + .8)), x = partes[i];
+      x.r.style.strokeDashoffset = x.Lr * (1 - pr);
+      x.fi.style.opacity = pc; x.pa.style.strokeDashoffset = x.Lp * (1 - C.salidaCubica(k(t, a + .3, a + .6)));
+      f.querySelector('.chk').style.transform = `scale(${lerp(1, 1, 0) + .25 * Math.sin(Math.PI * Math.min(1, Math.max(0, pp)))})`;
+      f.classList.toggle('hecho', t >= a + .3);
+      if (encender) { x.txt.style.color = t >= a + .3 ? 'var(--tinta)' : 'color-mix(in srgb, var(--tinta) 45%, transparent)'; x.raya.style.width = 0; }
+      else { x.raya.style.width = `calc(${pt * 100}% + 8px)`; x.raya.style.opacity = pt > 0 ? 1 : 0; x.txt.style.opacity = 1 - .45 * pt; }
+      // golpe: la fila se hunde un pelín al marcar
+      const g = Math.sin(Math.PI * k(t, a + .2, a + .55)) * .025;
+      MG.pon(f, L.lx + e.x, y + e.y, e.s - g);
+      y += L.hs[i] + L.gap;
+    });
+
+    // ---- cierre
+    const bloque = 190 + 60 + 128 + 36 + 50, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .3, curva: 'reboteFuerte', base: 18 });
+    MG.pon(logo, (W - 190) / 2, y0, el.s, `rotate(${-14 * (1 - C.salidaQuint(k(t, tC, tC + .9)))}deg)`);
+    const ea = MG.entra(marca, t, tC + .2, { d: .7, dy: 0, escala0: .6, curva: 'salidaExpo', base: 14 });
+    MG.pon(marca, (W - L.lw) / 2, y0 + 250, ea.s);
+    const eb = MG.entra(lema, t, tC + .42, { d: .6, dy: 40, escala0: 1, curva: 'salidaQuint', base: 5 });
+    MG.pon(lema, (W - L.lmw) / 2, y0 + 250 + 128 + 36 + eb.y);
+    if (t < tC) logo.style.opacity = marca.style.opacity = lema.style.opacity = 0;
+  };
+});
+</script>
+</body></html>

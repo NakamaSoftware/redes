@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Pieza «3d-asterisco» · 3D con three.js · Viegas IA · Motion Lab
+     El asterisco de Claude extruido en 3D (el trazado oficial, coral #D97757 siempre) llega en 12 piezas desde fuera de cuadro,
+     se arma con frenada suave y rebote, y gira con luz de estudio: barrido de luz, reflejos de metal barnizado, orbes de cristal
+     y bokeh desenfocados detrás. Cámara en dolly + órbita que nunca se para, desenfoque de movimiento y de profundidad reales.
+     Formato: #9x16 (por defecto) · #16x9 · #1x1 · #4x5 · Fondo transparente: ?fondo=transparente · Tema: noche-azul. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+<style>
+.tit{ position:absolute; left:0; text-align:center; font:600 132px var(--fuente); letter-spacing:-.04em; color:var(--texto); white-space:nowrap; }
+.tit em{ font-family:var(--serif); font-style:italic; font-weight:400; color:#E8A38A; }
+.sub{ position:absolute; left:0; text-align:center; font:500 30px var(--mono); letter-spacing:.22em; text-transform:uppercase; color:var(--mute); white-space:nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 6,
+  "titular": "Claude <em>Code</em>",
+  "subtitulo": "hecho con three.js",
+  "piezas": 12,
+  "metal": 0.2,
+  "salida": true,
+  "orbes": false,
+  "fondo": "marca"
+}
+</script>
+<script type="module">
+import { pieza3d, THREE } from '../motor/piezas3d.js';
+pieza3d({ duracion: 6, profundidad: { apertura: 16, max: 24 }, movimiento: { muestras: 8, obturador: 0.5 }, nieblaCerca: 16, nieblaLejos: 46 },
+  ({ P, W, H, VERT, U, MG, scene, camara, obj, mat, coral, luces, lente, encuadre, bokeh }) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion;
+  // ---- el logo: trazado oficial extruido, centrado en su caja
+  const tam = 3.2, base = obj.logoClaude({ tam, fondo: 0.26, bisel: 0.045, mat: coral() });
+  base.geometry.computeBoundingBox(); const bb = base.geometry.boundingBox, cy = (bb.min.y + bb.max.y) / 2;
+  base.geometry.translate(0, -cy, 0);
+  const logo = new THREE.Group(); scene.add(logo);
+  // ---- 12 piezas: el mismo logo recortado en cuñas (planos de recorte que viajan con cada pieza)
+  const N = P.piezas, piezas = [];
+  for (let i = 0; i < N; i++) {
+    const a0 = (i / N) * Math.PI * 2 + 0.13, a1 = ((i + 1) / N) * Math.PI * 2 + 0.13;
+    const local = [new THREE.Plane(new THREE.Vector3(-Math.sin(a0), Math.cos(a0), 0), 0), new THREE.Plane(new THREE.Vector3(Math.sin(a1), -Math.cos(a1), 0), 0)];
+    const m = coral({ metalness: P.metal, roughness: 0.42, clearcoat: 0.35, clearcoatRoughness: 0.55, envMapIntensity: 0.5, side: THREE.DoubleSide, clippingPlanes: local.map((p) => p.clone()), clipShadows: true });
+    const pz = new THREE.Mesh(base.geometry, m); pz.castShadow = pz.receiveShadow = true;
+    const am = (a0 + a1) / 2, s = (i * 7919) % 13 / 13;
+    // de dónde llega: fuera de cuadro, hacia fuera de su cuña y hacia la cámara, girada
+    pz.userData = { local, desde: new THREE.Vector3(Math.cos(am) * (6 + s * 3), Math.sin(am) * (7 + s * 3), 3 + s * 5),
+      giro: new THREE.Euler((s - 0.5) * 5, (0.5 - s) * 6, (s - 0.3) * 4), t0: 0.15 + ((i * 5) % N) * 0.055 };
+    logo.add(pz); piezas.push(pz);
+  }
+  // ---- orbes de cristal y bokeh detrás (salen redondos y suaves por la profundidad de campo)
+  const orbes = P.orbes ? [[-3.2, 3.0, -7.5, 0.5], [3.4, -2.6, -6.5, 0.42], [2.6, 3.6, -9, 0.35], [-3.0, -3.4, -8.5, 0.4]].map(([x, y, z, r]) => {
+    const o = obj.esfera(r, mat.vidrio({ thickness: 1.2, roughness: 0.04, ior: 1.5, attenuationColor: new THREE.Color(0xE8A38A), attenuationDistance: 2.5 })); o.position.set(x, y, z); o.castShadow = false; scene.add(o); return o; }) : [];
+  const bk = bokeh(36, { radio: 7, alto: 12, z: -9, fondo: 6, tam: 0.07 }); scene.add(bk);
+  // ---- luz: barrido de estudio que cruza el logo y luz de contorno
+  const barrido = new THREE.PointLight(0xffffff, 0, 9); scene.add(barrido);
+  luces.contra.position.set(0, 2, -4); luces.contra.intensity = 60; luces.clave.intensity = 1.1; luces.clave.position.set(6, 5, 3);
+  const dist = encuadre(tam * 1.25, tam * (VERT ? 2.25 : 1.5));
+  const tit = MG.el(`<div class="tit">${P.titular}</div>`), sub = MG.el(`<div class="sub">${P.subtitulo}</div>`);
+  [tit, sub].forEach((e) => { e.style.width = W + 'px'; });
+  if (!VERT) { tit.style.fontSize = '110px'; }
+  const yTit = VERT ? H * 0.70 : H * 0.74, ySub = yTit + (VERT ? 170 : 140);
+  const tmp = new THREE.Vector3(), q = new THREE.Quaternion(), e0 = new THREE.Euler();
+  return (t) => {
+    // cámara: dolly hacia atrás con frenada suave + órbita continua (nunca se para)
+    const ab = C.salidaQuint(k(t, 0, 2.6));
+    const R = lerp(dist * 0.78, dist, ab) + t * 0.12, ang = lerp(-20, 16, t / D) * Math.PI / 180;
+    camara.position.set(Math.sin(ang) * R, lerp(-0.6, 0.35, ab) + (VERT ? -1.2 : -0.5), Math.cos(ang) * R);
+    camara.lookAt(0, VERT ? -1.0 : -0.45, 0);
+    // logo: arriba en 9:16 para dejar sitio al titular; giro continuo con frenada al armarse
+    logo.position.set(0, VERT ? 0.25 : 0.15, 0);
+    logo.rotation.set(-0.22 + Math.sin(t * 0.8) * 0.05, lerp(-1.1, -0.35, C.salidaQuint(k(t, 0.2, 2.4))) + t * 0.12, 0);
+    piezas.forEach((pz) => {
+      const u = pz.userData, p = C.salidaExpo(k(t, u.t0, u.t0 + 1.05));          // entrada rápida, frenada suave
+      const s = C.reboteSuave(k(t, u.t0 + 0.55, u.t0 + 1.6));                    // asentado con un rebote mínimo
+      pz.position.copy(u.desde).multiplyScalar(1 - p);
+      pz.position.z += (1 - s) * 0.12 * (p >= 1 ? 1 : 0);
+      e0.set(u.giro.x * (1 - p), u.giro.y * (1 - p), u.giro.z * (1 - p)); pz.rotation.copy(e0);
+      pz.visible = t > u.t0 - 0.02;
+      // salida inversa: se separa acelerando (entradaCubica) en los últimos 0,6 s
+      if (P.salida) { const x = C.entradaCubica(k(t, D - 0.62, D)); if (x > 0) { pz.position.addScaledVector(u.desde, x * 0.6); pz.rotation.z += x * 0.8; } }
+    });
+    logo.updateMatrixWorld(true);
+    piezas.forEach((pz) => pz.material.clippingPlanes.forEach((pl, j) => pl.copy(pz.userData.local[j]).applyMatrix4(pz.matrixWorld)));
+    // barrido de luz (CC Light Sweep, pero con luz real)
+    const b = k(t, 1.7, 3.0); barrido.intensity = b > 0 && b < 1 ? 120 * Math.sin(b * Math.PI) : 0;
+    barrido.position.set(lerp(-4, 4, C.entradaSalidaQuint(b)), 1.2, 2.2).applyMatrix4(logo.matrixWorld);
+    orbes.forEach((o, i) => { o.position.y += 0; o.rotation.y = t * 0.3; o.position.x = [-3.2, 3.4, 2.6, -3.0][i] + Math.sin(t * 0.5 + i) * 0.15; });
+    bk.flota(t);
+    lente.enfocar(logo.getWorldPosition(tmp));
+    // titular y subtítulo: entrada rápida con frenada (salidaExpo) y salida inversa (entradaCubica)
+    let e = MG.entra(tit, t, 1.45, { d: 0.75, dy: 90, curva: 'salidaExpo', escala0: 0.92 }); MG.pon(tit, 0, yTit + e.y, e.s);
+    e = MG.entra(sub, t, 1.7, { d: 0.7, dy: 50, curva: 'salidaExpo' }); MG.pon(sub, 0, ySub + e.y, e.s);
+    if (P.salida) { const x = C.entradaCubica(k(t, D - 0.55, D)); if (x > 0) { [tit, sub].forEach((el) => { el.style.opacity = (1 - x) * +el.style.opacity; MG.desenfoca(el, 0, x * 18); }); MG.pon(tit, 0, yTit - x * 120); MG.pon(sub, 0, ySub - x * 80); } }
+  };
+});
+</script>
+</body></html>

@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-dispositivos-keynote» · Viegas IA · Motion Lab
+     Línea de dispositivos de keynote: portátil, tableta y teléfono dibujados en CSS suben desde el suelo a oscuras
+     (cada uno con su curva) y un barrido de luz los «revela» uno a uno, encendiendo su pantalla; reflejo en el suelo
+     brillante, nombre y detalle debajo de cada uno. La cámara recorre los dispositivos (se acerca a cada uno al
+     encenderse), se aleja para verlos todos y entra en la pantalla del teléfono con «zoom a través» hasta el logo.
+     Cambia "titular" (*palabra* = acento), "dispositivos" (lista de {tipo: portatil·tableta·telefono, nombre, detalle,
+     imagen: ruta a tu captura o "" = degradado}; uno de cada tipo, en el orden en que se revelan), "marca", "lema",
+     "logo" (ruta o "" = inicial), colores "fondo", "tinta", "gris", "acento", "acento2" y "duracion".
+     Formato por hash: #9x16 (Reels, por defecto: portátil arriba, tableta y teléfono debajo) · #16x9 (YouTube: en fila). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif;
+  --fondo:#050506; --tinta:#F5F5F7; --gris:#86868B; --acento:#D97757; --acento2:#7A3CE0; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(90% 60% at 50% 40%, #16151A, var(--fondo) 70%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-style:normal; background:linear-gradient(100deg,var(--acento),#F4C2A8); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.disp{ transform-origin:0 0; -webkit-box-reflect:below 6px linear-gradient(transparent 72%, rgba(255,255,255,.16)); }
+.marco{ position:absolute; background:linear-gradient(145deg,#3A3A3F,#1B1B1E 40%,#2A2A2E); box-shadow:0 0 0 2px #4A4A50 inset, 0 40px 80px rgba(0,0,0,.6); overflow:hidden; }
+.pant{ position:absolute; overflow:hidden; background:#000; }
+.pant .img{ position:absolute; inset:0; background-size:cover; background-position:center; }
+.pant .ui{ position:absolute; border-radius:14px; background:rgba(255,255,255,.14); }
+.base{ position:absolute; background:linear-gradient(#5A5A60,#2B2B2F 60%,#1A1A1C); border-radius:4px 4px 30px 30px; }
+.base::after{ content:''; position:absolute; left:42%; right:42%; top:0; height:10px; background:#1E1E21; border-radius:0 0 12px 12px; }
+.isla{ position:absolute; background:#000; border-radius:30px; }
+.oscuro{ position:absolute; inset:-2px; background:#000; pointer-events:none; }
+.barrido{ position:absolute; top:-30%; height:160%; width:45%; pointer-events:none; mix-blend-mode:screen;
+  background:linear-gradient(90deg, transparent, rgba(255,255,255,.0) 20%, rgba(255,255,255,.55) 50%, rgba(255,255,255,0) 80%, transparent); transform:skewX(-18deg); }
+.nom{ text-align:center; white-space:nowrap; }
+.nom b{ display:block; font:700 var(--fn) var(--fuente); letter-spacing:-.03em; color:var(--tinta); }
+.nom span{ display:block; font:500 calc(var(--fn)*.6) var(--fuente); color:var(--gris); margin-top:4px; }
+.tit{ font:700 var(--ft)/1.05 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; white-space:nowrap; }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:700 64px var(--fuente); letter-spacing:-.035em; color:var(--tinta); white-space:nowrap; }
+.lema{ font:500 36px var(--fuente); color:var(--gris); white-space:nowrap; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#050506",
+  "tinta": "#F5F5F7",
+  "gris": "#86868B",
+  "acento": "#D97757",
+  "acento2": "#7A3CE0",
+  "titular": "Todo tu *ecosistema*.",
+  "dispositivos": [
+    { "tipo": "portatil", "nombre": "Escritorio", "detalle": "Edita a lo grande", "imagen": "" },
+    { "tipo": "tableta", "nombre": "Tableta", "detalle": "Revisa en el sofá", "imagen": "" },
+    { "tipo": "telefono", "nombre": "Móvil", "detalle": "Publica al instante", "imagen": "" }
+  ],
+  "marca": "Tu Marca",
+  "lema": "En todos tus dispositivos",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'tinta', 'gris', 'acento', 'acento2']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+raiz.setProperty('--ft', (VERT ? 76 : 96) + 'px'); raiz.setProperty('--fn', (VERT ? 40 : 38) + 'px');
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, '<em>$1</em>');
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = () => P.logo ? `<div class="logo"><img src="${P.logo}" alt=""></div>` : `<div class="logo">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+
+// geometría de cada dispositivo (en su propio tamaño) y dónde va en cada formato: [x, y (arriba), escala]
+const GEO = {
+  portatil: { w: 1180, h: 690, pant: [108, 18, 964, 600], marco: [90, 0, 1000, 640, 28], base: [0, 640, 1180, 46] },
+  tableta: { w: 500, h: 680, pant: [22, 22, 456, 636], marco: [0, 0, 500, 680, 44] },
+  telefono: { w: 300, h: 620, pant: [14, 14, 272, 592], marco: [0, 0, 300, 620, 58], isla: true },
+};
+const LAY = VERT
+  ? { portatil: [80, 400, .78], tableta: [190, 1050, .56], telefono: [610, 1080, .56], nombres: (t, x, y, w, h) => [x + w / 2, y + h + 14], tit: 270 }
+  : { tableta: [150, 280, .74], portatil: [590, 278, .74], telefono: [1520, 304, .74], nombres: (t, x, y, w, h) => [x + w / 2, y + h + 22], tit: 110 };
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const tit = MG.el(`<div class="tit">${md(esc(P.titular))}</div>`);
+  const grad = (i) => [`linear-gradient(135deg, var(--acento), var(--acento2))`, `linear-gradient(160deg, #3A2A5A, var(--acento) 105%)`, `linear-gradient(200deg, var(--acento2), var(--acento) 70%, #F4C2A8)`][i % 3];
+  const devs = P.dispositivos.map((d, i) => {
+    const g = GEO[d.tipo] || GEO.telefono, L = LAY[d.tipo] || LAY.telefono;
+    const el = MG.el(`<div class="disp"></div>`); el.style.width = g.w + 'px'; el.style.height = g.h + 'px';
+    const [mx, my, mw, mh, mr] = g.marco, [px, py, pw, ph] = g.pant;
+    el.innerHTML = `<div class="marco" style="left:${mx}px;top:${my}px;width:${mw}px;height:${mh}px;border-radius:${mr}px"></div>
+      <div class="pant" style="left:${px}px;top:${py}px;width:${pw}px;height:${ph}px;border-radius:${Math.max(6, mr - 14)}px">
+        <div class="img" style="background:${d.imagen ? `url('${d.imagen}') center/cover` : grad(i)}"></div>
+        ${d.imagen ? '' : `<div class="ui" style="left:8%;top:${g.isla ? 14 : 9}%;width:46%;height:5%"></div><div class="ui" style="left:8%;top:${g.isla ? 22 : 18}%;width:70%;height:3%;opacity:.6"></div>
+          <div class="ui" style="left:8%;bottom:8%;width:84%;height:${d.tipo === 'portatil' ? 38 : 30}%;background:rgba(0,0,0,.22);border-radius:${d.tipo === 'portatil' ? 18 : 24}px"></div>`}
+        <div class="barrido"></div></div>
+      ${g.isla ? `<div class="isla" style="left:${g.w / 2 - 50}px;top:28px;width:100px;height:28px"></div>` : ''}
+      ${g.base ? `<div class="base" style="left:${g.base[0]}px;top:${g.base[1]}px;width:${g.base[2]}px;height:${g.base[3]}px"></div>` : ''}
+      <div class="oscuro" style="border-radius:${mr}px"></div>`;
+    const nom = MG.el(`<div class="nom"><b>${esc(d.nombre)}</b><span>${esc(d.detalle)}</span></div>`);
+    const [x, y, s] = L, w = g.w * s, h = g.h * s, [nx, ny] = LAY.nombres(d.tipo, x, y, w, h);
+    const pc = [x + (px + pw / 2) * s, y + (py + ph / 2) * s];
+    return { el, nom, x, y, s, w, h, nx, ny, cx: x + w / 2, cy: y + h / 2, pc, osc: el.querySelector('.oscuro'), bar: el.querySelector('.barrido'), pw };
+  });
+  const logo = MG.el(logoHTML()), marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`), lema = MG.el(`<div class="lema">${esc(P.lema)}</div>`);
+
+  const N = devs.length, tR = (i) => 1.25 + i * 1.15, tFin = tR(N - 1) + 1.15;
+  const tZ = Math.max(tFin + 1.4, D - 2.7), tC = tZ + .6;
+  const iZ = Math.max(0, P.dispositivos.findIndex((d) => d.tipo === 'telefono'));
+  const Zf = VERT ? 1.6 : 1.3;
+  // recorrido de cámara: claves [t, x, y, zoom] interpoladas con curvas suaves (las claves se mueven: nunca se para)
+  const ancho = [W / 2, H / 2 + (VERT ? 20 : 30), 1];
+  const claves = [[0, ...ancho], [.7, ...ancho]];
+  devs.forEach((d, i) => { const z = Math.min(Zf, (VERT ? 900 : 1500) / d.w); claves.push([tR(i) - .25, d.cx - 12, d.cy + 30, z * .97], [tR(i) + .7, d.cx + 12, d.cy + 10, z]); });
+  claves.push([tFin + .9, ...ancho], [D, W / 2, H / 2 + 20, 1.03]);
+  const cam = (t) => { let i = 0; while (i < claves.length - 2 && t > claves[i + 1][0]) i++;
+    const a = claves[i], b = claves[i + 1], u = C.entradaSalidaQuint(k(t, a[0], b[0])); return [lerp(a[1], b[1], u), lerp(a[2], b[2], u), lerp(a[3], b[3], u)]; };
+
+  return (t) => {
+    let [fx, fy, z] = cam(t);
+    const zt = C.entradaCubica(k(t, tZ, tC)), zc = C.salidaQuint(k(t, tC - .05, tC + 1.4));
+    const dz = devs[iZ];
+    if (t >= tFin + .9 && t < tC) { const u = C.entradaSalidaQuint(k(t, tZ - .6, tZ + .2)); fx = lerp(fx, dz.pc[0], u); fy = lerp(fy, dz.pc[1], u); }
+    z = z * lerp(1, 1.04, k(t, 0, D)) * (1 + 14 * zt);
+    if (t >= tC) { fx = W / 2; fy = H / 2; z = lerp(1.3, 1, zc) * lerp(1, 1.05, k(t, tC, D)); }
+    // desenfoque de cámara según su velocidad (al 50 %)
+    const [fx2, fy2, z2] = cam(t - DT); const vc = Math.hypot(fx - fx2, fy - fy2) * z / DT;
+    MG.vista.style.transformOrigin = '0 0';
+    MG.vista.style.transform = `translate(${W / 2 - fx * z + Math.sin(t * .5) * 5}px, ${H / 2 - fy * z + Math.cos(t * .4) * 4}px) scale(${z})`;
+    MG.vista.style.filter = t < tC && vc * MB * .5 > .4 ? `blur(${Math.min(8, vc * MB * .5).toFixed(2)}px)` : 'none';
+
+    // titular
+    const et = MG.entra(tit, t, .25, { d: .8, dy: 50, escala0: .96, curva: 'salidaQuint', base: 8 });
+    MG.pon(tit, (W - tit.offsetWidth) / 2, LAY.tit + et.y, et.s);
+
+    const vis = t < tC ? 1 : 0;
+    const curvas = ['rebote', 'salidaExpo', 'reboteSuave'];
+    devs.forEach((d, i) => {
+      const t0 = tR(i) - .9;
+      const e = MG.entra(d.el, t, t0, { d: .75, dy: 260, escala0: .9, curva: curvas[i % 3], base: 6 });
+      d.el.style.transform = `translate(${d.x}px,${d.y + e.y}px) scale(${d.s * e.s})`;
+      d.el.style.transformOrigin = '0 0';
+      d.el.style.opacity = Math.min(1, e.p * 1.8) * vis;
+      // barrido de luz que revela: oscuro → encendido
+      const b = k(t, tR(i), tR(i) + .9);
+      d.osc.style.opacity = lerp(.86, 0, C.salidaCubica(b));
+      d.bar.style.left = (lerp(-60, 150, C.entradaSalidaQuint(b))) + '%';
+      d.bar.style.opacity = b > 0 && b < 1 ? 1 : 0;
+      const en = MG.entra(d.nom, t, tR(i) + .35, { d: .6, dy: 40, escala0: 1, curva: i % 2 ? 'salidaQuint' : 'salidaCubica', base: 5 });
+      MG.pon(d.nom, d.nx - d.nom.offsetWidth / 2, d.ny + en.y);
+      d.nom.style.opacity = Math.min(1, en.p * 1.8) * vis;
+    });
+    tit.style.opacity = Math.min(1, et.p * 1.8) * vis;
+
+    // cierre
+    const bloque = 150 + 50 + 80 + 20 + 50, y0 = (H - bloque) / 2 - (VERT ? 40 : 0);
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .25, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-14 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    const ma = MG.entra(marca, t, tC + .3, { d: .6, dy: 60, escala0: 1, curva: 'salidaExpo', base: 6 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2, y0 + 200 + ma.y);
+    const le = MG.entra(lema, t, tC + .5, { d: .6, dx: -60, dy: 0, escala0: 1, curva: 'salidaQuint', base: 5 });
+    MG.pon(lema, (W - lema.offsetWidth) / 2 + le.x, y0 + 290);
+  };
+});
+</script>
+</body></html>

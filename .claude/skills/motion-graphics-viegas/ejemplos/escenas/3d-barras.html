@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Pieza «3d-barras» · 3D con three.js · Viegas IA · Motion Lab
+     Columnas de cristal que se llenan de luz desde un suelo con rejilla: el líquido sube con frenada suave y rebote, las
+     cifras cuentan a la vez y siguen a cada columna en pantalla, y la última (la destacada) se ilumina en el acento.
+     La cámara baja en grúa desde arriba mientras orbita (nunca se para). Distinta de «grafica-3d»: vertical, cristal + relleno.
+     Formato: #9x16 (por defecto) · #16x9 · #1x1 · #4x5 · Fondo transparente: ?fondo=transparente · Tema: noche-azul. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<script src="../motor/motor.js"></script>
+<script type="importmap">{ "imports": { "three": "../motor/vendor/three.module.min.js", "three/addons/": "../motor/vendor/addons/" } }</script>
+<style>
+.tit{ position:absolute; left:0; text-align:center; font:600 100px var(--fuente); letter-spacing:-.04em; color:var(--texto); white-space:nowrap; }
+.tit em{ font-family:var(--serif); font-style:italic; font-weight:400; color:#E8A38A; }
+.eti{ position:absolute; width:240px; text-align:center; }
+.eti b{ display:block; font:600 62px var(--fuente); letter-spacing:-.03em; color:var(--texto); }
+.eti b.on{ color:#E8A38A; }
+.eti span{ display:block; font:500 24px var(--mono); letter-spacing:.16em; text-transform:uppercase; color:var(--mute); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 7,
+  "titular": "Seguidores <em>+212 %</em>",
+  "datos": [ { "valor": 12, "etiqueta": "Ene" }, { "valor": 19, "etiqueta": "Feb" }, { "valor": 27, "etiqueta": "Mar" }, { "valor": 38, "etiqueta": "Abr" } ],
+  "sufijo": "k",
+  "acento": "#D97757",
+  "salida": true,
+  "fondo": "marca"
+}
+</script>
+<script type="module">
+import { pieza3d, THREE } from '../motor/piezas3d.js';
+pieza3d({ duracion: 7, profundidad: { apertura: 10, max: 18 }, movimiento: { muestras: 6, obturador: 0.5 }, nieblaCerca: 14, nieblaLejos: 40 },
+  ({ P, W, H, VERT, MG, scene, camara, obj, mat, acento, lente, encuadre, bokeh, luces }) => {
+  const { k, lerp, curvas: C } = MG, D = P.duracion, N = P.datos.length, max = Math.max(...P.datos.map((d) => d.valor));
+  const SEP = 1.25, ALTO = 4.2, AN = 0.82;
+  const suelo = obj.suelo(new THREE.ShadowMaterial({ opacity: 0.4 })); scene.add(suelo);
+  const rejilla = new THREE.GridHelper(30, 60, 0x3B82F6, 0x1E3A8A); rejilla.material.transparent = true; rejilla.material.opacity = 0.22; rejilla.position.y = 0.002; scene.add(rejilla);
+  const cols = P.datos.map((d, i) => {
+    const g = new THREE.Group(); g.position.x = (i - (N - 1) / 2) * SEP; scene.add(g);
+    const vaso = obj.cajaRedonda(AN, ALTO, AN, new THREE.MeshPhysicalMaterial({ color: 0xBFD7FF, roughness: 0.08, metalness: 0, clearcoat: 1, transparent: true, opacity: 0.16, depthWrite: false }), 0.1); vaso.position.y = ALTO / 2; vaso.castShadow = false; g.add(vaso);
+    const top = i === N - 1;
+    const liq = obj.cajaRedonda(AN * 0.8, 1, AN * 0.8, top ? acento({ emissive: 0x000000 }) : mat.oscuro({ color: 0x2A4A8A, roughness: 0.3, metalness: 0.2 }), 0.08); g.add(liq);
+    const tapa = new THREE.Mesh(new THREE.CylinderGeometry(AN * 0.36, AN * 0.36, 0.02, 32), new THREE.MeshBasicMaterial({ color: top ? 0xF2B9A3 : 0x93C5FD, toneMapped: false })); g.add(tapa);
+    const el = MG.el(`<div class="eti"><b class="${top ? 'on' : ''}">0</b><span>${d.etiqueta}</span></div>`);
+    return { g, vaso, liq, tapa, el, d, top };
+  });
+  const bk = bokeh(26, { radio: 9, alto: 10, z: -10, fondo: 6, tam: 0.08 }); scene.add(bk); bk.position.y = 3;
+  luces.clave.intensity = 1.6;
+  const dist = encuadre(N * SEP + 1.4, ALTO * (VERT ? 2.2 : 1.6));
+  const tit = MG.el(`<div class="tit">${P.titular}</div>`); tit.style.width = W + 'px';
+  const yTit = VERT ? H * 0.1 : H * 0.07;
+  const pr = new THREE.Vector3(), tmp = new THREE.Vector3();
+  return (t) => {
+    // cámara: grúa de cenital a contrapicado suave + órbita continua
+    const gr = C.salidaQuint(k(t, 0, 3.2)), ang = lerp(-34, 18, t / D) * Math.PI / 180, R = dist * lerp(1.15, 0.98, gr);
+    camara.position.set(Math.sin(ang) * R, lerp(9, 2.4, gr), Math.cos(ang) * R); camara.lookAt(0, lerp(0.6, VERT ? 3.2 : 2.0, gr), 0);
+    rejilla.material.opacity = 0.22 * C.salidaCubica(k(t, 0, 0.8));
+    cols.forEach((c, i) => {
+      const t0 = 0.3 + i * 0.12, ev = C.salidaExpo(k(t, t0, t0 + 0.6));                       // el vaso nace del suelo
+      c.vaso.scale.set(1, Math.max(0.001, ev), 1); c.vaso.position.y = ALTO * ev / 2; c.vaso.visible = ev > 0.01;
+      const t1 = 1.1 + i * 0.22, p = C.rebote(k(t, t1, t1 + 1.4));                              // el líquido sube con rebote
+      const hh = Math.max(0.001, (c.d.valor / max) * (ALTO - 0.25) * p);
+      c.liq.scale.y = hh; c.liq.position.y = hh / 2 + 0.02; c.liq.visible = p > 0.002;
+      c.tapa.position.y = hh + 0.03; c.tapa.visible = p > 0.002; c.tapa.scale.setScalar(1 + Math.sin(t * 6 + i) * 0.04);
+      pr.set(c.g.position.x, ALTO * ev + 0.6, 0).project(camara);
+      MG.pon(c.el, (pr.x * 0.5 + 0.5) * W - 120, (-pr.y * 0.5 + 0.5) * H - 110);
+      const a = C.salidaCubica(k(t, t1, t1 + 0.4)); c.el.style.opacity = a; MG.desenfoca(c.el, 0, (1 - a) * 8);
+      MG.contador(c.el.querySelector('b'), t, t1, t1 + 1.3, 0, c.d.valor, { sufijo: P.sufijo });
+      if (P.salida) { const x = C.entradaCubica(k(t, D - 0.6 + i * 0.04, D)); if (x > 0) { c.g.position.y = -x * 6; c.el.style.opacity = a * (1 - x); } }
+    });
+    bk.flota(t);
+    lente.enfocar(tmp.set(cols[N - 1].g.position.x, 2, 0));
+    const e = MG.entra(tit, t, 0.5, { d: 0.75, dy: -80, curva: 'salidaExpo', escala0: 0.94 }); MG.pon(tit, 0, yTit + e.y, e.s);
+    if (P.salida) { const x = C.entradaCubica(k(t, D - 0.5, D)); if (x > 0) { tit.style.opacity = 1 - x; MG.desenfoca(tit, 0, x * 16); MG.pon(tit, 0, yTit - x * 110); } }
+  };
+});
+</script>
+</body></html>

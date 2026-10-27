@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-mapa-notificaciones» · Viegas IA · Motion Lab
+     Mapamundi de puntos (rejilla con máscara de continentes dibujada en canvas) que se enciende desde el centro; en cada
+     ciudad se enciende un foco azul que late (halo gaussiano + ondas) y aparece una notificación oscura con avatar (iniciales
+     si no hay foto), nombre, «hace 3 min» y un chip de color según el tipo (compra · visitante · carrito · lead). La cámara
+     viaja de foco en foco con desenfoque de movimiento y nunca se para; arriba, un contador total que sube con cada evento;
+     al final se aleja para enseñar el mapa entero con todas las notificaciones.
+     Cambia "ciudades" ([{ciudad, lat, lon, nombre, foto, tiempo, tipo, importe}]), "tipos" (texto y color de cada chip),
+     "contador" ({etiqueta, desde, hasta, sufijo}), "acento" (color de los focos), "fondo".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','SF Pro Display','Inter','Segoe UI',system-ui,sans-serif; --fondo:#F7F8FA; --acento:#2F6BFF; --halo:47,107,255; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(80% 60% at 50% 50%, #FFFFFF, var(--fondo)); }
+.mapa{ position:absolute; left:0; top:0; transform-origin:0 0; }
+.mapa canvas{ position:absolute; left:0; top:0; }
+.foco{ position:absolute; width:0; height:0; }
+.foco .luz{ position:absolute; left:-170px; top:-170px; width:340px; height:340px; border-radius:50%;
+  background:radial-gradient(circle, rgba(var(--halo),.42), rgba(var(--halo),.14) 45%, transparent 70%); filter:blur(14px); }
+.foco .onda{ position:absolute; left:-22px; top:-22px; width:44px; height:44px; border-radius:50%; border:2.5px solid rgba(var(--halo),.6); }
+.foco .nucleo{ position:absolute; left:-17px; top:-17px; width:34px; height:34px; border-radius:50%; background:#1E4FD8;
+  box-shadow:0 0 0 5px rgba(var(--halo),.28), 0 6px 14px rgba(30,79,216,.4); }
+.foco .nucleo::after{ content:''; position:absolute; left:12px; top:12px; width:10px; height:10px; border-radius:50%; background:#BFD3FF; }
+.noti{ position:absolute; display:flex; align-items:center; gap:20px; padding:20px 26px 20px 20px; border-radius:28px; background:#14161B; white-space:nowrap;
+  box-shadow:0 30px 60px rgba(12,16,30,.28), 0 6px 14px rgba(12,16,30,.18), inset 0 1px 0 rgba(255,255,255,.08); }
+.ava{ width:68px; height:68px; border-radius:50%; flex:none; display:grid; place-items:center; overflow:hidden; color:#fff; font:600 26px var(--fuente); letter-spacing:-.02em;
+  box-shadow:0 0 0 3px rgba(255,255,255,.12); }
+.ava img{ width:100%; height:100%; object-fit:cover; }
+.noti .txt{ margin-right:22px; }
+.noti b{ display:block; font:600 30px var(--fuente); letter-spacing:-.02em; color:#fff; }
+.noti small{ display:block; margin-top:3px; font:400 24px var(--fuente); letter-spacing:-.01em; color:#8B909B; }
+.chip{ display:flex; align-items:center; gap:9px; padding:9px 14px 9px 11px; border-radius:11px; color:#fff; font:700 21px var(--fuente); letter-spacing:.03em; text-transform:uppercase; }
+.chip svg{ width:22px; height:22px; }
+.panel{ position:absolute; white-space:nowrap; z-index:50; padding:26px 34px 28px; border-radius:34px; background:rgba(255,255,255,.78); -webkit-backdrop-filter:blur(20px); backdrop-filter:blur(20px);
+  box-shadow:0 30px 60px rgba(20,30,60,.12), inset 0 0 0 1.5px rgba(255,255,255,.9); }
+.panel .eti{ display:flex; align-items:center; gap:12px; font:500 28px var(--fuente); letter-spacing:-.01em; color:#6B7080; }
+.panel .vivo{ width:14px; height:14px; border-radius:50%; background:#16A34A; box-shadow:0 0 0 0 rgba(22,163,74,.4); }
+.panel .num{ margin-top:6px; font:600 96px/1 var(--fuente); letter-spacing:-.035em; color:#111318; font-variant-numeric:tabular-nums; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 12,
+  "acento": "#2F6BFF",
+  "fondo": "#F7F8FA",
+  "contador": { "etiqueta": "Ventas de hoy · en directo", "desde": 12480, "hasta": 14306, "sufijo": " €" },
+  "tipos": {
+    "compra": { "texto": "Compra", "color": "#16A34A" },
+    "visitante": { "texto": "Nuevo visitante", "color": "#2563EB" },
+    "carrito": { "texto": "Carrito abandonado", "color": "#E11D48" },
+    "lead": { "texto": "Nuevo lead", "color": "#7C3AED" }
+  },
+  "ciudades": [
+    { "ciudad": "Ciudad de México", "lat": 19.4, "lon": -99.1, "nombre": "Diego R.", "foto": "", "tiempo": "hace 1 min", "tipo": "visitante", "lado": "abajo-der" },
+    { "ciudad": "Nueva York", "lat": 40.7, "lon": -74.0, "nombre": "Carlos P.", "foto": "", "tiempo": "hace 3 min", "tipo": "compra", "importe": "352,49 $", "lado": "arriba-der" },
+    { "ciudad": "Buenos Aires", "lat": -34.6, "lon": -58.4, "nombre": "Valentina S.", "foto": "", "tiempo": "hace 27 min", "tipo": "carrito", "lado": "abajo-der" },
+    { "ciudad": "Madrid", "lat": 40.4, "lon": -3.7, "nombre": "Lucía M.", "foto": "", "tiempo": "hace 2 min", "tipo": "compra", "importe": "129,90 €", "lado": "abajo-der" },
+    { "ciudad": "Tokio", "lat": 35.7, "lon": 139.7, "nombre": "Sofía G.", "foto": "", "tiempo": "ahora", "tipo": "lead", "lado": "arriba-izq" }
+  ]
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+if (P.acento) { raiz.setProperty('--acento', P.acento); raiz.setProperty('--halo', hexRgb(P.acento)); }
+if (P.fondo) raiz.setProperty('--fondo', P.fondo);
+const esc = (s) => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const miles = (n) => String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+
+// ---------------------------------------------------------------- continentes simplificados (lon, lat): máscara de la rejilla
+const TIERRA = [
+  [[-168,66],[-162,70],[-140,70],[-120,73],[-95,72],[-80,73],[-65,62],[-60,52],[-55,48],[-67,45],[-70,42],[-76,36],[-81,31],[-80,25],[-83,29],[-90,30],[-97,27],[-97,21],[-90,21],[-87,16],[-83,10],[-79,8],[-84,12],[-92,15],[-105,20],[-110,24],[-112,30],[-118,33],[-124,40],[-125,48],[-133,56],[-150,60],[-160,58],[-168,62]],
+  [[-55,60],[-45,60],[-20,70],[-20,80],[-60,82],[-72,77],[-55,68]],
+  [[-80,8],[-60,10],[-50,0],[-35,-6],[-40,-22],[-48,-28],[-58,-38],[-65,-42],[-68,-52],[-74,-52],[-72,-40],[-71,-30],[-70,-18],[-76,-14],[-81,-5],[-78,2]],
+  [[-10,36],[-9,43],[-2,44],[-5,48],[0,50],[5,53],[8,57],[5,62],[15,69],[28,71],[40,67],[60,69],[70,73],[80,73],[100,77],[115,74],[140,72],[160,70],[180,68],[178,62],[160,60],[155,52],[142,47],[135,43],[130,42],[127,38],[122,31],[120,24],[110,20],[108,12],[105,9],[100,13],[98,8],[103,1],[98,16],[93,20],[90,22],[80,15],[77,8],[73,18],[67,25],[57,25],[56,27],[50,30],[48,29],[57,20],[52,15],[44,12],[35,28],[34,31],[36,36],[28,36],[26,40],[23,36],[20,40],[16,38],[12,44],[8,44],[3,42],[0,38],[-5,36]],
+  [[-17,21],[-10,30],[-6,36],[10,37],[20,32],[32,31],[35,27],[43,12],[51,12],[42,-2],[40,-15],[33,-26],[20,-35],[18,-30],[12,-15],[13,-5],[9,4],[-5,5],[-12,7],[-17,14]],
+  [[114,-22],[122,-18],[130,-12],[137,-12],[142,-11],[146,-19],[153,-26],[150,-37],[140,-38],[131,-31],[115,-34]],
+  [[95,5],[105,-6],[120,-8],[140,-6],[130,-2],[118,2],[110,2]],
+  [[-6,50],[2,51],[-2,58],[-6,57]], [[130,31],[141,36],[145,44],[140,42],[132,34]],
+  [[44,-25],[50,-15],[48,-13],[43,-20]], [[167,-46],[178,-38],[174,-41]], [[-24,64],[-14,64],[-14,66],[-22,66]]];
+const dentro = (x, y, pol) => { let c = false; for (let i = 0, j = pol.length - 1; i < pol.length; j = i++) { const [xi, yi] = pol[i], [xj, yj] = pol[j];
+  if ((yi > y) !== (yj > y) && x < (xj - xi) * (y - yi) / (yj - yi) + xi) c = !c; } return c; };
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const MW = 2000, LAT0 = 80, LAT1 = -58, MH = MW * (LAT0 - LAT1) / 360;
+  const px = (lon) => (lon + 180) / 360 * MW, py = (lat) => (LAT0 - lat) / (LAT0 - LAT1) * MH;
+
+  // ---- mapa de puntos (canvas a 2x para que el zoom no lo ablande)
+  const mapa = MG.el('<div class="mapa"></div>');
+  const cv = document.createElement('canvas'), ESC = 2; cv.width = MW * ESC; cv.height = MH * ESC; cv.style.width = MW + 'px'; cv.style.height = MH + 'px'; mapa.appendChild(cv);
+  const ctx = cv.getContext('2d');
+  const PASO = 14, puntos = [];
+  for (let y = PASO / 2; y < MH; y += PASO) for (let x = PASO / 2; x < MW; x += PASO) {
+    const lon = x / MW * 360 - 180, lat = LAT0 - y / MH * (LAT0 - LAT1);
+    if (TIERRA.some((p) => dentro(lon, lat, p))) puntos.push([x, y, Math.hypot(x - MW / 2, y - MH / 2)]);
+  }
+
+  // ---- focos y notificaciones
+  const TIPOS = P.tipos || {};
+  const ICO = {
+    compra: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9.5"/><path d="M14.8 9.2c-.5-1-1.6-1.5-2.8-1.5-1.6 0-2.8.8-2.8 2.1 0 2.9 5.8 1.5 5.8 4.4 0 1.3-1.3 2.1-3 2.1-1.4 0-2.6-.6-3-1.7M12 6v1.7M12 16.3V18"/></svg>',
+    visitante: '<svg viewBox="0 0 24 24" fill="#fff"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-6.5 8-6.5s8 2.5 8 6.5z"/></svg>',
+    carrito: '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 4h2.5l2.2 10.5h9.8L20 7H6.4"/><circle cx="9" cy="19" r="1.4" fill="#fff"/><circle cx="17" cy="19" r="1.4" fill="#fff"/></svg>',
+    lead: '<svg viewBox="0 0 24 24" fill="#fff"><path d="M12 2.8l2.7 5.6 6.1.8-4.5 4.2 1.1 6-5.4-2.9-5.4 2.9 1.1-6L3.2 9.2l6.1-.8z"/></svg>' };
+  const COLAVA = ['#F59E0B', '#EC4899', '#10B981', '#6366F1', '#EF4444', '#0EA5E9'];
+  const lista = (P.ciudades || []).slice(0, 8), n = lista.length;
+  const focos = lista.map((c, i) => {
+    const x = px(c.lon), y = py(c.lat);
+    const f = MG.el(`<div class="foco"><div class="luz"></div><div class="onda"></div><div class="onda"></div><div class="nucleo"></div></div>`, mapa);
+    f.style.left = x + 'px'; f.style.top = y + 'px';
+    const tp = TIPOS[c.tipo] || { texto: c.tipo, color: '#2563EB' };
+    const ini = String(c.nombre || '·').split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+    const no = MG.el(`<div class="noti"><div class="ava" style="background:linear-gradient(150deg, ${COLAVA[i % 6]}, color-mix(in srgb, ${COLAVA[i % 6]} 60%, #000))">${c.foto ? `<img src="${c.foto}" alt="">` : ini}</div>
+      <div class="txt"><b>${esc(c.nombre)}</b><small>${esc(c.tiempo)}</small></div>
+      <div class="chip" style="background:${tp.color}">${ICO[c.tipo] || ''}<span>${esc(tp.texto)}${c.importe ? ' ' + esc(c.importe) : ''}</span></div></div>`, mapa);
+    return { c, x, y, f, no, luz: f.querySelector('.luz'), ondas: [...f.querySelectorAll('.onda')], nucleo: f.querySelector('.nucleo') };
+  });
+
+  // ---- contador
+  const ct = P.contador || {};
+  const panel = MG.el(`<div class="panel"><div class="eti"><span class="vivo"></span>${esc(ct.etiqueta)}</div><div class="num">0</div></div>`);
+  const num = panel.querySelector('.num'), vivo = panel.querySelector('.vivo');
+
+  // ---- tiempos: llegada a cada foco y alejamiento final
+  const T0 = 1.9, PASO_T = Math.min(1.75, (D - 3.8 - T0) / Math.max(1, n - 1));
+  const lleg = focos.map((_, i) => T0 + i * PASO_T), tFin = lleg[n - 1] + 1.35;
+  const zO = VERT ? (W - 60) / MW : (W - 200) / MW, zF = VERT ? 1.0 : 1.3, zFin = VERT ? zO * 1.08 : zO * 1.02;
+  let L = null;
+
+  // cámara: claves (t, x, y, z) con curva de 75 %; entre claves deriva y empuje lento para que nunca se pare
+  function camara(t) {
+    if (!L) return [MW / 2, MH / 2, zO];
+    const K = L.claves; let i = 0; while (i < K.length - 2 && t > K[i + 1][0]) i++;
+    const a = K[i], b = K[i + 1], p = C.afterEffects75(k(t, a[0], b[0]));
+    return [lerp(a[1], b[1], p), lerp(a[2], b[2], p), lerp(a[3], b[3], p)];
+  }
+
+  return (t) => {
+    if (!L) {
+      // la notificación va al lado con más aire: a la izquierda si el foco está a la derecha del mapa
+      focos.forEach((f) => { f.w = f.no.offsetWidth; f.h = f.no.offsetHeight; const lado = f.c.lado || (f.x > MW * .55 ? 'arriba-izq' : 'arriba-der');
+        f.izq = lado.includes('izq'); f.abajo = lado.includes('abajo');
+        f.nx = f.izq ? f.x - f.w - 46 : f.x + 46; f.ny = f.abajo ? f.y + 34 : f.y - f.h - 34; });
+      const centro = (f) => [f.izq ? f.x - f.w * .32 : f.x + f.w * .32, f.abajo ? f.y + f.h * .55 : f.y - f.h * .55];
+      const claves = [[0, MW / 2, MH / 2, zO * .92], [1.0, MW / 2, MH / 2, zO]];
+      focos.forEach((f, i) => { const [x, y] = centro(f), z = zF * (VERT ? Math.min(1, (W - 80) / (f.w + 120)) : 1);
+        const prev = claves[claves.length - 1]; claves.push([lleg[i] - 1.05, prev[1], prev[2], prev[3] * 1.03]); claves.push([lleg[i] - .1, x, y, z]); });
+      const ult = claves[claves.length - 1]; claves.push([tFin - .2, ult[1], ult[2], ult[3] * 1.03]); claves.push([tFin + 1.2, MW / 2, MH / 2 - 30, zFin]); claves.push([D + 1, MW / 2, MH / 2 - 30, zFin * 1.05]);
+      L = { claves };
+    }
+    // ---- cámara + desenfoque de movimiento según la velocidad en pantalla
+    const [cx, cy, z0] = camara(t), [cx2, cy2, z2] = camara(t - DT);
+    const z = z0 * (1 + .012 * Math.sin(t * .9)), dr = Math.sin(t * .6) * 6;
+    mapa.style.transform = `translate(${W / 2 - cx * z + dr}px, ${H / 2 - cy * z + Math.cos(t * .5) * 6}px) scale(${z})`;
+    const vx = (cx - cx2) * z / DT, vy = (cy - cy2) * z / DT, vz = Math.abs(z0 - z2) / DT * 300;
+    MG.desenfoca(mapa, Math.abs(vx) * MB * .5 + vz * MB, Math.abs(vy) * MB * .5 + vz * MB);
+
+    // ---- puntos: se encienden desde el centro; los cercanos a un foco encendido se tiñen de azul
+    ctx.setTransform(ESC, 0, 0, ESC, 0, 0); ctx.clearRect(0, 0, MW, MH);
+    const lit = focos.map((f, i) => [f.x, f.y, C.salidaCubica(k(t, lleg[i] - .3, lleg[i] + .4))]);
+    for (const [x, y, d] of puntos) {
+      const a = C.salidaCubica(k(t, .1 + d / 1100 * .9, .5 + d / 1100 * .9));
+      if (a <= 0) continue;
+      let az = 0; for (const [fx, fy, l] of lit) if (l > 0) { const dd = Math.hypot(x - fx, y - fy); if (dd < 150) az = Math.max(az, l * (1 - dd / 150)); }
+      ctx.globalAlpha = a; ctx.fillStyle = az > .02 ? `rgb(${Math.round(lerp(196, 70, az))},${Math.round(lerp(201, 120, az))},${Math.round(lerp(210, 255, az))})` : '#C4C9D2';
+      ctx.beginPath(); ctx.arc(x, y, 3.3 * (.6 + .4 * a), 0, 6.283); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+
+    // ---- focos y notificaciones
+    focos.forEach((f, i) => {
+      const a = lleg[i], on = C.reboteFuerte(k(t, a - .3, a + .6));
+      f.nucleo.style.transform = `scale(${Math.max(0, on)})`; f.nucleo.style.opacity = k(t, a - .3, a - .15);
+      f.luz.style.opacity = C.salidaCubica(k(t, a - .25, a + .5)) * (.8 + .2 * Math.sin((t - a) * 4));
+      f.luz.style.transform = `scale(${.6 + .4 * C.salidaCubica(k(t, a - .25, a + .6)) + .05 * Math.sin((t - a) * 4)})`;
+      f.ondas.forEach((o, j) => { const ph = t > a ? ((t - a + j * .7) % 1.4) / 1.4 : 0; o.style.transform = `scale(${1 + C.salidaCubica(ph) * 3.2})`; o.style.opacity = t > a ? .9 * (1 - ph) : 0; });
+      // la notificación sale del foco con muelle (escala desde la esquina más cercana) y flota
+      f.no.style.transformOrigin = `${f.izq ? 100 : 0}% ${f.abajo ? 0 : 100}%`;
+      const e = MG.entra(f.no, t, a + .05, { d: .7, dy: f.abajo ? -40 : 40, dx: f.izq ? 40 : -40, escala0: .6, curva: 'rebote', base: 6 });
+      MG.pon(f.no, f.nx + e.x, f.ny + e.y + Math.sin(t * 1.3 + i) * 4, e.s);
+      f.no.style.left = 0; f.no.style.top = 0; f.no.style.zIndex = 10 + i;
+    });
+
+    // ---- contador: sube un poco con cada evento
+    const ent = MG.entra(panel, t, .4, { d: .7, dy: -60, escala0: .9, curva: 'rebote', base: 6 });
+    const pw = panel.offsetWidth;
+    MG.pon(panel, VERT ? (W - pw) / 2 : 90, (VERT ? 200 : 70) + ent.y, ent.s);
+    let fr = 0; lleg.forEach((a) => { fr += C.salidaQuint(k(t, a + .1, a + 1.1)) / n; });
+    num.textContent = miles(lerp(ct.desde || 0, ct.hasta || 0, fr)) + (ct.sufijo || '');
+    vivo.style.boxShadow = `0 0 0 ${8 * ((t % 1.2) / 1.2)}px rgba(22,163,74,${.4 * (1 - (t % 1.2) / 1.2)})`;
+  };
+});
+</script>
+</body></html>

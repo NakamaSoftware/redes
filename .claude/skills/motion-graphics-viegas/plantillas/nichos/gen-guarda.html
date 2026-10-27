@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla genérica «gen-guarda» · Cualquier creador · Viegas IA · Motion Lab
+     «Guarda este post»: el icono de guardar cae con rebote fuerte, se rellena de abajo arriba al «tocarlo» y suelta un anillo
+     de partículas suaves; el texto entra por palabras y debajo la razón para guardarlo. Ideal al final de un carrusel o reel útil.
+     Cambia "titulo" (*palabra* = acento), "razon", "marca". Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". Fondo transparente: "transparente": true. -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.ico{ width:300px; height:300px; }
+.ico svg{ width:100%; height:100%; overflow:visible; filter:drop-shadow(0 30px 60px rgba(var(--halo),.45)); }
+.chispa{ width:22px; height:22px; margin:-11px 0 0 -11px; border-radius:50%; background:var(--acento); filter:blur(2px); }
+.razon{ font:500 42px/1.35 var(--fuente); color:var(--mute); text-align:center; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 6,
+  "paleta": "noche",
+  "acento": "",
+  "transparente": false,
+  "titulo": "*Guarda* este post",
+  "razon": "Lo vas a necesitar la próxima vez que te sientes a crear contenido",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: P.transparente ? 'transparente' : 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.0, cw = W - 160;
+  const ico = MG.el(`<div class="ico"><svg viewBox="0 0 100 100"><defs><clipPath id="cg"><path d="M22 8h56a6 6 0 016 6v80L50 74 16 94V14a6 6 0 016-6z"/></clipPath></defs>
+    <g clip-path="url(#cg)"><rect class="fill" x="0" y="0" width="100" height="100" fill="var(--acento)"/></g>
+    <path d="M22 8h56a6 6 0 016 6v80L50 74 16 94V14a6 6 0 016-6z" fill="none" stroke="var(--texto)" stroke-width="6" stroke-linejoin="round"/></svg></div>`);
+  const fill = ico.querySelector('.fill');
+  const chispas = Array.from({ length: 10 }, () => MG.el(`<div class="chispa"></div>`));
+  const tit = N.frase(P.titulo, 'n-tit', cw); tit.style.fontSize = (VERT ? 130 : 110) + 'px';
+  const razon = MG.el(`<div class="razon" style="width:${cw}px">${P.razon}</div>`);
+  const marca = MG.el(N.marca(.8));
+  return (t) => {
+    if (!P.transparente) N.vivo(t, 1, 1.08); else MG.camara(t, 1, 1.05);
+    const cy = H * (VERT ? .34 : .3);
+    N.es(ico, t, .1, fin, { x: (W - 300) / 2, y: cy - 150, dy: -600, curva: 'reboteFuerte', d: .6, oy: -200, s1: 1.2 });
+    const tt = 1.1, pf = C.salidaQuint(k(t, tt, tt + .5));
+    fill.setAttribute('y', 100 - 100 * pf);
+    ico.style.scale = 1 - .12 * Math.sin(Math.PI * k(t, tt - .05, tt + .3));
+    chispas.forEach((c, i) => { const a = i / chispas.length * Math.PI * 2, p = C.salidaExpo(k(t, tt + .1, tt + .9)), r = 120 + 140 * p;
+      MG.pon(c, W / 2 + Math.cos(a) * r, cy + Math.sin(a) * r, 1 - p * .6); c.style.opacity = t > tt + .1 ? (1 - k(t, tt + .4, tt + .9)) : 0; });
+    const yT = cy + 210; MG.pon(tit, 80, yT);
+    if (t < fin) MG.animaTexto(tit, t, .5, { paso: .1, dy: 80 }); else N.es(tit, t, 0, fin, { x: 80, y: yT, oy: -110 });
+    N.es(razon, t, 1.5, fin + .1, { x: 80, y: yT + tit.offsetHeight + 40, dy: 60, curva: 'reboteSuave', oy: -70 });
+    N.es(marca, t, 1.9, fin + .2, { x: N.cx(marca), y: H - (VERT ? 220 : 80), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

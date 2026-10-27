@@ -1,0 +1,34 @@
+/* nichos.css · piezas comunes de las «Plantillas por nicho» (Viegas IA · Motion Lab)
+   Todo lee los tokens del tema (noche-azul por defecto; "paleta": "claro" en los parámetros). Nada de colores fijos. */
+.mg-mundo > * { position: absolute; left: 0; top: 0; width: max-content; }
+.mg-mundo em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.01em; color: var(--brillo, var(--acento2)); }
+.n-claro .mg-mundo em { color: var(--acento); }
+.n-claro .mg-fondo::after { display: none; }
+.n-claro .mg-fondo-marca { background: radial-gradient(70% 50% at 50% 108%, rgba(var(--halo), .16), transparent 70%), linear-gradient(180deg, #FAF8F4, #EFECE6); }
+.n-blob { position: absolute; border-radius: 50%; pointer-events: none; filter: blur(90px); opacity: .55; }
+.n-claro .n-blob { opacity: .28; }
+.n-tit { font: 600 104px/1.02 var(--fuente); letter-spacing: -.035em; color: var(--texto); text-align: center; }
+.n-tit em, .n-em { font-family: var(--serif); font-style: italic; font-weight: 400; letter-spacing: -.01em; color: var(--brillo, var(--acento2)); }
+.n-claro .n-tit em, .n-claro .n-em { color: var(--acento); }
+.n-sub { font: 500 40px/1.3 var(--fuente); color: var(--mute); text-align: center; }
+.n-chip { display: inline-flex; align-items: center; gap: 12px; font: 500 26px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--texto);
+  padding: 12px 22px; border-radius: 99px; background: rgba(var(--claro), .07); border: 1px solid rgba(var(--claro), .16); white-space: nowrap; }
+.n-chip i { width: 12px; height: 12px; border-radius: 50%; background: var(--acento); box-shadow: 0 0 16px var(--acento); }
+.n-card { border-radius: 36px; background: linear-gradient(180deg, rgba(var(--claro), .09), rgba(var(--claro), .03)), var(--tarjeta);
+  border: 1px solid rgba(var(--claro), .14); box-shadow: 0 40px 90px rgba(var(--sombra), .45); }
+.n-claro .n-card { background: var(--tarjeta); border-color: rgba(var(--claro), .08); box-shadow: 0 30px 70px rgba(var(--sombra), .14); }
+.n-btn { display: inline-flex; align-items: center; justify-content: center; gap: 14px; font: 600 40px var(--fuente); color: #fff; background: var(--acento);
+  padding: 26px 46px; border-radius: 99px; box-shadow: 0 18px 50px rgba(var(--halo), .45); white-space: nowrap; }
+.n-marca { display: inline-flex; align-items: center; gap: 18px; font: 600 38px var(--fuente); letter-spacing: -.02em; color: var(--texto); white-space: nowrap; }
+.n-marca .ic { width: 72px; height: 72px; border-radius: 20px; display: grid; place-items: center; overflow: hidden;
+  background: linear-gradient(160deg, var(--brillo, var(--acento2)), var(--acento)); color: #fff; font: 700 36px var(--fuente); }
+.n-marca .ic img { width: 100%; height: 100%; object-fit: contain; }
+.n-foto { position: absolute; overflow: hidden; border-radius: 32px; background: var(--superficie); box-shadow: 0 40px 90px rgba(var(--sombra), .5); }
+.n-foto > img, .n-foto > .n-img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transform-origin: 50% 50%; }
+.n-mono { font-family: var(--mono); }
+.n-num { font: 600 200px/1 var(--fuente); letter-spacing: -.05em; color: var(--texto); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.n-linea { height: 2px; background: linear-gradient(90deg, transparent, rgba(var(--claro), .3), transparent); }
+.n-estrellas { display: inline-flex; gap: 10px; }
+.n-estrellas svg { width: 56px; height: 56px; }
+.n-av { width: 96px; height: 96px; border-radius: 50%; display: grid; place-items: center; font: 600 38px var(--fuente); color: #fff;
+  background: linear-gradient(160deg, var(--brillo, var(--acento2)), var(--acento)); flex: none; }

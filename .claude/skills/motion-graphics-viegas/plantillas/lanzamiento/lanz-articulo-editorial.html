@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-articulo-editorial» · Viegas IA · Motion Lab
+     Artículo de revista a columnas: la página sube y se posa, el antetítulo y el titular serif entran palabra a palabra, la
+     CAPITULAR enorme cae con rebote y el texto se compone solo, palabra a palabra, columna a columna, mientras la cámara baja
+     leyendo. Una frase del texto se subraya con un rotulador de acento, la cámara se acerca, la frase sale de la página como
+     CITA DESTACADA en serif cursiva gigante (la página se oscurece y desenfoca detrás) y la cámara entra con «zoom a través»
+     en la palabra clave de la cita; cierre con logo.
+     Cambia "antetitulo", "titular" (*palabra* = acento), "autor", "texto" (párrafos separados por "|"), "frase" (la frase que
+     se subraya; se coloca dentro del texto, después del párrafo "fraseEn"), "cita" (la cita destacada; *palabra* = clave del
+     «zoom a través»; vacío = la propia frase), "cierre", "marca", "logo" (ruta o "" = inicial), colores "fondo", "fondo2",
+     "tinta", "acento", "papel", "tintaPapel".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?titular=Hola en la dirección. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&family=DM+Serif+Display:ital@0;1&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif; --serif:'Instrument Serif','Times New Roman',serif; --display:'DM Serif Display','Instrument Serif',serif;
+  --fondo:#141210; --fondo2:#2B1912; --tinta:#F4EDE4; --tintaRgb:244,237,228; --acento:#D97757; --halo:217,119,87; --papel:#F1EADF; --tintaPapel:#1A1614; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(120% 75% at 50% 105%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-family:var(--serif); font-style:italic; font-weight:400; letter-spacing:-.01em; color:var(--acento); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.tit{ font:600 120px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); text-align:center; }
+.tit .mg-trozo{ padding:0 .03em; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.07; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+.mg-mundo .abs, .abs{ position:absolute; left:0; top:0; }
+.pagina{ background:var(--papel); color:var(--tintaPapel); border-radius:8px; box-shadow:0 50px 140px rgba(0,0,0,.6); overflow:hidden; }
+.pagina > *{ position:absolute; left:0; top:0; }
+.ante{ font:700 22px var(--fuente); letter-spacing:.26em; text-transform:uppercase; color:var(--acento); white-space:nowrap; }
+.pagina .titA{ font:400 96px/0.96 var(--display); letter-spacing:-.025em; color:var(--tintaPapel); }
+.titA .mg-trozo{ display:inline-block; }
+.mg-mundo .pagina em{ color:var(--acento); }
+.autor{ font:600 21px var(--fuente); letter-spacing:.14em; text-transform:uppercase; color:var(--tintaPapel); opacity:.55; white-space:nowrap; }
+.regla{ height:2px; background:var(--tintaPapel); opacity:.8; transform-origin:0 50%; }
+.cuerpo{ font:400 25px/1.42 var(--serif); color:var(--tintaPapel); column-gap:44px; column-fill:auto; text-align:justify; hyphens:auto; }
+.cuerpo p{ margin:0 0 .7em; }
+.cuerpo .w{ display:inline; }
+.cuerpo .f{ background:linear-gradient(rgba(var(--halo),.38),rgba(var(--halo),.38)) no-repeat 0 85% / 0% 55%; font-style:italic; }
+.capi{ float:left; font:400 6.2em/0.8 var(--display); color:var(--acento); margin:.06em .1em 0 0; display:inline-block; transform-origin:50% 100%; }
+.pull{ font:400 120px/1.0 var(--serif); font-style:italic; letter-spacing:-.02em; color:var(--tinta); text-align:center; }
+.pull .mg-trozo{ display:inline-block; }
+.pull .q{ font-family:var(--display); color:var(--acento); font-style:normal; }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#141210",
+  "fondo2": "#2B1912",
+  "tinta": "#F4EDE4",
+  "acento": "#D97757",
+  "papel": "#F1EADF",
+  "tintaPapel": "#1A1614",
+  "antetitulo": "Ensayo · Número 07",
+  "titular": "El valor de hacer las cosas *despacio*",
+  "autor": "Por Tu Marca",
+  "texto": "En un tiempo que premia la prisa, detenerse parece un lujo. Sin embargo, cada proyecto que de verdad importa nace de una pausa: de mirar dos veces, de borrar y volver a empezar, de escuchar lo que el trabajo nos pide antes de decidir lo que queremos de él.|Las herramientas cambian cada semana, pero el oficio sigue siendo el mismo. Elegir bien, cuidar los detalles y contar una historia que alguien quiera recordar al día siguiente.|Por eso este número va de procesos y no de atajos: de las decisiones pequeñas que hacen grande un resultado y de la gente que las toma cada día sin que nadie lo vea.|Al final, lo que permanece no es lo más rápido ni lo más ruidoso, sino aquello que se hizo con intención, con calma y con algo que decir.",
+  "frase": "Lo que hace grande un trabajo es la atención, no la prisa.",
+  "fraseEn": 1,
+  "cita": "La atención es el *nuevo* lujo.",
+  "cierre": "Lee el *número*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'acento', 'papel', 'tintaPapel']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = (cl = '') => P.logo ? `<div class="logo ${cl}"><img src="${P.logo}" alt=""></div>` : `<div class="logo ${cl}">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+const azar = (s) => () => { s = (s * 16807) % 2147483647; return s / 2147483647; };   // pseudoaleatorio con semilla (render exacto)
+const offA = (el, anc) => { let x = 0, y = 0; while (el && el !== anc) { x += el.offsetLeft; y += el.offsetTop; el = el.offsetParent; } return { x, y }; };
+// cámara libre: el punto del mundo (fx, fy) queda en el centro de la pantalla, con zoom z
+const camaraEn = (MG, fx, fy, z, rot = 0) => { MG.vista.style.transformOrigin = '0 0';
+  MG.vista.style.transform = `translate(${W / 2 - z * fx}px,${H / 2 - z * fy}px) scale(${z}) rotate(${rot}deg)`; };
+// cierre común: logo + frase + marca (entra tras el «zoom a través»)
+function cierre(MG, ancho) {
+  const logo = MG.el(logoHTML()), cie = MG.texto(md(P.cierre), 'tit'), marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+  cie.style.width = ancho + 'px'; cie.style.fontSize = (VERT ? 124 : 134) + 'px';
+  return (t, tC) => {
+    const { k, curvas: C } = MG, vis = t >= tC - .05 ? 1 : 0;
+    [logo, cie, marca].forEach((e) => e.style.visibility = vis ? 'visible' : 'hidden');
+    const bloque = 150 + 60 + cie.offsetHeight + 50 + 60, y0 = (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - ancho) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6 + cie.trozos.length * .08, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+}
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'puntos', tamano: 44, intensidad: .3 }, halo: { fuerza: .22, x: 50, y: 60 } }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const [pX, pY, pW, pH] = VERT ? [70, 270, 940, 1250] : [150, 70, 1620, 940], M = VERT ? 60 : 70;
+  const pag = MG.el(`<div class="pagina"></div>`); pag.style.width = pW + 'px'; pag.style.height = pH + 'px';
+  const ante = MG.el(`<div class="ante">${esc(P.antetitulo)}</div>`, pag);
+  const tit = MG.texto(md(P.titular), 'titA'); pag.appendChild(tit);
+  const aut = MG.el(`<div class="autor">${esc(P.autor)}</div>`, pag), regla = MG.el(`<div class="regla"></div>`, pag);
+  // cuerpo: cada palabra en su <span> para componerla; la frase va marcada
+  const pars = String(P.texto).split('|'); let html = '', nW = 0;
+  const pal = (s, cl = '') => s.split(/\s+/).filter(Boolean).map((w) => `<span class="w${cl}" data-i="${nW++}">${esc(w)} </span>`).join('');
+  pars.forEach((p, i) => { let s = p.trim(), cap = '';
+    if (i === 0) { cap = `<span class="capi">${esc(s[0])}</span>`; s = s.slice(1); }
+    html += `<p>${cap}${pal(s)}</p>`;
+    if (i === (P.fraseEn ?? 1) - 1 || (i === pars.length - 1 && (P.fraseEn ?? 1) > pars.length)) html += `<p>${pal(P.frase, ' f')}</p>`; });
+  const cuerpo = MG.el(`<div class="cuerpo">${html}</div>`, pag);
+  const ws = [...cuerpo.querySelectorAll('.w')], fs = [...cuerpo.querySelectorAll('.f')], capi = cuerpo.querySelector('.capi');
+  const pull = MG.el(`<div class="pull"></div>`);
+  { const pz = ['<span class="q">“</span>', ...String(P.cita || P.frase).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => '' + w).join(' ')).split(/\s+/).filter(Boolean)
+      .map((w) => w[0] === '' ? `<em>${esc(w.slice(1))}</em>` : esc(w)), '<span class="q">”</span>'];
+    pull.innerHTML = pz.map((w) => `<span class="mg-trozo">${w}</span>`).join(' '); pull.trozos = [...pull.querySelectorAll('.mg-trozo')]; }
+  const cierreF = cierre(MG, VERT ? W - 180 : 1500);
+  let Lay = null;
+  const tW0 = 1.3, tW1 = 3.9, tS = 4.05, tQ = 5.3, tZ = Math.max(7.4, D - 2.6), tC = tZ + .7;
+  return (t) => {
+    if (!Lay) {
+      ante.style.left = tit.style.left = aut.style.left = M + 'px';
+      tit.style.width = (pW - M * 2) + 'px'; tit.style.fontSize = (VERT ? 92 : 96) + 'px';
+      const yT = M + 46, yA = yT + tit.offsetHeight + 26, yR = yA + 44;
+      Object.assign(ante.style, { top: M + 'px' }); tit.style.top = yT + 'px'; aut.style.top = yA + 'px';
+      Object.assign(regla.style, { left: M + 'px', top: yR + 'px', width: (pW - M * 2) + 'px' });
+      Object.assign(cuerpo.style, { left: M + 'px', top: (yR + 34) + 'px', width: (pW - M * 2) + 'px', height: (pH - yR - 34 - M) + 'px', columnCount: VERT ? 1 : 2, fontSize: (VERT ? 31 : 30) + 'px' });
+      pull.style.width = (VERT ? W - 150 : 1500) + 'px'; pull.style.fontSize = (VERT ? 132 : 132) + 'px';
+      const f0 = offA(fs[0], pag), fl = offA(fs[fs.length - 1], pag);
+      const kw = pull.querySelector('em') || pull, ko = offA(kw, pull);
+      Lay = { fx: pX + (f0.x + fl.x + fl.w) / 2, fy: pY + (f0.y + fl.y) / 2 + 16, f0, yR,
+        px: (W - pull.offsetWidth) / 2, py: (VERT ? 880 : H / 2) - pull.offsetHeight / 2, ko, kw };
+      Lay.fx = pX + f0.x + 200;
+      const xs = fs.map((e) => offA(e, pag)); Lay.fx = pX + (Math.min(...xs.map((o) => o.x)) + Math.max(...xs.map((o, i) => o.x + fs[i].offsetWidth))) / 2;
+      Lay.fy = pY + (Math.min(...xs.map((o) => o.y)) + Math.max(...xs.map((o) => o.y)) ) / 2 + 18;
+    }
+    // --- página: sube rápido y se posa; detrás de la cita se oscurece y desenfoca
+    const e = MG.entra(pag, t, 0, { d: .9, dy: H * .5, escala0: .9, curva: 'salidaQuint', base: 4 });
+    const dim = C.salidaCubica(k(t, tQ - .1, tQ + .8));
+    MG.pon(pag, pX, pY + e.y, e.s);
+    if (t > tQ - .1) { pag.style.filter = `blur(${dim * 8}px) brightness(${1 - dim * .72})`; }
+    // --- cabecera del artículo, cada pieza con su curva
+    const ea = MG.entra(ante, t, .35, { d: .5, dx: -60, dy: 0, curva: 'salidaExpo' }); ante.style.translate = `${ea.x}px 0`;
+    tit.trozos.forEach((sp, i) => { const r = MG.entra(sp, t, .5 + i * .08, { d: .6, dy: 80, escala0: 1, curva: i % 2 ? 'salidaQuint' : 'rebote', base: 6 }); sp.style.transform = `translateY(${r.y}px)`; });
+    const eu = MG.entra(aut, t, 1.0, { d: .5, dy: 20, curva: 'salidaCubica' }); aut.style.translate = `0 ${eu.y}px`;
+    regla.style.transform = `scaleX(${C.salidaExpo(k(t, 1.0, 1.7))})`;
+    // capitular: cae desde arriba y rebota
+    const rc = C.reboteFuerte(k(t, 1.15, 1.95)), rq = C.reboteFuerte(k(t - DT, 1.15, 1.95));
+    capi.style.transform = `translateY(${(1 - rc) * -260}px) scaleY(${1 + (rc - rq) * .4})`; capi.style.opacity = Math.min(1, rc * 4);
+    // --- el texto se compone palabra a palabra (leve desenfoque al aparecer)
+    ws.forEach((w, i) => { const u = k(t, tW0 + (tW1 - tW0) * i / ws.length, tW0 + (tW1 - tW0) * i / ws.length + .25);
+      w.style.opacity = u; w.style.filter = u < 1 ? `blur(${(1 - u) * 4}px)` : 'none'; });
+    // la frase se subraya con rotulador (palabra a palabra)
+    fs.forEach((f, i) => { const u = C.salidaCubica(k(t, tS + i * .06, tS + .25 + i * .06)); f.style.backgroundSize = `${u * 100}% 55%`; });
+    // --- cita destacada: sale de la frase y crece hasta el centro
+    const q = C.salidaQuint(k(t, tQ, tQ + .9)), qq = C.salidaQuint(k(t - DT, tQ, tQ + .9));
+    const sx = lerp(Lay.fx - W / 2, 0, q), sy = lerp(Lay.fy - (Lay.py + pull.offsetHeight / 2), 0, q);
+    MG.pon(pull, Lay.px + sx, Lay.py + sy, lerp(.18, 1, q));
+    pull.style.opacity = t < tQ ? 0 : Math.min(1, q * 2.5) * (1 - C.salidaCubica(k(t, tZ + .35, tC)));
+    MG.desenfoca(pull, Math.abs(q - qq) / DT * 6, Math.abs(q - qq) / DT * 6);
+    pull.trozos.forEach((sp, i) => { const r = MG.entra(sp, t, tQ + .25 + i * .07, { d: .55, dy: 50, escala0: 1, curva: i % 2 ? 'rebote' : 'salidaExpo', base: 0, desenfoque: false }); sp.style.transform = `translateY(${r.y}px)`; sp.style.opacity = t < tQ ? 0 : .35 + .65 * r.p; });
+    // --- cámara: arriba en el titular → baja leyendo → se acerca a la frase → centra la cita → «zoom a través»
+    const lee = C.afterEffects(k(t, 1.2, 4.0)), aF = C.entradaSalidaQuint(k(t, 3.8, 4.9)), aQ = C.afterEffects75(k(t, tQ, tQ + 1.1));
+    let fx = W / 2, fy = lerp(pY + 260, pY + pH * .55, lee), z = lerp(1.18, 1.05, lee) * (VERT ? 1 : 1.04);
+    fx = lerp(fx, Lay.fx, aF); fy = lerp(fy, Lay.fy, aF); z = lerp(z, VERT ? 1.12 : 1.4, aF);
+    const kx = Lay.px + Lay.ko.x + Lay.kw.offsetWidth / 2, ky = Lay.py + Lay.ko.y + Lay.kw.offsetHeight / 2;
+    fx = lerp(fx, W / 2, aQ); fy = lerp(fy, Lay.py + pull.offsetHeight / 2, aQ); z = lerp(z, 1, aQ) * lerp(1, 1.06, k(t, tQ, tZ));
+    const zg = C.salidaCubica(k(t, tZ - .5, tZ + .2)); fx = lerp(fx, kx, zg); fy = lerp(fy, ky, zg);
+    const zt = C.entradaCubica(k(t, tZ, tC));
+    if (t < tC) camaraEn(MG, fx + Math.sin(t * .5) * 7, fy + Math.cos(t * .4) * 6, z * lerp(1, 1.03, Math.sin(t * .6) * .5 + .5) * (1 + 10 * zt), Math.sin(t * .3) * .4);
+    else { const zc = C.salidaQuint(k(t, tC - .05, tC + 1.3)); camaraEn(MG, W / 2 + Math.sin(t * .5) * 6, H / 2, lerp(1.25, 1, zc) * lerp(1, 1.04, k(t, tC, D))); }
+    pag.style.visibility = t < tC ? 'visible' : 'hidden'; pull.style.visibility = t < tC ? 'visible' : 'hidden';
+    pag.style.opacity = Math.min(1, e.p * 2) * (1 - C.salidaCubica(k(t, tZ + .2, tC)));
+    MG.halo(50 + Math.sin(t * .4) * 12, 60 + Math.cos(t * .3) * 10);
+    cierreF(t, tC);
+  };
+});
+
+</script>
+</body></html>

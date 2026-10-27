@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «foto-antes-despues» · Fotógrafo / editor / creativo · Viegas IA · Motion Lab
+     Antes y después de la edición con deslizador: la foto sube con rebote suave; el «antes» (plano, sin color) y el «después»
+     se separan con un tirador que barre de lado a lado con curvas distintas (ida rápida con frenada, vuelta suave) y se para
+     un instante en el centro. Pon "antes" y "despues" con tus dos archivos (si solo hay una foto, el «antes» se simula con filtros).
+     Cambia "antes", "despues", "titulo", "etiquetas", "marca". Formato: #9x16 · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.comp{ border-radius:36px; overflow:hidden; box-shadow:0 50px 110px rgba(var(--sombra),.55); }
+.comp .capa{ position:absolute; inset:0; }
+.comp img{ position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+.comp .antes img.sim{ filter:saturate(.25) contrast(.75) brightness(.9) sepia(.15); }
+.comp .despues img.sim{ filter:saturate(1.35) contrast(1.12) brightness(1.04); }
+.tir{ position:absolute; top:0; bottom:0; width:6px; margin-left:-3px; background:#fff; box-shadow:0 0 30px rgba(0,0,0,.4); }
+.tir i{ position:absolute; top:50%; left:50%; width:96px; height:96px; margin:-48px 0 0 -48px; border-radius:50%; background:#fff; display:grid; place-items:center; font:700 34px var(--fuente); color:#111; box-shadow:0 12px 30px rgba(0,0,0,.35); font-style:normal; }
+.et{ position:absolute; top:28px; font:500 24px var(--mono); letter-spacing:.16em; text-transform:uppercase; color:#fff; background:rgba(0,0,0,.5); padding:10px 16px; border-radius:10px; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "titulo": "La magia está en *la edición*",
+  "antes": "fotos/naturaleza.jpg",
+  "despues": "fotos/naturaleza.jpg",
+  "etiquetas": ["Antes", "Después"],
+  "marca": "Lucía Ferrer Fotografía",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C, lerp } = N, fin = P.duracion - 1.1, cw = W - (VERT ? 100 : 400), ch = VERT ? 1140 : 720;
+  const sim = P.antes === P.despues ? ' class="sim"' : '';
+  const tit = N.frase(P.titulo, 'n-tit', W - 140); tit.style.fontSize = (VERT ? 92 : 70) + 'px';
+  const comp = MG.el(`<div class="comp" style="width:${cw}px;height:${ch}px"><div class="capa despues"><img${sim} src="${P.despues}" alt=""></div><div class="capa antes"><img${sim} src="${P.antes}" alt=""></div>
+    <span class="et" style="left:28px">${P.etiquetas[0]}</span><span class="et" style="right:28px">${P.etiquetas[1]}</span><div class="tir"><i>‹ ›</i></div></div>`);
+  const antes = comp.querySelector('.antes'), tir = comp.querySelector('.tir'), [e1, e2] = comp.querySelectorAll('.et');
+  const marca = MG.el(N.marca(.8));
+  return (t) => {
+    N.vivo(t, 1, 1.06);
+    const y0 = VERT ? 200 : 40;
+    MG.pon(tit, 70, y0);
+    if (t < fin) MG.animaTexto(tit, t, .1, { paso: .08 }); else N.es(tit, t, 0, fin, { x: 70, y: y0, oy: -100 });
+    const yc = y0 + tit.offsetHeight + 50;
+    N.es(comp, t, .3, fin + .1, { x: (W - cw) / 2, y: yc, dy: 600, s0: .9, curva: 'reboteSuave', d: .9, oy: -200 });
+    comp.querySelectorAll('img').forEach((im) => { im.style.transform = `scale(${lerp(1.12, 1.02, t / P.duracion)})`; });
+    // recorrido del tirador: 0,92 → 0,08 (rápido, frena) → 0,5 (suave), con su propia curva en cada tramo
+    let x = .92;
+    x = lerp(x, .08, C.salidaQuint(k(t, 1.3, 2.6)));
+    x = lerp(x, .62, C.afterEffects75(k(t, 3.0, 4.2)));
+    x = lerp(x, .5, C.rebote(k(t, 4.4, 5.4)));
+    antes.style.clipPath = `inset(0 ${(1 - x) * 100}% 0 0)`; tir.style.left = x * 100 + '%';
+    tir.style.opacity = k(t, 1.0, 1.3); e1.style.opacity = Math.min(1, x * 4); e2.style.opacity = Math.min(1, (1 - x) * 4);
+    N.es(marca, t, 2.0, fin + .3, { x: N.cx(marca), y: yc + ch + (VERT ? 60 : 20), dy: 50, oy: -40 });
+  };
+});
+</script>
+</body></html>

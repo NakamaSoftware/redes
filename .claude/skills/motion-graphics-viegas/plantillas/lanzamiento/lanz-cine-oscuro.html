@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-cine-oscuro» · Viegas IA · Motion Lab
+     Tipografía de cine sobre negro: grano fino, texto centrado elegante que aparece de desenfocado a nítido mientras el tracking se
+     cierra, un halo de color (arcoíris suave o tu acento) que asoma por abajo y crece hasta el cierre «Ya disponible» + logo.
+     Cambia "frases" (2-3; *palabra* = cursiva en el color del halo), "cierre", "subtitulo", "fuente" ("serif" | "sans" | el nombre
+     de una fuente instalada o de Google Fonts ya cargada), "halo" ("arcoiris" | "acento"), "acento", "marca", "logo" (ruta; vacío =
+     inicial), "grano" (0-1), "duracion" (8-12 s). Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@200;300;400;500&family=Instrument+Serif:ital@0;1&family=Geist+Mono:wght@400;500&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root { --fondo: #050506; --texto: #F3F1EC; --mute: #8E8C88; --mono: 'Geist Mono', 'Cascadia Code', Consolas, monospace; }
+.mg-mundo > * { position: absolute; left: 0; top: 0; }
+.halo { position: absolute; left: 0; top: 0; border-radius: 50%; filter: blur(110px); pointer-events: none; mix-blend-mode: screen; }
+.frase { position: absolute; left: 0; top: 0; text-align: center; color: var(--texto); font-family: var(--letra); font-weight: var(--peso);
+  font-size: var(--tam); line-height: 1.08; }
+.frase .w { display: inline-block; }
+.frase em { font-style: italic; color: var(--em); }
+.cierre { position: absolute; left: 0; top: 0; width: var(--ancho); display: flex; flex-direction: column; align-items: center; color: var(--texto); }
+.cierre .ya { font: 400 var(--tamYa) var(--mono); letter-spacing: .32em; text-transform: uppercase; color: var(--texto); padding-left: .32em; white-space: nowrap; }
+.cierre .fila { display: flex; align-items: center; gap: 26px; margin-top: 54px; }
+.cierre .lg { width: 104px; height: 104px; border-radius: 28px; display: grid; place-items: center; overflow: hidden; color: #050506;
+  background: linear-gradient(160deg, #fff, #cfcfd6); font: 500 58px 'Inter Tight', sans-serif; }
+.cierre .lg img { width: 100%; height: 100%; object-fit: contain; }
+.cierre .nom { font: 300 74px 'Inter Tight', sans-serif; letter-spacing: -.02em; white-space: nowrap; }
+.cierre .sub { margin-top: 40px; font: 300 34px 'Inter Tight', sans-serif; color: var(--mute); letter-spacing: .01em; text-align: center; }
+.grano { position: absolute; left: 0; top: 0; width: var(--ancho); height: var(--alto); pointer-events: none; z-index: 5; }
+.vineta { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 90% at 50% 45%, transparent 55%, rgba(0,0,0,.65) 100%); z-index: 4; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "frases": ["Durante años, editar fue *lento*.", "Hoy, una idea basta para *empezar*.", "Esto lo cambia *todo*."],
+  "cierre": "Ya disponible",
+  "subtitulo": "viegasestudio.com",
+  "fuente": "serif",
+  "halo": "arcoiris",
+  "acento": "#8B7CFF",
+  "marca": "Viegas Estudio",
+  "logo": "",
+  "grano": 0.6
+}
+</script>
+<script>
+// ---------------------------------------------------------------- parámetros y formato (bloque params + ?clave=valor + #hash)
+const P = Object.assign(JSON.parse(document.getElementById('params').textContent), window.PARAMS || {});
+new URLSearchParams(location.search).forEach((v, c) => { if (c in P && typeof P[c] !== 'object') P[c] = typeof P[c] === 'number' ? +v : v; });
+P.duracion = Math.min(12, Math.max(8, +P.duracion || 10));
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+// fuente: serif (Instrument Serif) o sans fina (Inter Tight 200); cualquier otro valor se usa como familia
+const LETRA = { serif: ["'Instrument Serif', Georgia, serif", 400, 1], sans: ["'Inter Tight', 'Segoe UI', sans-serif", 200, .86] }[P.fuente] || [`'${P.fuente}', 'Inter Tight', sans-serif`, 300, .9];
+// colores del halo
+const ARCOIRIS = ['#FF6A88', '#FFB36B', '#7EE0A1', '#5CC8FF', '#9B7CFF'];
+const COLORES = P.halo === 'acento' ? [P.acento, '#FFFFFF', P.acento, P.acento, '#FFFFFF'] : ARCOIRIS;
+const R = document.documentElement.style;
+R.setProperty('--letra', LETRA[0]); R.setProperty('--peso', LETRA[1]); R.setProperty('--em', P.halo === 'acento' ? P.acento : '#C9B8FF');
+R.setProperty('--tamYa', (VERT ? 34 : 30) + 'px');
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'liso' }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB, desenfoca } = MG;
+  const frasesTxt = (P.frases || []).slice(0, 3), n = Math.max(1, frasesTxt.length);
+  // guion: las frases se reparten entre 0,35 s y el cierre (los 3,3 s finales)
+  const A = .35, B = P.duracion - 3.3, slot = (B - A) / n;
+  const tiempos = frasesTxt.map((_, i) => ({ a: A + i * slot, b: A + (i + 1) * slot - .55 }));
+
+  // ------------------------------------------------ halo: manchas de color con desenfoque gaussiano muy amplio, abajo del encuadre
+  const U = Math.min(W, H) / 1080;
+  const manchas = COLORES.map((c, i) => {
+    const r = (VERT ? 720 : 820) * U * (i % 2 ? 1.1 : .9);
+    const m = MG.el(`<div class="halo" style="width:${r * 1.5}px;height:${r}px;background:radial-gradient(closest-side, ${c}, transparent)"></div>`);
+    m._o = { r, fx: (i + .5) / COLORES.length, f: .21 + i * .05 }; return m; });
+
+  // ------------------------------------------------ frases (palabras separadas, con su espacio)
+  const palabras = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => '\u0001' + w).join(' '))
+    .split(' ').filter(Boolean).map((w) => w[0] === '\u0001' ? `<span class="w"><em>${w.slice(1)}</em></span>` : `<span class="w">${w}</span>`).join(' ');
+  const ancho = VERT ? W - 160 : 1500, tam = (VERT ? 124 : 124) * LETRA[2];
+  const frases = frasesTxt.map((s) => { const el = MG.el(`<div class="frase" style="--tam:${tam}px;width:${ancho}px">${palabras(s)}</div>`); el._w = [...el.querySelectorAll('.w')]; return el; });
+  const ini = (P.marca || '·').trim()[0].toUpperCase();
+  const cierre = MG.el(`<div class="cierre"><div class="ya">${P.cierre || ''}</div><div class="fila"><div class="lg">${P.logo ? `<img src="${P.logo}" alt="">` : ini}</div><div class="nom">${P.marca || ''}</div></div>${P.subtitulo ? `<div class="sub">${P.subtitulo}</div>` : ''}</div>`);
+  const [cYa, cFila, cSub] = ['.ya', '.fila', '.sub'].map((s) => cierre.querySelector(s));
+
+  // ------------------------------------------------ grano fino: 8 texturas de ruido deterministas que se alternan a 24 fps (fuera de la cámara)
+  const vineta = document.createElement('div'); vineta.className = 'vineta'; document.body.appendChild(vineta);
+  const grano = document.createElement('div'); grano.className = 'grano'; document.body.appendChild(grano);
+  let semilla = 7; const azar = () => { semilla = (semilla * 16807) % 2147483647; return (semilla - 1) / 2147483646; };
+  const texturas = Array.from({ length: 8 }, () => {
+    const c = document.createElement('canvas'); c.width = c.height = 256; const x = c.getContext('2d'), im = x.createImageData(256, 256);
+    for (let i = 0; i < im.data.length; i += 4) { const v = azar() * 255; im.data[i] = im.data[i + 1] = im.data[i + 2] = v; im.data[i + 3] = 255; }
+    x.putImageData(im, 0, 0); return c.toDataURL('image/png'); });
+  grano.style.opacity = (.07 * (P.grano ?? .6) / .6).toFixed(3); grano.style.mixBlendMode = 'screen';
+
+  // revelado de cine: cada palabra pasa de muy desenfocada a nítida (frenada suave) mientras el tracking de la línea se cierra;
+  // salida inversa: se desenfoca y se abre acelerando
+  function revela(el, t, a, b) {
+    const ent = (u) => C.salidaQuint(k(u, a, a + 1.5)), sal = (u) => C.entradaCubica(k(u, b, b + .55));
+    const e = ent(t), s = sal(t);
+    el.style.letterSpacing = (lerp(.42, -.012, C.salidaExpo(k(t, a, a + 1.9))) + .12 * s).toFixed(4) + 'em';
+    el.style.display = t < a - .05 || t > b + .6 ? 'none' : '';
+    el._w.forEach((w, i) => {
+      const a2 = a + i * .09, f = (u) => C.salidaQuint(k(u, a2, a2 + 1.1)), p = f(t), q = f(t - DT);
+      const vy = 26 * (p - q) / DT, bl = (1 - p) * 26 + s * 20;
+      w.style.opacity = (Math.min(1, p * 1.5) * (1 - s)).toFixed(3);
+      w.style.transform = `translateY(${((1 - p) * 26 - s * 18).toFixed(2)}px)`;
+      desenfoca(w, bl, bl + Math.abs(vy) * MB);
+    });
+    MG.pon(el, (W - ancho) / 2, (H - el.offsetHeight) / 2 - (VERT ? 40 : 20), lerp(1.035, 1, e) + .02 * s);
+  }
+
+  return (t) => {
+    // cámara: acercamiento lento y continuo
+    MG.camara(t, 1, 1.07, W / 2, H * .45);
+    // grano
+    const g = Math.floor(t * 24); grano.style.backgroundImage = `url(${texturas[g % 8]})`; grano.style.backgroundPosition = `${(g * 97) % 256}px ${(g * 61) % 256}px`;
+
+    // halo: asoma un poco con cada frase y sube del todo en el cierre (curvas suaves, siempre en movimiento)
+    const pulso = frasesTxt.reduce((acc, _, i) => acc + .18 * Math.sin(Math.PI * k(t, tiempos[i].a, tiempos[i].b + .6)), 0);
+    const sube = C.afterEffects75(k(t, B - .4, B + 1.8));
+    const nivel = .25 + Math.min(.3, pulso) + .55 * sube;                         // 0 = escondido, 1 = arriba del todo
+    manchas.forEach((m, i) => {
+      const o = m._o, x = o.fx * W - o.r * .75 + Math.sin(t * o.f + i * 1.7) * 140 * U;
+      const y = H - o.r * .5 * nivel - o.r * .25 + Math.cos(t * o.f * .8 + i) * 40 * U + (1 - nivel) * o.r * .45;
+      MG.pon(m, x, y, 1 + .08 * Math.sin(t * .4 + i));
+      m.style.opacity = (.35 + .55 * nivel).toFixed(3);
+    });
+
+    frases.forEach((el, i) => revela(el, t, tiempos[i].a, tiempos[i].b));
+
+    // cierre «Ya disponible» + logo
+    cierre.style.display = t < B - .05 ? 'none' : '';
+    MG.pon(cierre, 0, (H - cierre.offsetHeight) / 2 - (VERT ? 60 : 30));
+    const pY = C.salidaQuint(k(t, B, B + 1.5));
+    cYa.style.letterSpacing = lerp(.75, .32, C.salidaExpo(k(t, B, B + 2))).toFixed(3) + 'em';
+    cYa.style.opacity = Math.min(1, pY * 1.4); desenfoca(cYa, (1 - pY) * 24, (1 - pY) * 24);
+    const pF = C.salidaQuint(k(t, B + .7, B + 1.9)), qF = C.salidaQuint(k(t - DT, B + .7, B + 1.9));
+    cFila.style.opacity = Math.min(1, pF * 1.5); cFila.style.transform = `translateY(${((1 - pF) * 40).toFixed(2)}px) scale(${lerp(.94, 1, pF).toFixed(4)})`;
+    desenfoca(cFila, (1 - pF) * 18, (1 - pF) * 18 + Math.abs(40 * (pF - qF) / DT) * MB);
+    if (cSub) { const pS = C.salidaQuint(k(t, B + 1.15, B + 2.2)); cSub.style.opacity = Math.min(1, pS * 1.4) * .9; desenfoca(cSub, (1 - pS) * 12, (1 - pS) * 12); }
+  };
+});
+</script>
+</body></html>

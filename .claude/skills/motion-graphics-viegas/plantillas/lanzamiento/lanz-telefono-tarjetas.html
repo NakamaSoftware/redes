@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-telefono-tarjetas» · Viegas IA · Motion Lab
+     Teléfono con app de datos (lenguaje «Do Health»): un teléfono en 3D ligera sube con muelle sobre fondo gris cálido (o sobre la
+     foto de una mano); dentro, la app verde con un anillo de puntos que se encienden mientras la cifra cuenta, un deslizador que
+     se coloca y una frase; después, tarjetas de cristal salen DEL TELÉFONO hacia el espectador y se apilan por delante: la nueva
+     delante y nítida, las de detrás suben, encogen y se desenfocan. La cámara se acerca despacio sin pararse nunca.
+     Cambia "cifra", "etiqueta", "frase", "escala" ([menor, centro, mayor]), "tarjetas" ([{titulo, valor, chip, color_chip, texto}], 1–4),
+     "color_app" (fondo de la app), "acento_app" (puntos y cifra), "fondo" (gris cálido), "mano" (ruta a un PNG recortado de la mano;
+     vacío = solo el teléfono), "hora", "duracion" (8–12 s). Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','SF Pro Display','Inter','Segoe UI',system-ui,sans-serif; --app:#1F3A25; --luz:#B8F46C; --luzrgb:184,244,108; --fondo:#D8D3CC; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(70% 55% at 50% 42%, color-mix(in srgb, var(--fondo) 80%, #fff), var(--fondo) 60%, color-mix(in srgb, var(--fondo) 82%, #000)); }
+.mg-vista{ perspective:none; }
+.mg-mundo{ transform-style:flat; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.rig{ position:absolute; left:0; top:0; width:1080px; height:1920px; transform-origin:0 0; }
+.rig > *{ position:absolute; left:0; top:0; }
+.sombra{ width:640px; height:120px; border-radius:50%; background:rgba(40,30,20,.32); filter:blur(46px); }
+.mano{ width:1080px; }
+.cuna{ width:580px; height:1200px; perspective:2200px; }
+.tel{ position:absolute; inset:0; border-radius:96px; padding:15px; transform-style:preserve-3d;
+  background:linear-gradient(135deg, #5B5E5C, #1A1C1B 18%, #0C0D0D 60%, #3A3C3B);
+  box-shadow:0 60px 120px rgba(40,30,20,.35), 0 20px 40px rgba(40,30,20,.25), inset 0 0 0 2px rgba(255,255,255,.18), inset 0 0 0 6px #050606; }
+.tel .bot{ position:absolute; width:7px; border-radius:3px; background:linear-gradient(90deg,#2A2C2B,#5A5D5B); }
+.pant{ position:relative; width:550px; height:1170px; border-radius:82px; overflow:hidden; font-family:var(--fuente); color:#F3F7EE;
+  background:radial-gradient(90% 50% at 50% 28%, color-mix(in srgb, var(--app) 82%, #fff), var(--app) 55%, color-mix(in srgb, var(--app) 70%, #000)); }
+.pant::after{ content:''; position:absolute; inset:0; pointer-events:none; background:linear-gradient(118deg, rgba(255,255,255,.10), rgba(255,255,255,0) 32%); }
+.est{ position:absolute; left:0; top:30px; width:550px; height:50px; font:600 30px var(--fuente); letter-spacing:-.01em; }
+.est .h{ position:absolute; left:74px; top:6px; }
+.est .isla{ position:absolute; left:190px; top:0; width:170px; height:50px; border-radius:25px; background:#000; }
+.est svg{ position:absolute; right:58px; top:12px; }
+.nav{ position:absolute; left:0; top:118px; width:550px; height:60px; }
+.nav .atras{ position:absolute; left:40px; top:0; width:58px; height:58px; border-radius:50%; background:rgba(255,255,255,.12); display:grid; place-items:center; }
+.nav .prog{ position:absolute; left:150px; top:27px; width:200px; height:5px; border-radius:3px; background:#fff; }
+.nav .prog2{ position:absolute; left:360px; top:27px; width:56px; height:5px; border-radius:3px; background-image:radial-gradient(circle, rgba(255,255,255,.45) 2.5px, transparent 3px); background-size:14px 5px; }
+.nav svg.x{ position:absolute; right:50px; top:15px; }
+.anillo{ position:absolute; left:0; top:0; }
+.centro{ position:absolute; width:196px; height:196px; border-radius:50%; display:grid; place-items:center; border:3px solid var(--luz);
+  background:radial-gradient(circle, rgba(var(--luzrgb),.16), rgba(var(--luzrgb),.04)); box-shadow:0 0 40px rgba(var(--luzrgb),.35), inset 0 0 30px rgba(var(--luzrgb),.15); }
+.centro b{ font:500 104px/1 var(--fuente); letter-spacing:-.04em; color:var(--luz); font-variant-numeric:tabular-nums; }
+.etiq{ position:absolute; left:0; width:550px; text-align:center; font:500 26px var(--fuente); letter-spacing:.12em; text-transform:uppercase; color:rgba(243,247,238,.6); }
+.desl{ position:absolute; left:50px; width:450px; height:80px; }
+.desl .pista{ position:absolute; left:0; top:20px; width:450px; height:6px; border-radius:3px; background:rgba(255,255,255,.14); }
+.desl .rel{ position:absolute; left:0; top:20px; height:6px; border-radius:3px; background:linear-gradient(90deg, rgba(var(--luzrgb),.2), var(--luz)); }
+.desl .pomo{ position:absolute; top:-2px; width:50px; height:50px; margin-left:-25px; border-radius:50%; background:#F3F7EE; box-shadow:0 0 0 7px rgba(var(--luzrgb),.35), 0 8px 18px rgba(0,0,0,.35); }
+.desl .lab{ position:absolute; top:56px; font:600 19px var(--fuente); letter-spacing:.1em; text-transform:uppercase; color:rgba(243,247,238,.5); }
+.frase{ position:absolute; left:50px; width:450px; text-align:center; font:500 33px/1.3 var(--fuente); letter-spacing:-.015em; }
+/* tarjetas de cristal */
+.tar{ width:840px; padding:38px 44px 42px; border-radius:52px; font-family:var(--fuente); color:#fff; transform-origin:50% 0;
+  background:linear-gradient(170deg, rgba(120,120,112,.42), rgba(70,70,64,.40)); -webkit-backdrop-filter:blur(30px) saturate(140%); backdrop-filter:blur(30px) saturate(140%);
+  box-shadow:0 40px 90px rgba(40,30,20,.30), inset 0 2px 0 rgba(255,255,255,.35), inset 0 0 0 1.5px rgba(255,255,255,.22); }
+.tar .fila{ display:flex; align-items:center; gap:22px; }
+.tar h3{ flex:1; font:600 46px var(--fuente); letter-spacing:-.025em; }
+.tar .val{ font:500 38px var(--fuente); letter-spacing:-.02em; color:rgba(255,255,255,.92); font-variant-numeric:tabular-nums; }
+.tar .chip{ padding:9px 20px 8px; border-radius:12px; font:700 26px var(--fuente); letter-spacing:.1em; color:#1B2A12; }
+.tar p{ margin-top:22px; font:400 37px/1.32 var(--fuente); letter-spacing:-.015em; color:rgba(255,255,255,.86); }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#D8D3CC",
+  "color_app": "#1F3A25",
+  "acento_app": "#B8F46C",
+  "mano": "",
+  "hora": "9:41",
+  "cifra": 36,
+  "etiqueta": "Edad biológica",
+  "escala": ["Menor", "Tu edad", "Mayor"],
+  "frase": "2 años más joven que tu edad real. ¡Buen trabajo!",
+  "tarjetas": [
+    { "titulo": "PCR", "valor": "0,3 mg/L", "chip": "ÓPTIMO", "color_chip": "#B8F46C", "texto": "Inflamación baja: tu cuerpo se recupera bien." },
+    { "titulo": "Triglicéridos", "valor": "1,47 mmol/L", "chip": "BIEN", "color_chip": "#B8F46C", "texto": "Grasas en sangre dentro del rango sano." },
+    { "titulo": "ApoB", "valor": "87,2 mg/dL", "chip": "BIEN", "color_chip": "#B8F46C", "texto": "Calcula cuántas partículas de colesterol circulan por tu sangre." }
+  ]
+}
+</script>
+<script>
+// ---------------------------------------------------------------- parámetros: bloque params + ?clave=valor + formato por hash
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+if (P.color_app) raiz.setProperty('--app', P.color_app);
+if (P.acento_app) { raiz.setProperty('--luz', P.acento_app); raiz.setProperty('--luzrgb', hexRgb(P.acento_app)); }
+if (P.fondo) raiz.setProperty('--fondo', P.fondo);
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  // rig de diseño 1080×1920; en 16:9 se escala y se centra en la zona útil (y 220–1720)
+  const rig = MG.el(`<div class="rig"></div>`);
+  const ESC = VERT ? 1 : .6, RX = VERT ? 0 : (W - 1080 * ESC) / 2, RY = VERT ? 0 : -260 * ESC + 40;
+  const TX = 250, TY = 330;                                   // posición del teléfono en el rig
+
+  const sombra = MG.el(`<div class="sombra"></div>`, rig);
+  const mano = P.mano ? MG.el(`<img class="mano" src="${P.mano}" alt="">`, rig) : null;
+  const cuna = MG.el(`<div class="cuna"><div class="tel">
+      <i class="bot" style="left:-6px;top:250px;height:70px"></i><i class="bot" style="left:-6px;top:350px;height:110px"></i><i class="bot" style="right:-6px;top:330px;height:150px"></i>
+      <div class="pant">
+        <div class="est"><span class="h">${esc(P.hora || '9:41')}</span><div class="isla"></div>
+          <svg width="96" height="26" viewBox="0 0 96 26"><g fill="#F3F7EE"><rect x="0" y="16" width="6" height="9" rx="2"/><rect x="9" y="11" width="6" height="14" rx="2"/><rect x="18" y="6" width="6" height="19" rx="2"/><rect x="27" y="1" width="6" height="24" rx="2" opacity=".4"/>
+          <rect x="52" y="3" width="38" height="20" rx="6" fill="none" stroke="#F3F7EE" stroke-opacity=".5" stroke-width="2"/><rect x="55" y="6" width="27" height="14" rx="3"/><rect x="92" y="9" width="3" height="8" rx="1.5" opacity=".5"/></g></svg></div>
+        <div class="nav"><div class="atras"><svg width="22" height="22" viewBox="0 0 22 22"><path d="M14 4 7 11l7 7" fill="none" stroke="#F3F7EE" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <div class="prog"></div><div class="prog2"></div>
+          <svg class="x" width="30" height="30" viewBox="0 0 30 30"><path d="M6 6l18 18M24 6 6 24" stroke="#F3F7EE" stroke-width="3" stroke-linecap="round"/></svg></div>
+        <svg class="anillo" width="550" height="760" viewBox="0 0 550 760"></svg>
+        <div class="centro" style="left:${275 - 98}px;top:${445 - 98}px"><b>0</b></div>
+        <div class="etiq" style="top:700px">${esc(P.etiqueta || '')}</div>
+        <div class="desl" style="top:770px"><div class="pista"></div><div class="rel"></div><div class="pomo"></div>
+          ${(P.escala || []).slice(0, 3).map((l, i) => `<span class="lab" style="${['left:0', 'left:50%;transform:translateX(-50%)', 'right:0'][i]}">${esc(l)}</span>`).join('')}</div>
+        <div class="frase" style="top:900px">${esc(P.frase || '')}</div>
+      </div></div></div>`, rig);
+  const tel = cuna.querySelector('.tel'), num = cuna.querySelector('.centro b'), centro = cuna.querySelector('.centro');
+  const etiq = cuna.querySelector('.etiq'), desl = cuna.querySelector('.desl'), pomo = desl.querySelector('.pomo'), rel = desl.querySelector('.rel'), frase = cuna.querySelector('.frase');
+
+  // ---- anillo de puntos: 4 aros concéntricos; cada punto se enciende cuando el barrido pasa por su ángulo
+  const svg = cuna.querySelector('.anillo'), puntos = [], LUZ = getComputedStyle(document.documentElement).getPropertyValue('--luzrgb').trim();
+  [[132, 22, 7], [164, 30, 6], [196, 38, 5], [228, 46, 4]].forEach(([r, n, d], a) => {
+    for (let i = 0; i < n; i++) {
+      const ang = (i / n) * Math.PI * 2 - Math.PI / 2 + a * .06;
+      const c = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+      c.setAttribute('cx', 275 + Math.cos(ang) * r); c.setAttribute('cy', 445 + Math.sin(ang) * r); c.setAttribute('r', d);
+      svg.appendChild(c); puntos.push({ c, f: i / n, a });
+    }
+  });
+
+  // ---- tarjetas
+  const lista = (P.tarjetas || []).slice(0, 4), NT = lista.length;
+  const tars = lista.map((o) => MG.el(`<div class="tar"><div class="fila"><h3>${esc(o.titulo)}</h3><span class="val">${esc(o.valor)}</span>
+      ${o.chip ? `<span class="chip" style="background:${o.color_chip || 'var(--luz)'}">${esc(o.chip)}</span>` : ''}
+      <svg width="20" height="32" viewBox="0 0 20 32"><path d="M4 4l12 12L4 28" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+      ${o.texto ? `<p>${esc(o.texto)}</p>` : ''}</div>`, rig));
+
+  // ---- tiempos
+  const tTel = .05, tCuenta = .9, fCuenta = 3.3, tDesl = 1.7, tFrase = 2.9;
+  const tTar = lista.map((_, i) => 4.0 + i * 1.15 - i * i * .05);
+  const YF = 1390;                                           // y final de la tarjeta delantera (sobre la parte baja del teléfono)
+
+  return (t) => {
+    // ---- cámara: zoom lento continuo hacia las tarjetas + deriva suave
+    const z = lerp(1, 1.13, C.suave(t / D));
+    MG.vista.style.transformOrigin = `${W / 2}px ${VERT ? H * .6 : H * .55}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .33) * 10}px, ${Math.cos(t * .27) * 12 - 30 * C.suave(t / D)}px)`;
+    rig.style.transform = `translate(${RX}px,${RY}px) scale(${ESC})`;
+
+    // ---- teléfono: sube con muelle y gira hasta su sitio; luego respira en 3D sin pararse
+    const e = MG.entra(cuna, t, tTel, { d: .9, dy: 620, escala0: .86, curva: 'reboteSuave', base: 6 });
+    const asiento = C.salidaQuint(k(t, tTel, tTel + 1.4));
+    const ry = lerp(-24, -9, asiento) + Math.sin(t * .55) * 3, rx = lerp(16, 6, asiento) + Math.cos(t * .45) * 1.5, rz = lerp(-6, 2, asiento);
+    tel.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg) rotateZ(${rz}deg)`;
+    MG.pon(cuna, TX, TY + e.y + Math.sin(t * .8) * 4, e.s);
+    MG.pon(sombra, TX - 30, TY + 1180 + e.y * .15, .8 + .2 * Math.min(1, e.p));
+    sombra.style.opacity = Math.min(1, Math.max(0, e.p)) * .9;
+    if (mano) { MG.pon(mano, 0, 520 + e.y * 1.1); mano.style.opacity = Math.min(1, Math.max(0, e.p) * 1.5); }
+
+    // ---- contador + anillo
+    const pc = C.salidaExpo(k(t, tCuenta, fCuenta));
+    num.textContent = Math.round((P.cifra || 0) * pc).toLocaleString('es-ES');
+    const pulso = Math.sin(Math.PI * k(t, fCuenta - .15, fCuenta + .35));
+    centro.style.transform = `scale(${MG.curvas.rebote(k(t, tCuenta - .3, tCuenta + .6)) * (1 + .06 * pulso)})`;
+    puntos.forEach((d) => {
+      const umbral = (d.f + d.a * .08) / 1.24, on = k(pc, umbral - .04, umbral + .02);
+      d.c.style.fill = `rgba(${LUZ},${(.14 + .86 * on * (1 - d.a * .16)).toFixed(3)})`;
+    });
+    etiq.style.opacity = C.salidaCubica(k(t, tCuenta + .2, tCuenta + .8));
+
+    // ---- deslizador: el pomo se coloca a la izquierda del centro (más joven) con frenada suave
+    const pd = C.afterEffects75(k(t, tDesl, tDesl + 1.3)), xP = lerp(225, 150, pd) ;
+    pomo.style.left = xP + 'px'; rel.style.left = xP + 'px'; rel.style.width = (225 - xP) + 'px';
+    const ed = MG.entra(desl, t, tDesl - .3, { d: .6, dy: 40, curva: 'salidaQuint', base: 3 }); desl.style.transform = `translateY(${ed.y}px)`;
+    const ef = MG.entra(frase, t, tFrase, { d: .7, dy: 40, curva: 'salidaQuint', base: 4 }); frase.style.transform = `translateY(${ef.y}px)`;
+
+    // ---- tarjetas: salen del teléfono hacia el espectador y se apilan por delante (las de detrás suben, encogen y se desenfocan)
+    tars.forEach((el, i) => {
+      const P0 = C.afterEffects75, a = tTar[i];
+      const p = C.rebote(k(t, a, a + 1.25)), q = C.rebote(k(t - DT, a, a + 1.25));
+      const lin = k(t, a, a + .5);
+      // profundidad: cuántas han llegado delante (fraccionario mientras llegan)
+      let prof = 0; for (let j = i + 1; j < NT; j++) prof += C.salidaCubica(k(t, tTar[j] + .1, tTar[j] + .9));
+      const yIni = TY + 760, yFin = YF - 92 * prof;
+      const y = lerp(yIni, yFin, p), s = lerp(.56, 1, p) * Math.pow(.93, prof);
+      const vy = (lerp(yIni, yFin, p) - lerp(yIni, yFin, q)) / DT;
+      el.style.zIndex = 10 + i;
+      el.style.opacity = t < a ? 0 : Math.min(1, lin * 2.2);
+      el.style.visibility = t < a ? 'hidden' : 'visible';
+      const brillo = 1 - .18 * Math.min(prof, 2);
+      MG.pon(el, (1080 - 840) / 2, y, s, `perspective(1600px) rotateX(${lerp(-38, 0, C.salidaQuint(k(t, a, a + .8)))}deg)`);
+      el.style.setProperty('--b', brillo);
+      MG.desenfoca(el, prof * 3.2 + (1 - lin) * 6, Math.abs(vy) * MB + prof * 3.2 + (1 - lin) * 6);
+      if (prof > 0) el.style.filter = (el.style.filter === 'none' ? '' : el.style.filter + ' ') + `brightness(${brillo})`;
+    });
+  };
+});
+</script>
+</body></html>

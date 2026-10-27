@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla por nicho «coach-cita» · Coach / formador · Viegas IA · Motion Lab
+     Frase-cita animada: las comillas caen con rebote fuerte, la frase entra palabra a palabra, la palabra clave se subraya
+     con un trazo que se dibuja y la firma (avatar + nombre + marca) sube al final. Sale todo hacia arriba con la curva inversa.
+     Cambia "frase" (las *palabras* entre asteriscos van en el color de acento), "autor", "rol", "marca", "logo".
+     Formato: #9x16 (por defecto) · #4x5 · #1x1 · Paleta: "noche" | "claro". -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="../motor/temas/noche-azul.css">
+<link rel="stylesheet" href="_nichos/nichos.css">
+<script src="../motor/motor.js"></script>
+<style>
+.comillas{ font:400 420px/1 var(--serif); color:var(--acento); text-shadow:0 0 80px rgba(var(--halo),.5); }
+.cita{ font:600 112px/1.08 var(--fuente); letter-spacing:-.035em; color:var(--texto); text-align:center; }
+.firma{ display:flex; align-items:center; gap:26px; }
+.firma b{ display:block; font:600 42px var(--fuente); color:var(--texto); letter-spacing:-.02em; }
+.firma small{ display:block; font:500 30px var(--fuente); color:var(--mute); margin-top:4px; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 8,
+  "paleta": "noche",
+  "acento": "",
+  "etiqueta": "Frase del lunes",
+  "frase": "No necesitas más motivación, necesitas *un sistema* que funcione cuando no la tienes.",
+  "autor": "Laura Méndez",
+  "rol": "Coach de productividad",
+  "marca": "Método Foco",
+  "logo": ""
+}
+</script>
+<script src="../motor/estilos.js"></script>
+<script src="_nichos/nichos.js"></script>
+<script>
+const { P, W, H, VERT } = EST;
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca' }, (MG) => {
+  const N = NICHOS(MG), { k, C } = N, fin = P.duracion - 1.1;
+  const chip = MG.el(`<div class="n-chip"><i></i>${P.etiqueta}</div>`);
+  const com = MG.el(`<div class="comillas">“</div>`);
+  const cita = N.frase(P.frase, 'cita', W - (VERT ? 150 : 220));
+  const raya = MG.el(`<div style="height:10px;border-radius:9px;background:var(--acento);box-shadow:0 0 30px rgba(var(--halo),.6);transform-origin:0 50%"></div>`);
+  const firma = MG.el(`<div class="firma"><span class="n-av">${P.autor.split(' ').map((p) => p[0]).slice(0, 2).join('')}</span><div><b>${P.autor}</b><small>${P.rol}</small></div></div>`);
+  const marca = MG.el(N.marca(.9));
+  let L;
+  return (t) => {
+    if (!L) {   // se mide cuando las fuentes ya están cargadas
+      const hC = cita.offsetHeight, y0 = (H - hC) / 2 + (VERT ? 40 : 0);
+      const ems = cita.querySelectorAll('em'), a = ems[0], b = ems[ems.length - 1];
+      L = { y0, hC, em: a ? { x: a.offsetLeft + (W - cita.offsetWidth) / 2, y: y0 + b.offsetTop + b.offsetHeight * .84, w: b.offsetLeft + b.offsetWidth - a.offsetLeft } : null };
+      raya.style.width = (L.em ? L.em.w : 0) + 'px';
+    }
+    N.vivo(t, 1, 1.08);
+    N.es(chip, t, .1, fin, { x: N.cx(chip), y: L.y0 - (VERT ? 400 : 290), dy: -80, curva: 'salidaQuint', d: .6, oy: -80 });
+    // comillas: caen girando con rebote fuerte
+    const pc = N.pop(t, .25, .7);
+    N.es(com, t, .25, fin + .1, { x: N.cx(com), y: L.y0 - (VERT ? 330 : 260), dy: -260, curva: 'reboteFuerte', rot: -25, oy: -160, dOut: .5 });
+    com.style.scale = .6 + .4 * pc;
+    MG.pon(cita, (W - cita.offsetWidth) / 2, L.y0);
+    if (t < fin + .2) MG.animaTexto(cita, t, .7, { paso: .085, dy: 70 });
+    else N.es(cita, t, 0, fin + .2, { x: (W - cita.offsetWidth) / 2, y: L.y0, oy: -140, dOut: .5 });
+    // subrayado de la palabra clave: se dibuja con salidaExpo y se recoge al salir con entradaCubica
+    const tr = 0.7 + cita.trozos.length * .085 + .3;
+    const sr = C.salidaExpo(k(t, tr, tr + .7)) * (1 - C.entradaCubica(k(t, fin + .1, fin + .45)));
+    if (L.em) { raya.style.transform = `translate(${L.em.x}px,${L.em.y}px) scaleX(${sr})`; raya.style.opacity = sr > .01 ? 1 : 0; }
+    N.es(firma, t, tr + .4, fin + .3, { x: N.cx(firma), y: L.y0 + L.hC + (VERT ? 170 : 90), dy: 120, oy: -100 });
+    N.es(marca, t, tr + .65, fin + .38, { x: N.cx(marca), y: L.y0 + L.hC + (VERT ? 400 : 230), dy: 90, curva: 'reboteSuave', oy: -60 });
+  };
+});
+</script>
+</body></html>

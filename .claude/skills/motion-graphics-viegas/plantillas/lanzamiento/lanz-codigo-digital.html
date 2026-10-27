@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-codigo-digital» · Viegas IA · Motion Lab
+     Código digital: fondo negro con una rejilla de caracteres que se encienden en el acento como lluvia y ondas, un terminal retro
+     donde se escriben las líneas de comando, una frase central que EMERGE de la rejilla, glitch sutil y cierre con logo.
+     Cambia "frase", "sub", "lineas" (comandos del terminal), "titulo", "acento", "fondo", "caracteres", "glitch" (0-1), "marca", "logo", "lema".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). Duración 8-12 s: los tiempos se reparten solos. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700;800&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+.mg-mundo > * { position: absolute; left: 0; top: 0; }
+canvas.rej { position: absolute; left: 0; top: 0; }
+canvas.brillo { position: absolute; left: 0; top: 0; filter: blur(9px); mix-blend-mode: screen; opacity: .9; }
+.term { border-radius: 18px; background: rgba(4, 10, 6, .88); border: 1.5px solid rgba(var(--acento-rgb), .55); overflow: hidden;
+  box-shadow: 0 0 0 1px rgba(var(--acento-rgb), .12), 0 0 60px rgba(var(--acento-rgb), .22), 0 40px 100px rgba(0,0,0,.7); font-family: 'JetBrains Mono', Consolas, monospace; }
+.term .bar { display: flex; align-items: center; gap: 12px; padding: 18px 24px; border-bottom: 1px solid rgba(var(--acento-rgb), .25); color: rgba(var(--acento-rgb), .8); font-size: .8em; letter-spacing: .08em; }
+.term .bar i { width: 14px; height: 14px; border-radius: 50%; border: 1.5px solid rgba(var(--acento-rgb), .7); }
+.term .bar span { margin-left: 14px; }
+.term .cuerpo { padding: 26px 30px 34px; color: var(--acento); line-height: 1.55; white-space: pre; text-shadow: 0 0 12px rgba(var(--acento-rgb), .6); }
+.term .cuerpo b { color: #EAFBEF; font-weight: 700; }
+.term::after { content: ''; position: absolute; inset: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, rgba(0,0,0,.28) 0 2px, transparent 2px 5px); }
+.frase { font: 800 100px/1.02 'JetBrains Mono', Consolas, monospace; color: #F2FFF5; text-align: center; letter-spacing: -.04em; white-space: pre;
+  text-shadow: 0 0 30px rgba(var(--acento-rgb), .55); }
+.frase em { font-style: normal; color: var(--acento); }
+.sub { font: 500 34px 'JetBrains Mono', Consolas, monospace; color: rgba(var(--acento-rgb), .9); letter-spacing: .06em; white-space: nowrap; }
+.logo { display: grid; place-items: center; border: 3px solid var(--acento); border-radius: 22px; color: var(--acento); overflow: hidden;
+  font: 800 1px 'JetBrains Mono', Consolas, monospace; box-shadow: 0 0 50px rgba(var(--acento-rgb), .45), inset 0 0 30px rgba(var(--acento-rgb), .25); background: rgba(0,0,0,.6); }
+.logo img { width: 78%; height: 78%; object-fit: contain; }
+.nom { font: 800 76px 'JetBrains Mono', Consolas, monospace; color: #F2FFF5; letter-spacing: -.02em; white-space: nowrap; }
+.vel { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(75% 60% at 50% 50%, transparent 40%, rgba(0,0,0,.75)); z-index: 40; }
+</style>
+</head><body>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#030604",
+  "acento": "#3DFF7E",
+  "caracteres": "01アイウエオカキクケコサシスセソ<>/{}[]=+*#$%ABCDEFXYZ",
+  "titulo": "~/viegas-estudio — zsh",
+  "lineas": ["$ npx viegas lanzar", "> cargando motor de vídeo … ok", "> conectando con Claude … ok", "> renderizando 4K60 … ok", "✓ listo para publicar"],
+  "frase": "Tu estudio,\n*en código*",
+  "sub": "Lanzamiento · 25.10.2026",
+  "glitch": 0.5,
+  "marca": "Viegas Estudio",
+  "lema": "viegasestudio.com",
+  "logo": ""
+}
+</script>
+<script>
+// ---------------------------------------------------------------- parámetros y formato (#9x16 por defecto · #16x9)
+const P = JSON.parse(document.getElementById('params').textContent);
+const FMT = (location.hash.slice(1) || P.formato || '9x16'), VERT = FMT !== '16x9';
+const W = VERT ? 1080 : 1920, H = VERT ? 1920 : 1080, U = Math.min(W, H) / 1080;
+const hex = (h) => { h = h.replace('#', ''); const n = parseInt(h, 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; };
+const AC = hex(P.acento);
+document.documentElement.style.setProperty('--fondo', P.fondo);
+document.documentElement.style.setProperty('--acento', P.acento);
+document.documentElement.style.setProperty('--acento-rgb', AC.join(','));
+// azar determinista (mismo resultado en cada fotograma y en cada render)
+const hash = (a, b, c = 0) => { let h = (a * 374761393 + b * 668265263 + c * 2147483647) | 0; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
+
+escena({ duracion: P.duracion, ancho: W, alto: H }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG;
+  const expo = C.bezier(.16, 1, .3, 1), inv = C.bezier(.7, 0, .84, 0);
+  const D = P.duracion, f = D / 10;                       // todo el guion está escrito para 10 s y se escala
+  const T = { term: .5 * f, escribe: 1.0 * f, termSale: 4.3 * f, frase: 4.6 * f, fraseSale: 7.5 * f, logo: 7.9 * f };
+
+  // ---------------------------------------------------------------- rejilla de caracteres (canvas) + copia desenfocada para el brillo
+  const CEL = Math.round(26 * U), cols = Math.ceil(W / CEL) + 2, filas = Math.ceil(H / CEL) + 2;
+  const cv = MG.el(`<canvas class="rej" width="${W}" height="${H}"></canvas>`), cx = cv.getContext('2d');
+  const gl = MG.el(`<canvas class="brillo" width="${W / 2}" height="${H / 2}"></canvas>`), gx = gl.getContext('2d');
+  const CH = [...P.caracteres];
+  // máscara de la frase a la resolución de la rejilla: las celdas «dentro» de las letras se encienden
+  const mk = document.createElement('canvas'); mk.width = cols; mk.height = filas; const mx = mk.getContext('2d');
+  let mascara = null;
+  const lineasFrase = P.frase.replace(/\*/g, '').split('\n');
+  function hazMascara(fsPx, cyPx) {
+    mx.fillStyle = '#000'; mx.fillRect(0, 0, cols, filas); mx.fillStyle = '#fff';
+    const fs = fsPx / CEL;
+    mx.font = `800 ${fs}px 'JetBrains Mono', Consolas, monospace`; mx.textAlign = 'center'; mx.textBaseline = 'middle';
+    lineasFrase.forEach((l, i) => mx.fillText(l, W / 2 / CEL - .5, cyPx / CEL + (i - (lineasFrase.length - 1) / 2) * fs * 1.02 - .5));
+    const d = mx.getImageData(0, 0, cols, filas).data; mascara = new Float32Array(cols * filas);
+    for (let i = 0; i < mascara.length; i++) mascara[i] = d[i * 4] / 255;
+  }
+  const cols0 = [...Array(cols)].map((_, c) => ({ v: 4 + hash(c, 1) * 9, f: hash(c, 2) * 40, l: 6 + hash(c, 3) * 14 }));   // lluvia por columna
+
+  function pintaRejilla(t) {
+    cx.clearRect(0, 0, W, H);
+    cx.font = `500 ${Math.round(CEL * .78)}px 'JetBrains Mono', Consolas, monospace`; cx.textAlign = 'center'; cx.textBaseline = 'middle';
+    const desp = (t * 18 * U) % CEL;                   // la rejilla se desliza despacio: nunca quieta
+    const ondas = [[T.term - .2, .9], [T.termSale + .1, 1.2], [T.logo - .1, 1]];   // ondas desde el centro en los cambios
+    const em = expo(k(t, T.frase, T.frase + 1.2)) * (1 - inv(k(t, T.fraseSale - .1, T.fraseSale + .7)));   // la frase emerge y se disuelve
+    const ini = expo(k(t, 0, 1.2));
+    for (let c = 0; c < cols; c++) {
+      const L = cols0[c], cab = ((t * L.v + L.f) % (filas + L.l * 2)) - L.l;
+      for (let r = 0; r < filas; r++) {
+        const x = c * CEL + CEL / 2, y = r * CEL + CEL / 2 - desp;
+        let b = .055 + hash(c, r) * .05;               // brillo de base, muy bajo
+        const dl = cab - r; if (dl >= 0 && dl < L.l) b += Math.pow(1 - dl / L.l, 2.2) * .75;   // estela de la lluvia
+        const dx = (x - W / 2) / W, dy = (y - H / 2) / H, dist = Math.sqrt(dx * dx + dy * dy) * (VERT ? 1.5 : 1.8);
+        for (const [t0, a] of ondas) { const rad = (t - t0) * 1.1; if (rad > 0 && rad < 2) b += Math.exp(-Math.pow((dist - rad) / .045, 2)) * a * (1 - rad / 2); }
+        const m = mascara ? mascara[r * cols + c] : 0;
+        if (m > .3) b = lerp(b * (1 - em * .7), 1, em * m * (.82 + .18 * hash(c, r, Math.floor(t * 12))));
+        else b *= 1 - em * .55;                         // alrededor se apaga un poco para que la frase respire
+        b *= ini;
+        if (b < .04) continue;
+        const ch = CH[Math.floor(hash(c, r, Math.floor(t * (m > .3 && em > .5 ? 3 : 7) + hash(c, r) * 9)) * CH.length)];
+        const w = Math.min(1, b);
+        cx.fillStyle = w > .85 ? `rgba(225,255,232,${w})` : `rgba(${AC[0]},${AC[1]},${AC[2]},${w})`;
+        cx.fillText(ch, x, y);
+      }
+    }
+    gx.clearRect(0, 0, W / 2, H / 2); gx.drawImage(cv, 0, 0, W / 2, H / 2);   // brillo: copia a media resolución con desenfoque gaussiano (CSS)
+  }
+
+  // ---------------------------------------------------------------- terminal retro
+  const TF = Math.round(VERT ? 40 : 36);
+  const TW = VERT ? W - 110 : W * .56;
+  const term = MG.el(`<div class="term" style="width:${TW}px;font-size:${TF}px"><div class="bar"><i></i><i></i><i></i><span>${P.titulo}</span></div><div class="cuerpo"></div></div>`);
+  const cuerpo = term.querySelector('.cuerpo');
+  cuerpo.textContent = P.lineas.join('\n') + '\n';   // para medir el alto final
+
+  // ---------------------------------------------------------------- frase, sub y cierre
+  const fraseHtml = P.frase.split('\n').map((l) => l.replace(/\*([^*]+)\*/g, '<em>$1</em>')).join('\n');
+  const frase = MG.el(`<div class="frase">${fraseHtml}</div>`);
+  const sub = MG.el(`<div class="sub"></div>`);
+  const LS = Math.round(200 * U * (VERT ? 1 : 1.1));
+  const logo = MG.el(`<div class="logo" style="width:${LS}px;height:${LS}px;font-size:${LS * .5}px">${P.logo ? `<img src="${P.logo}" alt="">` : (P.marca || '·').trim()[0].toUpperCase()}</div>`);
+  const nom = MG.el(`<div class="nom"></div>`), lema = MG.el(`<div class="sub"></div>`);
+  MG.el(`<div class="vel"></div>`, document.body);       // viñeta suave fuera de la cámara
+
+  let L;
+  function maqueta() {
+    const fw = Math.max(...lineasFrase.map((l) => l.length)), fsF = Math.min((W * .9) / (fw * .6), H * .2);
+    frase.style.fontSize = fsF + 'px';
+    hazMascara(fsF, H / 2);
+    const th = term.offsetHeight; cuerpo.textContent = '';
+    nom.textContent = P.marca; nom.style.fontSize = Math.min(76 * U * (VERT ? 1 : 1.3), (W * .84) / (P.marca.length * .6)) + 'px';
+    const nw = nom.offsetWidth, nh = nom.offsetHeight; nom.textContent = '';
+    lema.textContent = P.lema; const lw = lema.offsetWidth; lema.textContent = '';
+    sub.textContent = P.sub; const sw = sub.offsetWidth; sub.textContent = '';
+    const yc = (H - LS - 40 * U - nh - 30 * U - 40) / 2;
+    L = { term: { x: (W - TW) / 2, y: (H - th) / 2 }, frase: { x: (W - frase.offsetWidth) / 2, y: (H - frase.offsetHeight) / 2 - H * .03 * 0 },
+      sub: { x: (W - sw) / 2, y: (H + frase.offsetHeight) / 2 + 50 * U }, logo: { x: (W - LS) / 2, y: yc }, nom: { x: (W - nw) / 2, y: yc + LS + 40 * U },
+      lema: { x: (W - lw) / 2, y: yc + LS + 40 * U + nh + 30 * U } };
+  }
+  // texto que se «descifra»: caracteres al azar que se resuelven de izquierda a derecha
+  function descifra(el, txt, t, a, b) {
+    const p = k(t, a, b), n = txt.length, fijos = Math.floor(n * expo(p));
+    el.textContent = [...txt].map((ch, i) => i < fijos || ch === ' ' ? ch : (t < a ? '' : CH[Math.floor(hash(i, Math.floor(t * 20)) * CH.length)])).join('').slice(0, t < a ? 0 : n);
+  }
+  // entrada rápida con frenada suave + desenfoque de movimiento, y salida inversa (acelera al irse)
+  function es(el, t, t0, t1, x, y, dy, oy, s0 = .94) {
+    if (t < t1) { const e = MG.entra(el, t, t0, { d: .55, dy, escala0: s0, curva: expo, base: 6 }); MG.pon(el, x, y + e.y, e.s); return e.p; }
+    const p = inv(k(t, t1, t1 + .45)), q = inv(k(t - DT, t1, t1 + .45));
+    el.style.opacity = 1 - p; MG.desenfoca(el, p * 6, Math.abs(oy * (p - q) / DT) * MB + p * 8); MG.pon(el, x, y + oy * p, 1 + .05 * p); return 1;
+  }
+  // glitch sutil: unos pocos fotogramas con desplazamiento horizontal y separación de color, nunca agresivo
+  const golpesG = [T.frase + .9, T.frase + 2.1, T.logo + .6].map((g) => g * 1);
+  function glitch(el, t) {
+    const a = P.glitch ?? .5; let on = 0; for (const g of golpesG) if (t >= g && t < g + .1) on = 1 - (t - g) / .1;
+    if (!on || !a) { el.style.textShadow = ''; return 0; }
+    const d = (4 + 6 * a) * on * U;
+    el.style.textShadow = `${d}px 0 rgba(255,40,90,.55), ${-d}px 0 rgba(40,200,255,.5), 0 0 30px rgba(${AC.join(',')},.55)`;
+    return (hash(Math.floor(t * 60), 7) - .5) * 14 * a * on * U;
+  }
+
+  return (t) => {
+    if (!L) maqueta();
+    // cámara: empuje lento continuo + deriva suave
+    MG.vista.style.transformOrigin = `${W / 2}px ${H / 2}px`;
+    MG.vista.style.transform = `scale(${lerp(1, 1.08, C.suave(t / D))}) translate(${Math.sin(t * .4) * 6 * U}px,${Math.cos(t * .33) * 5 * U}px)`;
+    pintaRejilla(t);
+
+    // terminal: entra, se escriben las líneas (cada una con su ritmo) y sale hacia arriba acelerando
+    es(term, t, T.term, T.termSale, L.term.x, L.term.y, 140 * U, -180 * U, .9);
+    const tl = (T.termSale - .35 - T.escribe) / P.lineas.length;
+    let txt = '';
+    P.lineas.forEach((l, i) => {
+      const a = T.escribe + i * tl, cmd = l.startsWith('$'), b = a + (cmd ? tl * .8 : tl * .45);
+      const n = cmd ? Math.round(l.length * k(t, a, b)) : (t >= a ? Math.round(l.length * expo(k(t, a, b))) : 0);
+      if (t >= a) txt += (i ? '\n' : '') + (cmd ? `<b>${l.slice(0, n)}</b>` : l.slice(0, n));
+    });
+    cuerpo.innerHTML = txt + (Math.floor(t * 2.6) % 2 ? '<b>▌</b>' : '<b style="opacity:0">▌</b>');
+
+    // frase: emerge de la rejilla (primero la rejilla dibuja las letras, luego la tipografía nítida pasa de desenfocada a enfocada)
+    const fa = T.frase + .55, fp = expo(k(t, fa, fa + .9)), salF = inv(k(t, T.fraseSale, T.fraseSale + .5));
+    const gx_ = glitch(frase, t);
+    frase.style.opacity = fp * (1 - salF);
+    MG.desenfoca(frase, (1 - fp) * 22 + salF * 14, (1 - fp) * 22 + salF * 30);
+    MG.pon(frase, L.frase.x + gx_, L.frase.y - salF * 120 * U, lerp(1.08, 1, fp) + salF * .04);
+    descifra(sub, P.sub, t, fa + .6, fa + 1.5);
+    sub.style.opacity = 1 - salF; MG.pon(sub, L.sub.x, L.sub.y - salF * 140 * U);
+
+    // cierre: logo con rebote, nombre que se descifra, lema
+    const lp = C.reboteFuerte(k(t, T.logo, T.logo + .9));
+    logo.style.opacity = Math.min(1, k(t, T.logo, T.logo + .15));
+    MG.desenfoca(logo, 0, Math.max(0, 1 - lp) * 10);
+    MG.pon(logo, L.logo.x + glitch(logo, t) * 0, L.logo.y, Math.max(0, lp), `rotate(${(1 - Math.min(1, lp)) * 45}deg)`);
+    descifra(nom, P.marca, t, T.logo + .35, T.logo + 1.2); glitch(nom, t);
+    MG.pon(nom, L.nom.x, L.nom.y + (1 - expo(k(t, T.logo + .3, T.logo + .8))) * 40 * U);
+    descifra(lema, P.lema, t, T.logo + .8, T.logo + 1.6); MG.pon(lema, L.lema.x, L.lema.y);
+  };
+});
+</script>
+</body></html>

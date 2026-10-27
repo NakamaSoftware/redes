@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Ejemplo «interruptor» · comparar dos modos: cápsula de cristal con pastilla coral que salta de A a B con rebote y estirón;
+     dos tarjetas (la activa con brillo coral); la inactiva se apaga. (Versión HTML del «Modo Chat vs Code» del vídeo.) -->
+<link rel="stylesheet" href="../motor/estilo.css">
+<link rel="stylesheet" href="ejemplos.css">
+<script src="../motor/motor.js"></script>
+<style>
+  .cap { width:750px; height:150px; border-radius:75px; background:rgba(var(--fondo-rgb),.9); border:1.5px solid rgba(var(--claro),.16); box-shadow:0 20px 60px rgba(var(--sombra),.5); }
+  .pas { width:360px; height:120px; border-radius:60px; background:var(--acento); box-shadow:0 0 50px rgba(var(--halo),.7); }
+  .et { width:375px; text-align:center; font-size:52px; font-weight:700; }
+  .tj { width:700px; height:280px; border-radius:32px; background:var(--tarjeta2); border:1.5px solid rgba(var(--claro),.12); box-shadow:0 30px 70px rgba(var(--sombra),.55); text-align:center; padding-top:40px; }
+  .tj .ic { width:58px; height:58px; margin:0 auto 14px; } .tj b { display:block; font-size:54px; } .tj small { display:block; font-size:30px; color:var(--mute); margin-top:10px; }
+  .tj.on { border:2.5px solid var(--acento); box-shadow:0 0 70px rgba(var(--halo),.45), 0 30px 70px rgba(var(--sombra),.55); } .tj.on b { color:var(--acento); }
+</style>
+</head><body>
+<script>
+escena({ duracion: 6, ancho: 1920, alto: 1080, fondo: 'marca' }, (MG) => {
+  const tit = MG.el(`<div class="mg-abs mg-titulo" style="font-size:72px;width:1920px;text-align:center">Pasa de modo <em>Chat</em> a modo <em>Code</em></div>`);
+  const cap = MG.el(`<div class="mg-abs cap"></div>`), pas = MG.el(`<div class="mg-abs pas"></div>`);
+  const eA = MG.el(`<div class="mg-abs et">Chat</div>`), eB = MG.el(`<div class="mg-abs et">Code</div>`);
+  const tA = MG.el(`<div class="mg-abs tj"><div class="ic logo"></div><b>Modo Chat</b><small>Para tus tareas del día a día</small></div>`);
+  const tB = MG.el(`<div class="mg-abs tj"><img class="ic" src="claude-code-logo.svg"><b>Modo Code</b><small>Escribe archivos y programa en tu PC</small></div>`);
+  return (t) => {
+    MG.camara(t, 1.0, 1.08, 960, 520);
+    let e = MG.entra(tit, t, 0.0, { dy: 80 }); MG.pon(tit, e.x, 170 + e.y, e.s);
+    e = MG.entra(cap, t, 0.2, { dy: 0, escala0: 0.8 }); MG.pon(cap, 585 + e.x, 330, e.s);
+    const salto = MG.curvas.rebote(MG.k(t, 3.0, 4.1)), sx = 1 + Math.sin(Math.min(1, MG.k(t, 3.0, 3.5)) * Math.PI) * 0.14;
+    e = MG.entra(pas, t, 0.35, { dy: 0, escala0: 0.6 }); MG.pon(pas, 600 + MG.lerp(0, 360, salto), 345, e.s, `scale(${sx},${2 - sx})`);
+    MG.desenfoca(pas, Math.abs(MG.curvas.rebote(MG.k(t, 3.0, 4.1)) - MG.curvas.rebote(MG.k(t - MG.DT, 3.0, 4.1))) * 360 / MG.DT * MG.MB, 0);
+    eA.style.color = t < 3.25 ? 'var(--tinta)' : 'var(--mute)'; eB.style.color = t < 3.25 ? 'var(--mute)' : 'var(--tinta)';
+    MG.pon(eA, 585, 368); MG.pon(eB, 960, 368); eA.style.opacity = eB.style.opacity = MG.k(t, 0.4, 0.8);
+    e = MG.entra(tA, t, 0.9, { dy: 180 }); MG.pon(tA, 220 + e.x, 600 + e.y, e.s); tA.style.opacity = Math.min(+tA.style.opacity, MG.lerp(1, 0.4, MG.k(t, 3.0, 3.6)));
+    e = MG.entra(tB, t, 3.1, { dy: 180 }); MG.pon(tB, 1000 + e.x, 600 + e.y, e.s); tB.classList.add('on');
+  };
+});
+</script>
+</body></html>

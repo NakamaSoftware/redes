@@ -1,0 +1,202 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8">
+<!-- Plantilla de lanzamiento «lanz-archivador-pestanas» · Viegas IA · Motion Lab
+     Archivador con carpetas de pestañas de colores: las carpetas suben al cajón una a una con muelle; la elegida se saca
+     (sale rápida y frena suave), el resto del cajón se va acelerando hacia abajo, la carpeta se abre (la tapa gira en 3D) y
+     de dentro salen volando fichas de papel que se colocan en rejilla con su título, sus líneas y su etiqueta. La cámara
+     deriva sin pararse, entra en la primera ficha con «zoom a través» y cierre con logo y lema.
+     Cambia "carpetas" (3–6: {nombre, color}), "elegida" (índice de la carpeta que se abre), "fichas" (2–4: {titulo, texto,
+     etiqueta}), "etiquetaCajon", "titular" (*palabra* = acento), "cierre", "marca", "logo" (ruta o "" = inicial),
+     colores "fondo", "fondo2", "tinta", "papel", "acento" y "duracion".
+     Formato por hash: #9x16 (Reels, por defecto) · #16x9 (YouTube). También ?titular=Hola en la dirección. -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800&display=block">
+<link rel="stylesheet" href="../motor/estilo.css">
+<script src="../motor/motor.js"></script>
+<style>
+:root{ --fuente:'Inter Tight','Inter','Segoe UI',system-ui,sans-serif;
+  --fondo:#121014; --fondo2:#2A1913; --tinta:#F4EDE4; --tintaRgb:244,237,228; --papel:#F4EDE4; --acento:#D97757; --halo:217,119,87; }
+html,body{ background:var(--fondo); }
+.mg-fondo{ background:radial-gradient(110% 70% at 50% 100%, var(--fondo2), var(--fondo) 62%); }
+.mg-vista{ perspective:none; }
+.mg-mundo > *{ position:absolute; left:0; top:0; }
+.mg-mundo em{ font-style:normal; color:var(--acento); }
+.carp{ transform-style:preserve-3d; }
+.carp .atras{ position:absolute; left:0; right:0; bottom:0; border-radius:0 22px 22px 22px; box-shadow:0 30px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.25); }
+.carp .pest{ position:absolute; top:0; height:80px; border-radius:22px 22px 0 0; display:flex; align-items:flex-start; padding:16px 26px; box-sizing:border-box;
+  font:700 30px var(--fuente); letter-spacing:-.01em; color:rgba(255,255,255,.95); white-space:nowrap; box-shadow:inset 0 1px 0 rgba(255,255,255,.3); }
+.carp .tapa{ position:absolute; left:0; right:0; bottom:0; border-radius:20px; transform-origin:50% 100%;
+  box-shadow:0 -10px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35); display:flex; align-items:flex-end; padding:30px 36px; box-sizing:border-box; }
+.carp .tapa span{ font:700 44px var(--fuente); letter-spacing:-.03em; color:rgba(255,255,255,.95); }
+.cajon{ border-radius:28px; background:linear-gradient(180deg,#2E2A30,#1D1B1F); box-shadow:0 40px 80px rgba(0,0,0,.6), inset 0 1.5px 0 rgba(255,255,255,.14);
+  display:grid; place-items:center; }
+.cajon .asa{ width:220px; height:54px; border-radius:16px; background:#141216; box-shadow:inset 0 3px 8px rgba(0,0,0,.7); display:grid; place-items:center;
+  font:700 22px var(--fuente); letter-spacing:.2em; color:rgba(var(--tintaRgb),.55); text-transform:uppercase; }
+.ficha{ background:var(--papel); border-radius:22px; padding:30px 32px; box-sizing:border-box; box-shadow:0 30px 60px rgba(0,0,0,.45);
+  color:#1B1918; display:flex; flex-direction:column; gap:16px; }
+.ficha .eti{ align-self:flex-start; font:700 20px var(--fuente); letter-spacing:.12em; text-transform:uppercase; color:var(--acento);
+  padding:8px 14px; border-radius:99px; background:rgba(var(--halo),.14); }
+.ficha h4{ margin:0; font:700 40px/1.05 var(--fuente); letter-spacing:-.03em; }
+.ficha p{ margin:0; font:500 24px/1.35 var(--fuente); color:#5E5853; }
+.ficha .ln{ height:10px; border-radius:6px; background:#DDD4C8; transform-origin:0 50%; }
+.tit{ font:700 104px/1.02 var(--fuente); letter-spacing:-.045em; color:var(--tinta); }
+.logo{ width:150px; height:150px; border-radius:42px; display:grid; place-items:center; overflow:hidden; background:var(--acento); color:var(--fondo);
+  font:700 86px var(--fuente); box-shadow:0 30px 90px rgba(var(--halo),.45), inset 0 1px 0 rgba(255,255,255,.35); }
+.logo img{ width:100%; height:100%; object-fit:contain; }
+.marca{ font:600 44px var(--fuente); letter-spacing:-.02em; color:var(--tinta); white-space:nowrap; }
+.grano{ position:fixed; inset:0; pointer-events:none; opacity:.06; mix-blend-mode:overlay; z-index:50;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E"); }
+</style>
+</head><body>
+<div class="grano"></div>
+<script id="params" type="application/json">
+{
+  "formato": "9x16",
+  "duracion": 10,
+  "fondo": "#121014",
+  "fondo2": "#2A1913",
+  "tinta": "#F4EDE4",
+  "papel": "#F4EDE4",
+  "acento": "#D97757",
+  "carpetas": [
+    { "nombre": "Ideas", "color": "#4A5A73" },
+    { "nombre": "Guiones", "color": "#D97757" },
+    { "nombre": "Clientes", "color": "#8C7A5B" },
+    { "nombre": "Recursos", "color": "#3B3A44" }
+  ],
+  "elegida": 1,
+  "fichas": [
+    { "titulo": "Gancho", "texto": "La primera frase decide todo.", "etiqueta": "Paso 1" },
+    { "titulo": "Historia", "texto": "Un problema, un giro, una salida.", "etiqueta": "Paso 2" },
+    { "titulo": "Prueba", "texto": "Datos o un caso real.", "etiqueta": "Paso 3" },
+    { "titulo": "Llamada", "texto": "Qué hacer ahora mismo.", "etiqueta": "Paso 4" }
+  ],
+  "etiquetaCajon": "Archivo",
+  "titular": "Todo *ordenado* en su sitio",
+  "cierre": "Tu sistema, *listo*",
+  "marca": "Tu Marca",
+  "logo": ""
+}
+</script>
+<script>
+const P = JSON.parse(document.getElementById('params').textContent);
+for (const [c, v] of new URLSearchParams(location.search)) {
+  if (c === 'ver') continue; const d = P[c];
+  P[c] = typeof d === 'number' ? parseFloat(v) : (d && typeof d === 'object') ? (() => { try { return JSON.parse(v); } catch { return v.split(','); } })() : v;
+}
+const FMT = (location.hash.match(/(16x9|9x16)/) || [0, P.formato || '9x16'])[1];
+const [W, H] = FMT === '16x9' ? [1920, 1080] : [1080, 1920], VERT = H > W;
+const raiz = document.documentElement.style;
+const hexRgb = (h) => { const n = parseInt(h.replace('#', '').replace(/^(.)(.)(.)$/, '$1$1$2$2$3$3'), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
+for (const c of ['fondo', 'fondo2', 'tinta', 'papel', 'acento']) if (P[c]) raiz.setProperty('--' + c, P[c]);
+if (P.acento) raiz.setProperty('--halo', hexRgb(P.acento));
+if (P.tinta) raiz.setProperty('--tintaRgb', hexRgb(P.tinta));
+if (P.fuente) raiz.setProperty('--fuente', `'${P.fuente}','Inter Tight',system-ui,sans-serif`);
+const md = (s) => String(s).replace(/\*([^*]+)\*/g, (_, g) => g.split(' ').map((w) => `<em>${w}</em>`).join(' '));
+const esc = (s) => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;');
+const logoHTML = () => P.logo ? `<div class="logo"><img src="${P.logo}" alt=""></div>` : `<div class="logo">${esc((P.marca || '·').trim()[0].toUpperCase())}</div>`;
+const osc = (c, p) => `color-mix(in srgb, ${c} ${p}%, #000)`;
+
+escena({ duracion: P.duracion, ancho: W, alto: H, fondo: 'marca', trama: { tipo: 'puntos', tamano: 40, intensidad: .35 }, halo: { fuerza: .24, x: 50, y: 60 } }, (MG) => {
+  const { k, lerp, curvas: C, DT, MB } = MG, D = P.duracion;
+  const F = (P.carpetas || []).slice(0, 6), N = F.length, sel = Math.min(N - 1, Math.max(0, P.elegida | 0));
+  const fw = VERT ? 820 : 760, fh = VERT ? 600 : 540, pw = fw * .24;
+  const cx = VERT ? W / 2 : 560, baseY = VERT ? 1420 : 960;                  // borde de abajo del cajón
+  const carps = F.map((c, i) => {
+    const el = MG.el(`<div class="carp" style="width:${fw}px;height:${fh}px">
+      <div class="pest" style="left:${fw * (.04 + (i % 4) * .235)}px;width:${pw}px;background:${osc(c.color, 82)}">${esc(c.nombre)}</div>
+      <div class="atras" style="top:66px;background:${osc(c.color, 78)}"></div>
+      <div class="tapa" style="top:120px;background:linear-gradient(180deg, color-mix(in srgb, ${c.color} 88%, #fff), ${c.color})"><span>${esc(c.nombre)}</span></div></div>`);
+    el.tapa = el.querySelector('.tapa'); return el;
+  });
+  const cajonH = VERT ? 300 : 270;
+  const cajon = MG.el(`<div class="cajon" style="width:${fw + 80}px;height:${cajonH}px"><div class="asa">${esc(P.etiquetaCajon)}</div></div>`);
+  const FI = (P.fichas || []).slice(0, 4), M = FI.length;
+  const gw = VERT ? 430 : 440, gh = VERT ? 330 : 300, gap = 30;
+  const fichas = FI.map((f) => { const el = MG.el(`<div class="ficha" style="width:${gw}px;height:${gh}px"><div class="eti">${esc(f.etiqueta || '')}</div><h4>${esc(f.titulo)}</h4><p>${esc(f.texto || '')}</p><div class="ln" style="width:80%"></div><div class="ln" style="width:55%"></div></div>`);
+    el.lns = [...el.querySelectorAll('.ln')]; return el; });
+  const cols = M > 2 ? 2 : M, filas = Math.ceil(M / cols);
+  const gx0 = VERT ? (W - (cols * gw + (cols - 1) * gap)) / 2 : 880, gy0 = VERT ? 300 : (H - (filas * gh + (filas - 1) * gap)) / 2;
+  const pos = (j) => ({ x: gx0 + (j % cols) * (gw + gap), y: gy0 + Math.floor(j / cols) * (gh + gap) });
+  const anchoTit = VERT ? W - 180 : 780;
+  const tit = MG.texto(md(P.titular), 'tit'); tit.style.width = anchoTit + 'px'; tit.style.textAlign = VERT ? 'center' : 'left';
+  const logo = MG.el(logoHTML());
+  const cie = MG.texto(md(P.cierre), 'tit'); cie.style.width = (VERT ? W - 180 : 1400) + 'px'; cie.style.textAlign = 'center'; cie.style.fontSize = '120px';
+  const marca = MG.el(`<div class="marca">${esc(P.marca)}</div>`);
+
+  const tSaca = 2.2, tVa = 2.6, tAbre = 3.15, tVuela = 3.55, tZ = Math.max(7.0, D - 3.0), tC = tZ + .7;
+  // posición final de la carpeta abierta (abajo en 9:16, a la izquierda en 16:9)
+  const fin = VERT ? { x: W / 2, y: 1400 } : { x: 430, y: 930 };
+  const f0 = pos(0);
+  return (t) => {
+    const zt = C.entradaCubica(k(t, tZ, tC)), zc = C.salidaQuint(k(t, tC - .05, tC + 1.3));
+    const z = t < tC ? lerp(1.0, 1.08, k(t, 0, tZ)) * (1 + 8 * zt) : lerp(1.25, 1, zc) * lerp(1, 1.04, k(t, tC, D));
+    const ox = t < tC ? lerp(W / 2, f0.x + gw / 2, C.salidaCubica(k(t, tVuela + 1, tZ))) : W / 2, oy = t < tC ? lerp(H / 2, f0.y + gh / 2, C.salidaCubica(k(t, tVuela + 1, tZ))) : H / 2;
+    MG.vista.style.transformOrigin = `${ox}px ${oy}px`;
+    MG.vista.style.transform = `scale(${z}) translate(${Math.sin(t * .5) * 9}px, ${Math.cos(t * .37) * 8}px) rotate(${Math.sin(t * .29) * .5}deg)`;
+    MG.halo(50 + Math.sin(t * .4) * 10, 60 + Math.cos(t * .3) * 8);
+    const vis = 1 - C.salidaCubica(k(t, tZ + .3, tC));
+
+    // el cajón y las carpetas no elegidas: entran y luego se van acelerando hacia abajo
+    const va = C.entradaCubica(k(t, tVa, tVa + .55)), vaq = C.entradaCubica(k(t - DT, tVa, tVa + .55));
+    const caida = va * 1000, vcaida = (va - vaq) * 1000 / DT;
+    const ec = MG.entra(cajon, t, .15, { d: .6, dy: 500, escala0: .9, curva: 'salidaQuint', base: 4 });
+    MG.pon(cajon, cx - (fw + 80) / 2, baseY - cajonH + ec.y + caida, ec.s); cajon.style.zIndex = 40;
+    if (t > tVa) { MG.desenfoca(cajon, 0, Math.min(50, vcaida * MB)); cajon.style.opacity = 1 - va; }
+    carps.forEach((el, i) => {
+      const e = MG.entra(el, t, .35 + i * .14, { d: .55, dy: 700, escala0: 1, curva: i % 2 ? 'rebote' : 'salidaQuint', base: 4 });
+      const yi = baseY - cajonH * .55 - fh - (N - 1 - i) * -38 - (N - 1 - i) * 0 - i * 0, x0 = cx - fw / 2;
+      let x = x0, y = baseY - fh - 120 + i * 40 + e.y, s = 1 - (N - 1 - i) * .02, rx = 0;
+      el.style.zIndex = 10 + i;
+      if (i === sel) {
+        const sa = C.rebote(k(t, tSaca, tSaca + .6)), sq = C.rebote(k(t - DT, tSaca, tSaca + .6));
+        const mv = C.afterEffects75(k(t, tVa, tAbre + .2));
+        y -= sa * 190; el.style.zIndex = t > tSaca ? 60 : 10 + i;
+        // se lleva a su posición final
+        const fx = fin.x - fw / 2, fy = fin.y - fh; el.style.transformOrigin = '50% 100%';
+        x = lerp(x, fx, mv); y = lerp(y, fy, mv); s = lerp(s, VERT ? .78 : .72, mv);
+        if (t > tSaca && t < tSaca + .5) MG.desenfoca(el, 0, Math.min(40, Math.abs(sa - sq) * 300 / DT * MB));
+        rx = 72 * C.salidaQuint(k(t, tAbre, tAbre + .6));
+        el.tapa.style.transform = `perspective(1600px) rotateX(${-rx}deg)`;
+        el.tapa.style.filter = `brightness(${1 - .25 * rx / 72})`;
+        if (t > tZ) el.style.opacity = vis;
+      } else {
+        y += caida; if (t > tVa) { MG.desenfoca(el, 0, Math.min(50, vcaida * MB)); el.style.opacity = 1 - va; }
+      }
+      MG.pon(el, x, y, s);
+    });
+
+    // titular: entra pronto y se va acelerando antes de las fichas
+    const tx = VERT ? (W - anchoTit) / 2 : 1000, ty = VERT ? 330 : H / 2 - tit.offsetHeight / 2;
+    const sale = C.entradaCubica(k(t, tVuela - .5, tVuela)), saleq = C.entradaCubica(k(t - DT, tVuela - .5, tVuela));
+    MG.pon(tit, tx, ty - sale * 260);
+    tit.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, .8 + i * .09, { d: .55, dy: 80, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 6 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; sp.style.opacity = Math.min(+sp.style.opacity, 1 - sale);
+      if (sale > 0 && sale < 1) MG.desenfoca(sp, 0, Math.min(40, (sale - saleq) * 260 / DT * MB)); });
+
+    // fichas: salen de la carpeta abierta y se colocan en rejilla
+    fichas.forEach((el, j) => {
+      const t0 = tVuela + j * .14, p = C.salidaQuint(k(t, t0, t0 + .75)), pq = C.salidaQuint(k(t - DT, t0, t0 + .75));
+      const ar = C.rebote(k(t, t0 + .1, t0 + .9));
+      const g = pos(j), sx = fin.x - gw / 2, sy = fin.y - fh * .6;
+      const x = lerp(sx, g.x, p), y = lerp(sy, g.y, p) - Math.sin(p * Math.PI) * 120, s = lerp(.35, 1, ar);
+      el.style.opacity = t < t0 ? 0 : Math.min(1, p * 4) * (j === 0 ? 1 : vis);
+      el.style.zIndex = 70;
+      MG.pon(el, x, y, s, `rotate(${(1 - ar) * (j % 2 ? 14 : -12)}deg)`);
+      const v = Math.hypot(g.x - sx, g.y - sy) * (p - pq) / DT; MG.desenfoca(el, Math.min(40, v * MB * .7), Math.min(40, v * MB * .7));
+      el.lns.forEach((l, q) => (l.style.transform = `scaleX(${C.salidaExpo(k(t, t0 + .6 + q * .12, t0 + 1.2 + q * .12))})`));
+    });
+    if (t > tC) fichas.forEach((f) => (f.style.opacity = 0)), (carps[sel].style.opacity = 0);
+
+    // cierre
+    const bloque = 150 + 60 + cie.offsetHeight + 110, y0 = VERT ? 260 + (1220 - bloque) / 2 : (H - bloque) / 2;
+    const el = MG.entra(logo, t, tC, { d: .7, dy: 0, escala0: .2, curva: 'reboteFuerte', base: 10 });
+    MG.pon(logo, (W - 150) / 2, y0 + el.y, el.s, `rotate(${-18 * (1 - C.salidaQuint(k(t, tC, tC + 1)))}deg)`);
+    MG.pon(cie, (W - cie.offsetWidth) / 2, y0 + 210);
+    cie.trozos.forEach((sp, i) => { const e = MG.entra(sp, t, tC + .2 + i * .08, { d: .6, dy: 90, escala0: 1, curva: i % 2 ? 'salidaExpo' : 'rebote', base: 7 });
+      sp.style.display = 'inline-block'; sp.style.transform = `translateY(${e.y}px)`; });
+    const em = MG.entra(marca, t, tC + .6, { d: .6, dx: -80, dy: 0, curva: 'salidaQuint', base: 5 });
+    MG.pon(marca, (W - marca.offsetWidth) / 2 + em.x, y0 + 210 + cie.offsetHeight + 50);
+  };
+});
+</script>
+</body></html>
