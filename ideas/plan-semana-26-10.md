@@ -1,14 +1,14 @@
 # Plan · semana del 26/10 al 01/11
 
 Horarios según los mejores momentos de Metricool para @pvmr.dev: 10:00 es el pico de lunes a viernes; 18:00 es la segunda franja (fuerte martes y jueves).
-**Esta semana no hay contenido con la cara de Pablo.** Los guiones para grabar quedan para más adelante.
+**Única excepción con cara: el reel del jueves 29.**
 
 | Día | 10:00 | 12:30 · historias | 18:00 |
 |---|---|---|---|
 | Lun 26 | ✅ Carrusel «5 pedidos a ChatGPT» (publicado) | Encuesta + Kumi (sin programar) | — |
 | Mar 27 | — | — | Reel animado: «Pedile a la IA que te haga 3 preguntas» (banco #16) |
 | Mié 28 | Carrusel «3 tareas IA» (Metricool) | Elegí una + Kumi CHARLA | — |
-| Jue 29 | — | Preguntame | Reel animado: «La IA no te avisa cuando no sabe» (banco #20) |
+| Jue 29 | — | Preguntame | Reel con cara: «ChatGPT te puede hacer preguntas a vos» (banco #16, guion en ideas/guiones/reel-3-preguntas.md) |
 | Vie 30 | Carrusel nuevo: «Mito vs. realidad: 5 cosas que creés sobre la IA en tu negocio» (banco #4) | Pregunta trampa + deslizador + Kumi | — |
 | Sáb 31 | — | Mini clase en 4 historias: cómo pedirle algo bien a ChatGPT (banco historias #15) | — |
 | Dom 01 | — | — | — |
