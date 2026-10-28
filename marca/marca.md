@@ -1,6 +1,6 @@
 # Marca de los reels · @pvmr.dev
 
-Look elegido: **C · Tarjeta de vidrio, versión clara** (28/10/2026). Sale de dos reels de referencia: la tarjeta de vidrio flotando arriba de la cabeza y la línea punteada (referencia 2), y la etiqueta en mono con un cuadradito de color (referencia 1). Se tomó el estilo, nunca la marca de otro.
+Look elegido: **C · Tarjeta de vidrio, versión clara** (28/10/2026). **Fijado: Pablo dijo «me gusta» el 28/10/2026.** Sale de dos reels de referencia: la tarjeta de vidrio flotando arriba de la cabeza y la línea punteada (referencia 2), y la etiqueta en mono con un cuadradito de color (referencia 1). Se tomó el estilo, nunca la marca de otro.
 
 Muestra aprobada: `marca/muestras/look-c-claro.jpg` y `marca/muestras/muestra-final.jpg`. El código que las dibuja está en `marca/muestras/` y sirve de referencia exacta de medidas.
 
