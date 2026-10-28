@@ -1,0 +1,14 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmake -S /root/herramientas/whisper.cpp *)",
+      "Bash(cmake --build /root/herramientas/whisper.cpp/build *)",
+      "Bash(npx --yes skills add heygen-com/hyperframes -g -a claude-code -s '*' -y)",
+      "Bash(npx --yes hyperframes --version)",
+      "Bash(npx hyperframes remove-background *)",
+      "Bash(npx hyperframes lint*)",
+      "Bash(npx hyperframes snapshot *)",
+      "Bash(npx hyperframes render *)"
+    ]
+  }
+}
