@@ -1,0 +1,15 @@
+Guardalo: una frase al final del prompt y ChatGPT te hace 3 preguntas antes de responder.
+
+Le escribís 10 líneas, te olvidás de un dato y no te avisa: lo inventa y sigue como si nada.
+
+Probá al revés.
+
+Contale lo que querés en una sola línea y terminá con:
+«Antes de responder, preguntame 3 cosas de lo que te quede duda.»
+
+Te pregunta lo que pasaste por alto.
+Contestás y recién ahí responde.
+
+Sirve para un mail difícil o para armar un viaje de 4 días, y es de los prompts de ChatGPT más simples que hay aunque casi nadie sabe cómo usar ChatGPT así.
+
+#chatgpt #inteligenciaartificial #prompts
