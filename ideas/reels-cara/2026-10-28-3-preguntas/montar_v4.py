@@ -10,7 +10,8 @@ F = '/home/user/redes/marca/fuentes/'
 SFX = '/root/.claude/skills/media-use/audio/assets/sfx/'
 NOCHE, CREMA, BLANCO, ROJO = (20, 24, 22), (245, 241, 232), (255, 255, 255), (168, 64, 44)
 FPS, GANANCIA = 30, float(sys.argv[1]) if len(sys.argv) > 1 else 19.0
-SOLO = sys.argv[2] if len(sys.argv) > 2 else ''          # «fotos»: solo fotogramas de control, sin exportar
+SOLO = sys.argv[2] if len(sys.argv) > 2 else ''
+MUSICA = os.environ.get('MUSICA', '')                       # archivo de música de fondo (opcional)          # «fotos»: solo fotogramas de control, sin exportar
 C = json.load(open('cortes.json')); ini, DUR = C['ini'], C['duracion']
 COLA = 1.3; TOTAL = DUR + COLA                            # el cierre se queda 1,3 s después de la última palabra
 
@@ -288,22 +289,28 @@ def cabeza_de(alpha):
 # ---------- sonido: voz limpia + efectos suaves en las acciones (nunca un golpe encima de una palabra)
 def audio():
     # voz-sin-eco.wav sale de dereverb.py (resta espectral de la cola de eco, T60 0,6 s); después puerta firme, menos «caja» en 280 Hz y algo de presencia
-    voz = (f'highpass=f=90,afftdn=nf=-25,volume=14dB,agate=threshold=0.05:ratio=6:range=0.08:attack=3:release=70:knee=2,'
-           f'equalizer=f=280:t=q:w=1.2:g=-4,equalizer=f=4000:t=q:w=1:g=2,acompressor=threshold=0.1:ratio=1.8:attack=8:release=120,volume={GANANCIA}dB,alimiter=limit=0.75:level=disabled')
+    voz = (f'highpass=f=90,afftdn=nf=-32,volume=14dB,agate=threshold=0.04:ratio=3.5:range=0.16:attack=3:release=110:knee=2,'
+           f'equalizer=f=280:t=q:w=1.2:g=-4,equalizer=f=4000:t=q:w=1:g=1.5,acompressor=threshold=0.1:ratio=1.6:attack=10:release=150,volume={GANANCIA}dB,alimiter=limit=0.8:level=disabled')
     ef = [(0.1, 'whoosh-short', -20), (ini[1] - 0.3, 'click-soft', -18), (P3 - 0.02, 'whoosh', -16), (P4, 'whoosh-short', -20), (P7 - 0.02, 'whoosh', -16),
           (P7 + 0.7, 'whoosh-short', -22), (T_FIN + 0.15, 'chime', -16)]
     ef += [(tc, 'pop', -18) for tc in T_CHECK] + [(tc, 'pop', -20) for _, tc in PILLS]
     ef += [(t_de('Sirve para'), 'click-soft', -18), (t_de('difícil o para'), 'click-soft', -18)]
     # puerta con «mirada adelante» de 12 ms: decide con la señal sin demorar y deja pasar la demorada, así no se come la primera consonante
     pre, post = voz.split(',agate=')[0], voz.split(',agate=')[1].split(',', 1)
-    ins, fc, labels = ['-i', 'voz-sin-eco.wav'], [f'[0:a]{pre},atrim=start=0.025,asetpts=PTS-STARTPTS,asplit[vm][vs];[vm]adelay=12[vd];[vd][vs]sidechaingate={post[0]}[vg];'
-                                                   f'[vg]atrim=start=0.012,asetpts=PTS-STARTPTS,{post[1]},aformat=channel_layouts=stereo,apad=whole_dur={TOTAL:.3f}[voz]'], ['[voz]']
+    ins, fc, labels = ['-i', 'voz-sin-eco-media.wav'], [f'[0:a]{pre},atrim=start=0.025,asetpts=PTS-STARTPTS,asplit[vm][vs];[vm]adelay=12[vd];[vd][vs]sidechaingate={post[0]}[vg];'
+                                                   f'[vg]atrim=start=0.012,asetpts=PTS-STARTPTS,{post[1]},aformat=channel_layouts=stereo,apad=whole_dur={TOTAL:.3f},asplit[voz][llave]'], ['[voz]']
     for i, (tt, nom, db) in enumerate(ef, 1):
         ins += ['-i', SFX + nom + '.mp3']; ms = int(max(0, tt) * 1000)
         fc.append(f'[{i}:a]aformat=channel_layouts=stereo,aresample=48000,volume={db}dB,adelay={ms}|{ms}[e{i}]'); labels.append(f'[e{i}]')
     for j, (ta, tb) in enumerate(T_TIPEO, len(ef) + 1):                # tecleo bajito mientras se escribe el prompt
         ins += ['-stream_loop', '-1', '-i', SFX + 'typing.mp3']; ms = int(ta * 1000)
         fc.append(f'[{j}:a]aformat=channel_layouts=stereo,aresample=48000,atrim=0:{tb-ta:.3f},afade=t=out:st={max(0,tb-ta-0.15):.3f}:d=0.15,volume=-26dB,adelay={ms}|{ms}[e{j}]'); labels.append(f'[e{j}]')
+    if MUSICA:   # música bajita (−13 dB) que se aparta otro poco cuando habla; entra y sale con fundido
+        j = sum(1 for x in ins if x == '-i')
+        ins += ['-i', MUSICA]
+        fc.append(f'[{j}:a]aformat=channel_layouts=stereo,aresample=48000,atrim=0:{TOTAL:.3f},volume=-13dB,afade=t=in:d=0.6,afade=t=out:st={TOTAL-1.6:.3f}:d=1.6[mus]')
+        fc.append('[mus][llave]sidechaincompress=threshold=0.04:ratio=4:attack=30:release=350:makeup=1[musd]'); labels.append('[musd]')
+    else: fc.append('[llave]anullsink')
     fc.append(''.join(labels) + f'amix=inputs={len(labels)}:duration=first:normalize=0,alimiter=limit=0.8:level=disabled[a]')
     subprocess.run(['ffmpeg', '-v', 'error', '-y', *ins, '-filter_complex', ';'.join(fc), '-map', '[a]', '-t', f'{TOTAL:.3f}', '-ar', '48000', 'mezcla.wav'], check=True)
 

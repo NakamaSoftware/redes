@@ -50,7 +50,7 @@ Como Inter es variable, los textos se dibujan con Pillow (o HTML) y se ponen enc
 
 ## Sonido
 - Voz limpia a −14 LUFS, pico por debajo de −1,5 dB.
-- Sin música salvo que se pida.
+- **Música de fondo: sí** (elegido el 29/10). Synthwave sin derechos generado con `synthflow_render.mjs music synthwave`, a −13 dB (≈ 16 dB por debajo de la voz), con bajada automática cuando habla (`sidechaincompress` threshold 0.04, ratio 4) y fundido de entrada y salida.
 - Efectos suaves solo en las acciones (entra una tarjeta, se marca un tilde): un clic o un chime bajito. Nunca un golpe encima de una palabra.
 
 ## Reglas fijas
@@ -63,7 +63,7 @@ Como Inter es variable, los textos se dibujan con Pillow (o HTML) y se ponen enc
 
 ## Correcciones apuntadas
 - **29/10 · La mano que arranca o corta la grabación nunca se ve.** Revisar cuadro por cuadro el primer y el último segundo de cada toma (la mano entra por abajo, a veces por el centro y no por la esquina). Si aparece cuando ya no habla, se recorta; si aparece mientras habla, se congela el cuadro limpio más cercano o se tapa con una pantalla completa.
-- **29/10 · Menos eco en la voz.** La habitación tiene reverberación: antes de la cadena de voz se pasa `dereverb.py` (resta espectral de la cola, T60 ≈ 0,6 s), después una puerta con mirada adelante de 12 ms (`sidechaingate` threshold 0.05, ratio 6, range 0.08), −4 dB en 280 Hz, +2 dB en 4 kHz y compresión suave (ratio 1,8). No subir la voz con compresión fuerte: levanta el eco. Meta: relación voz/eco de 13 dB o más.
+- **29/10 · Menos eco en la voz, sin que suene robótica.** Antes de la cadena de voz: `dereverb.py` con T60 0,5 y piso 0,22 (más fuerte suena metálico). Después: `afftdn` nf −32, puerta con mirada adelante de 12 ms (`sidechaingate` threshold 0.04, ratio 3.5, range 0.16, release 110), −4 dB en 280 Hz, +1,5 dB en 4 kHz y compresión suave (ratio 1,6). La música de fondo ayuda a tapar el eco que queda. No subir la voz con compresión fuerte: levanta el eco.
 - **29/10 · `afftdn` atrasa la voz 25 ms:** compensar con `atrim=start=0.025` para que vaya con la boca.
 - **29/10 · Ningún efecto de sonido encima de la primera sílaba de una frase** (un clic tapó la «P» de «Pasa»).
 - **29/10 · Las tomas se pasan a espejo** (como se ven en el celular al grabar).
