@@ -62,4 +62,8 @@ Como Inter es variable, los textos se dibujan con Pillow (o HTML) y se ponen enc
 6. Reels con cara: tips de IA en general, nunca sobre el negocio, Nakama ni Kumi.
 
 ## Correcciones apuntadas
-- (vacío: lo que corrijas en los próximos reels se apunta acá para que no se repita)
+- **29/10 · La mano que arranca o corta la grabación nunca se ve.** Revisar cuadro por cuadro el primer y el último segundo de cada toma (la mano entra por abajo, a veces por el centro y no por la esquina). Si aparece cuando ya no habla, se recorta; si aparece mientras habla, se congela el cuadro limpio más cercano o se tapa con una pantalla completa.
+- **29/10 · Menos eco en la voz.** La habitación tiene reverberación: antes de la cadena de voz se pasa `dereverb.py` (resta espectral de la cola, T60 ≈ 0,6 s), después una puerta con mirada adelante de 12 ms (`sidechaingate` threshold 0.05, ratio 6, range 0.08), −4 dB en 280 Hz, +2 dB en 4 kHz y compresión suave (ratio 1,8). No subir la voz con compresión fuerte: levanta el eco. Meta: relación voz/eco de 13 dB o más.
+- **29/10 · `afftdn` atrasa la voz 25 ms:** compensar con `atrim=start=0.025` para que vaya con la boca.
+- **29/10 · Ningún efecto de sonido encima de la primera sílaba de una frase** (un clic tapó la «P» de «Pasa»).
+- **29/10 · Las tomas se pasan a espejo** (como se ven en el celular al grabar).
