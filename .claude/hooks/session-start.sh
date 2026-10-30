@@ -41,7 +41,12 @@ if [ ! -d /root/.claude/skills/media-use ]; then
   (cd /tmp && npx --yes skills add heygen-com/hyperframes -g -a claude-code -s '*' -y > /dev/null)
 fi
 
-# 4 · Playwright ya instalado, enlazado en las skills del repo que renderizan con Chrome
+# 4 · yt-dlp: baja los reels de referencia desde el link
+if ! command -v yt-dlp > /dev/null && [ ! -x /root/.local/bin/yt-dlp ]; then
+  python3 -m pip install --user --quiet yt-dlp > /dev/null 2>&1
+fi
+
+# 5 · Playwright ya instalado, enlazado en las skills del repo que renderizan con Chrome
 PW=/opt/node-tools/node_modules
 for k in editar-reels-claude motion-graphics-viegas; do
   d="$CLAUDE_PROJECT_DIR/.claude/skills/$k"

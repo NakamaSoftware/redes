@@ -47,11 +47,41 @@ Como Inter es variable, los textos se dibujan con Pillow (o HTML) y se ponen enc
 - Un corte en cada salto de la toma, con un zoom suave constante en cada plano (100 → 108 %, alternando acercar y alejar). Nada de golpes, destellos ni barridos.
 - Las tarjetas entran subiendo con un desenfoque que se aclara en 0,3–0,5 s y salen al revés. Las cajas rojas de palabra clave entran con un rebote corto.
 - Efectos de efectos-reels solo si se piden, y como mucho uno o dos por reel.
+- **Cortinilla** (idea de la guía de Trescendit, 30/10): una pantalla roja `#A8402C` a pantalla completa, 0,4–0,6 s, que tapa el cambio de toma. Sirve para esconder un corte feo (la mano que va al celular, un salto de cámara) y, en los reels por pasos, para anunciar cada paso. Lleva «PASO 02» en JetBrains Mono y el número grande en Instrument Serif blanca. Detrás de la cortinilla cambia la toma; la voz sigue sonando. Suena un `whoosh` a −8 dB de la voz.
 
 ## Sonido
 - Voz limpia a −14 LUFS, pico por debajo de −1,5 dB.
 - **Música de fondo: sí** (elegido el 29/10). Synthwave sin derechos generado con `synthflow_render.mjs music synthwave`, a −13 dB (≈ 16 dB por debajo de la voz), con bajada automática cuando habla (`sidechaincompress` threshold 0.04, ratio 4) y fundido de entrada y salida.
 - Efectos suaves solo en las acciones (entra una tarjeta, se marca un tilde): un clic o un chime bajito. Nunca un golpe encima de una palabra.
+- **Volúmenes, contra la voz** (referencia de la guía de Trescendit, 30/10). Se miden en dB por debajo de la voz, no en volumen absoluto:
+
+  | Sonido | Contra la voz | Cuándo |
+  |---|---|---|
+  | Golpe grave (`impact-bass`) | −4 dB | solo al arrancar o en el momento más grande; nunca sobre una palabra |
+  | Whoosh | −8 dB | cuando entra un panel o una cortinilla |
+  | Notificación | −8 dB | cuando «llega» un mensaje |
+  | Pop | −9 dB | cuando aparece algo (tilde, chip, etiqueta) |
+  | Clic | −10 dB | botones, enviar |
+  | Teclas (`typing`) | −12 dB | mientras se escribe un texto, cortado al largo del texto |
+  | Música | −10 a −16 dB | −16 con mucho eco en la voz (la tapa menos); −10 si la voz está limpia |
+
+## Variantes según el tipo de reel
+El look C (tarjeta de vidrio clara) es el de siempre. Para dos tipos de video hay variantes con los mismos colores y letras. Muestras: `marca/muestras/variantes.jpg`.
+
+### Variante «Pasos» (para «cómo hacer X en N pasos»)
+- Se turnan dos tomas: **CARA** (el video con las tarjetas de vidrio del look C) y **PAPEL** (pantalla completa sobre papel; la voz sigue sonando).
+- Papel: crema `#F5F1E8` con una cuadrícula muy tenue cada 40 px (`#ECE6DA`).
+- Título del paso en Instrument Serif 120 px, color noche, con la idea clave en cursiva roja («Contalo en *una línea*»). Arriba, etiqueta «PASO 02» en JetBrains Mono gris con el cuadradito rojo.
+- Ventanas blancas estilo macOS (semáforo, título centrado, esquinas de 28 px, sombra suave) donde el texto se escribe letra por letra.
+- Al empezar cada paso, **cortinilla** roja con el número (ver Transiciones); detrás cambia la toma.
+- Subtítulos en el papel: de 1 a 3 palabras, Inter 800 de 62 px color noche, la palabra clave en rojo y en mayúsculas.
+
+### Variante «Pantalla partida» (para comparaciones, datos o una historia)
+- Arriba, de y 0 a y 740: un pizarrón crema `#EDE7DB` con una línea noche de 4 px abajo. Abajo: el video a todo lo ancho, bajado para que la cabeza quede debajo de la línea.
+- Un pizarrón por idea: no se desliza, cambia con un fundido de 0,2 s. Cada idea lleva algo que la explique (barras, una línea de tiempo, un antes y después), no una foto sola. Título corto en Inter 800 de 48 px.
+- Lo que todavía no se nombró va en gris `#A9AEA9`; lo importante en rojo, con un **círculo rojo que se dibuja** alrededor en 0,5 s.
+- Subtítulos: una palabra a la vez, blanca, Inter 800 de 66 px con sombra, justo debajo de la línea, arriba de la cabeza.
+- Pantalla completa solo una vez, para esconder un corte feo.
 
 ## Reglas fijas
 1. Nada tapa la cara, ni un fotograma.
@@ -60,6 +90,7 @@ Como Inter es variable, los textos se dibujan con Pillow (o HTML) y se ponen enc
 4. Zona segura de Instagram: nada importante en los 220 px de arriba, los 380 px de abajo ni los 140 px de la derecha (por debajo de y 1480).
 5. Voseo y textos sin faltas; «ChatGPT», «Claude» y los nombres propios se corrigen a mano en la transcripción.
 6. Reels con cara: tips de IA en general, nunca sobre el negocio, Nakama ni Kumi.
+7. Referencias: si te pasan un link de un reel, se baja con `yt-dlp` y se analiza cuadro por cuadro. Se copia la forma de editar, nunca logos, caras, música ni textos de otro.
 
 ## Correcciones apuntadas
 - **29/10 · La mano que arranca o corta la grabación nunca se ve.** Revisar cuadro por cuadro el primer y el último segundo de cada toma (la mano entra por abajo, a veces por el centro y no por la esquina). Si aparece cuando ya no habla, se recorta; si aparece mientras habla, se congela el cuadro limpio más cercano o se tapa con una pantalla completa.
