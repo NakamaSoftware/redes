@@ -48,11 +48,17 @@ Horarios sacados de Metricool (mejor momento para publicar en Instagram, zona Mo
 | R10 | Lun 23/11 · 18:00 | Una semana con las 3 preguntas | «Experimento con límite» (S3) | Look C |
 | R11 | Mié 25/11 · 18:00 | El mensaje difícil | «Tu problema en una frase» (S6) | Pantalla partida |
 | R12 | Vie 27/11 · 10:00 | No lo uses como Google | Orden en negativo + error común | Pasos |
+| P1 | Jue 5/11 · 18:00 | 12 frases para ChatGPT (lista de 9 s) | «Lista de 9 segundos + sacá captura» (IG, 30,4x) | Cara de fondo + lista |
+| P2 | Jue 12/11 · 18:00 | Restaurar una foto vieja | «Demo sin cara, comando ya escrito» (IG, 13x) | Solo pantalla |
+| P3 | Jue 19/11 · 18:00 | Planillas en papel, sin cara (R03 en versión B) | «Yo tampoco sabía que…» (23,1x) | Solo pantalla |
+
+Los P son pruebas que salen de la investigación en Instagram: van los jueves a las 18:00, el mejor horario de la tarde (5078). Esas tres semanas son 4 reels en vez de 3.
 
 ## Sesiones de grabación
 
-- **Sesión 1 · sáb 31/10 o dom 1/11:** R01 a R05. El domingo 1/11 a la noche, la prueba de la heladera para R06 (se graba ahí mismo).
+- **Sesión 1 · sáb 31/10 o dom 1/11:** R01 a R05 y P1 (10 s de cara mirando a cámara, para el fondo de la lista). El domingo 1/11 a la noche, la prueba de la heladera para R06 (se graba ahí mismo).
 - **Sesión 2 · sáb 14/11:** R07 a R12. Antes: la comparación de las 3 IA (R07) y cerrar el diario del experimento del 9 al 15/11 (R10, se graba el domingo 15).
+- P2 y P3 son solo pantalla y se graban cuando quieras: la pantalla del celular más la voz en una nota de audio, en un lugar sin eco.
 - Demos en pantalla (R03, R04, R06, R07): grabar el celular con la grabación de pantalla, sin notificaciones ni nombres a la vista.
 - Recordatorios de `marca/marca.md`: que la mano no se vea al empezar y cortar, tomas en espejo, y la misma ropa y luz en toda la sesión.
 
@@ -358,6 +364,78 @@ Guardalo, y la próxima no lo uses como Google.
 Primer segundo: la barra de Google con «viaje Florianópolis enero» y, al lado, el mismo texto en ChatGPT.
 
 Textos en pantalla: «Google ≠ ChatGPT» · «Quién · qué · para qué» · «Te contesta a vos»
+
+## Pruebas (P1 a P3)
+
+### P1 · 12 frases para ChatGPT (lista de 9 s)
+
+**Jue 5/11 · 18:00** · 9 s · tu cara de fondo, apenas oscurecida, y la lista fija encima · pide: **sacar captura y guardar**
+
+- **Gancho:** «Lista corta + sacá captura». Probado en felipe_marks, «Tu web hecha con IA se ve terminada. Le faltan las 20 cosas…», 30,4x, 9 s.
+- **Por qué:** junta en un solo reel las frases de todo el mes. Es para guardar, y cada frase lleva a su reel.
+
+Lo que decís (solo al principio):
+```
+12 frases para pegarle a ChatGPT.
+Sacale captura y probá una hoy.
+```
+
+La lista, en papel crema, con Inter 800 y los números en rojo:
+1. Respondeme en 3 líneas.
+2. Si no sabés, decime que no sabés.
+3. Dame 3 opciones bien distintas.
+4. Decime los 3 puntos más débiles, sin suavizarlo.
+5. Antes de contestar, haceme 3 preguntas.
+6. Explicámelo como si tuviera 12 años.
+7. Haceme 5 preguntas para ver si entendí.
+8. Es para ___, para ___, en ___ líneas.
+9. ¿Qué ves en esta foto?
+10. Dame una amable, una firme y una de 2 líneas.
+11. Pasalo a una tabla con estas columnas.
+12. ¿Cuál elegirías vos y por qué?
+
+> Las frases 2, 3 y 8 salen en reels de más adelante: no pasa nada, el que la guarda después reconoce la frase cuando sale el reel. La lista entra entera en pantalla, sin pisar la zona segura (de y 240 a y 1480).
+
+### P2 · Restaurar una foto vieja (solo pantalla)
+
+**Jue 12/11 · 18:00** · ≈ 24 s · solo pantalla, con tu voz · pide: **mandar a alguien**
+
+- **Gancho:** demo sin cara, que arranca con la foto ya subida y el pedido ya escrito. Probado en stephanobrooke, el comando en ChatGPT con 2 fotos subidas, 13,0x, 24 s (también 6,7x y 3,3x). Es la cuenta con el público más parecido al tuyo.
+- **Lo que busca la gente:** «prompts para fotos chatgpt», «chatgpt para crear imagenes».
+
+Primer segundo: la foto vieja ya subida y el pedido ya escrito, con el dedo por tocar «enviar».
+
+```
+Esta foto de {{quiénes}} es de {{año}}.
+Se la subí a ChatGPT con esto: sacale las rayas y las manchas, pasala a color y no les cambies las caras.
+{{El resultado, en una línea}}.
+Si te cambia una cara, pedile que arranque de nuevo desde la original.
+Sirve con la del casamiento de tus viejos o la de la escuela en 1985.
+Mandáselo a quien guarda la caja de fotos de la familia.
+```
+
+Final: la foto antes y después, una al lado de la otra, 2 segundos sin texto encima.
+
+> ⚠️ Necesita una foto real de tu familia y permiso de quien aparece, o una foto tuya de chico. Completar los {{…}} con lo que salga. Si ChatGPT cambia las caras, contarlo así: es el «ojo» del guion. Puntaje humano bajo (46) por los huecos y lo corto: se vuelve a medir con los datos reales.
+
+### P3 · Planillas en papel, sin cara (R03 en versión B)
+
+**Jue 19/11 · 18:00** · ≈ 25 s · solo pantalla, con tu voz · pide: **mandar a alguien**
+
+- **Para qué:** el mismo tema que R03 (vie 6/11) pero sin tu cara, para ver con tu propia cuenta qué funciona mejor. Puntaje humano 92,8.
+
+Primer segundo: la foto de la planilla en papel volviéndose una tabla de Excel.
+
+```
+Yo tampoco sabía que ChatGPT lee planillas en papel.
+Sacale una foto.
+Escribí: pasame esto a una tabla de Excel con las mismas columnas.
+{{Cuánto tardó}}.
+Ojo: a veces confunde un 1 con un 7 y no te avisa, así que revisá los números antes de usarla en el club o en el laburo.
+Mandáselo a alguien que todavía pasa planillas a mano.
+```
+
+> Cómo se compara: a los 7 días de cada uno, en Metricool, mirar alcance, tiempo medio de reproducción, guardados y envíos. Es una pista, no una prueba exacta, porque salen en semanas distintas. Si tu cuenta tiene la opción de reel de prueba (se muestra primero a gente que no te sigue), se puede subir P3 así y compararlos mejor.
 
 ## Cómo se revisaron
 
