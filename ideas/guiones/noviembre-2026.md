@@ -4,6 +4,17 @@
 
 > Nada de esto está programado. Los `{{…}}` se completan con lo que pase de verdad: no se inventan resultados.
 
+## Ajuste por la investigación en Instagram (30/10)
+
+Lo que más se repite en los reels que superaron 3 veces la mediana de su cuenta (28 reels de 10 cuentas, así que es una pista, no una regla): **en el primer segundo pasa algo concreto**. Se ve la herramienta en uso, un número o una imagen rara. Pasa en 6 de las 8 cuentas que tienen reels de 3x o más. Los que no funcionan arrancan con un tema abstracto o con algo de la marca.
+
+Por eso cada guion tiene ahora un **primer segundo**: lo que se ve antes de que hables o mientras decís el gancho, en el pizarrón (pantalla partida), en el papel (pasos) o a pantalla completa (look C). El gancho hablado no cambia.
+
+No se cambia:
+- **El largo:** los que funcionaron miden 58 s de mediana, pero los que no son charlas de 75 a 132 s. La diferencia está en lo que se ve, no en durar más; seguimos en 27 a 37 s.
+- **El pedido del final:** «comentá PALABRA» aparece igual en los dos grupos y no explica nada.
+- **Novedades y alarmas** («EL FIN DE Claude Code»): funcionan en cuentas de negocios y desarrolladores, pero en YouTube los lanzamientos fueron de lo peor. Tu público no técnico no las busca.
+
 ## Calendario
 
 Horarios sacados de Metricool (mejor momento para publicar en Instagram, zona Montevideo):
@@ -67,6 +78,8 @@ Te marca lo que falla.
 Guardalo para la próxima vez que te diga que está buenísimo.
 ```
 
+Primer segundo: la pantalla de ChatGPT contestando «¡Me encanta tu idea, está buenísima!» a una idea floja.
+
 Textos en pantalla: ««Está buenísimo» 👎» · «PROMPT · 3 puntos débiles» · «Currículum · mail · idea»
 
 ### R02 · Tres frases que cambian a ChatGPT
@@ -88,6 +101,8 @@ Tres: dame 3 opciones bien distintas.
 Las pegás al final de cualquier pedido, en WhatsApp, en el mail o en la compu, y listo.
 Guardalo y probá una de las tres hoy.
 ```
+
+Primer segundo: una respuesta de ChatGPT de 2 pantallas que baja sola, y de golpe la misma en 3 líneas.
 
 Textos en pantalla: «PASO 01 · En 3 líneas» · «PASO 02 · Si no sabés, decilo» · «PASO 03 · 3 opciones distintas»
 
@@ -112,6 +127,8 @@ Sirve para tickets, listas de precios, la planilla del club o el cuaderno de la 
 Mandáselo a alguien que todavía pasa planillas a mano.
 ```
 
+Primer segundo: la foto de la planilla en papel convirtiéndose en la tabla de Excel (la demo va primero y la explicación después).
+
 Textos en pantalla: «Foto → Excel» · «PROMPT · Pasalo a una tabla» · «Ojo: el 1 y el 7»
 
 > ⚠️ Grabar la pantalla: foto de una planilla real (sin datos de nadie) y la tabla que devuelve. Si en la prueba tarda más de 20 s, cambiar el número del guion por el real.
@@ -134,6 +151,8 @@ Reescribí este mail para el dueño del apartamento en Cordón, que está enojad
 Para quién, para qué y qué largo: con esas 3 cosas la respuesta cambia de una.
 Guardalo y dejá de pedirle que lo mejore.
 ```
+
+Primer segundo: se escribe «mejoralo» y sale una respuesta el doble de larga.
 
 Textos en pantalla: ««Mejoralo» ❌» · «Para quién · para qué · qué largo» · «Antes / después»
 
@@ -159,6 +178,8 @@ Pero vas a ver muchos más no sé, y un no sé te ahorra ir hasta la farmacia pa
 Guardalo, así la próxima te avisa cuando no sabe.
 ```
 
+Primer segundo: ChatGPT dando con toda seguridad el horario de una farmacia, con un sello rojo de «INVENTADO».
+
 Textos en pantalla: «Te inventa con seguridad» · «PROMPT · Si no sabés, decilo» · «Más «no sé» = menos sustos»
 
 ### R06 · Foto a la heladera → cenas de la semana
@@ -181,6 +202,8 @@ Si algo no se ve bien en la foto lo adivina. Antes de cocinar, preguntale: ¿qu�
 Sirve con lo que sobró del asado.
 Mandáselo a quien abre la heladera sin saber qué cocinar.
 ```
+
+Primer segundo: la foto real de tu heladera abierta.
 
 Textos en pantalla: «Heladera → 5 cenas» · «PROMPT · 5 cenas para 2» · «Preguntale qué ve»
 
@@ -206,6 +229,8 @@ No hay una que gane en todo.
 Seguime, que la semana que viene les hago otra pregunta.
 ```
 
+Primer segundo: las tres respuestas reales una al lado de la otra, con los tres nombres arriba.
+
 Textos en pantalla: «1 pregunta · 3 IA» · «ChatGPT · Claude · Gemini» · «Gana: {{tu elección}}»
 
 > ⚠️ Comparación real. Elegir una pregunta de la vida diaria, hacerla en las tres el mismo día y grabar la pantalla. Completar los {{…}}. Si la respuesta es larga, va recortada en el pizarrón.
@@ -230,6 +255,8 @@ Muchas veces la buena es la tercera.
 Guardalo: tres respuestas, nunca una sola.
 ```
 
+Primer segundo: 1 respuesta contra 3, en dos columnas.
+
 Textos en pantalla: «1 respuesta = la obvia» · «PROMPT · 3 opciones distintas» · «La buena es la 3ª»
 
 ### R09 · Que te tome examen
@@ -250,6 +277,8 @@ Contestás, y te corrige las que erraste y te vuelve a preguntar justo esas, una
 Así sabés si lo entendiste o solo lo leíste.
 Mandáselo a alguien que le pide a ChatGPT que le explique todo.
 ```
+
+Primer segundo: la pantalla de ChatGPT con «Pregunta 1 de 5» y tu respuesta marcada en rojo.
 
 Textos en pantalla: «No le pidas que explique» · «PASO 01 · Explicame como a 12» · «PASO 02 · Haceme 5 preguntas»
 
@@ -272,6 +301,8 @@ Me quedo con esto: {{tu conclusión en una línea}}.
 Si viste el video de las 3 preguntas, este es el después.
 Seguime para el experimento de la próxima semana.
 ```
+
+Primer segundo: un calendario de 7 días con los tildes que se van marcando.
 
 Textos en pantalla: «7 días · 3 preguntas» · «Día 1 · {{…}}» · «Me quedo con: {{…}}»
 
@@ -297,6 +328,8 @@ Vos sabés lo que pasó, ChatGPT no.
 Mandáselo a alguien que deja los mensajes difíciles en visto.
 ```
 
+Primer segundo: un chat de ejemplo con un mensaje difícil y los tres puntitos de «escribiendo…».
+
 Textos en pantalla: «Mensaje difícil 😬» · «Amable · firme · 2 líneas» · «Leela antes de mandar»
 
 > En el pizarrón, un mensaje de ejemplo inventado y marcado como ejemplo (sin capturas de chats de nadie).
@@ -321,6 +354,8 @@ Para qué: para decidir entre 2 barrios esta semana.
 Con esas 3 cosas deja de contestarle a todo el mundo y te contesta a vos, con lo que necesitás decidir esta semana y nada más.
 Guardalo, y la próxima no lo uses como Google.
 ```
+
+Primer segundo: la barra de Google con «viaje Florianópolis enero» y, al lado, el mismo texto en ChatGPT.
 
 Textos en pantalla: «Google ≠ ChatGPT» · «Quién · qué · para qué» · «Te contesta a vos»
 
