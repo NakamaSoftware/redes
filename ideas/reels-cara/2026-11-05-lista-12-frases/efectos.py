@@ -1,6 +1,7 @@
 # Tres efectos para la parte de la cara de P1 (2,17 s): chat, bichito y órbita.
 # Uso: python3 efectos.py <carpeta> <tarjeta.png> <version: chat|bichito|orbita> [c|partida]
-#   c = look C (cabeza abajo, lugar en el pecho); partida = pantalla partida (cabeza grande: los efectos van a la izquierda)
+#   c = look C (cabeza abajo, lugar en el pecho); baja = look C con la pera más abajo (y 1170): el chat baja a y 1230;
+#   partida = pantalla partida (cabeza grande: los efectos van a la izquierda)
 #   <carpeta>/f/NNN.png = cuadros de la toma; <carpeta>/m/NNN.png = máscara de la persona (hyperframes remove-background)
 import sys, os, math
 from PIL import Image, ImageDraw, ImageFilter
@@ -24,13 +25,13 @@ def pegar(im, capa, cx, cy, escala=1.0, alfa=1.0):
 
 # --- 1 · chat: una ventanita de chat sube a la altura del pecho y responde
 def ventana(t):
-    W, H = (800, 300) if MODO == 'c' else (340, 380); v = pildora(W, H, 34); g = ImageDraw.Draw(v); o = 30
+    W, H = (340, 380) if MODO == 'partida' else (800, 300); v = pildora(W, H, 34); g = ImageDraw.Draw(v); o = 30
     for i, col in enumerate(((236, 106, 94), (245, 190, 79), (98, 197, 84))): g.ellipse([o + 28 + i * 30, o + 26, o + 46 + i * 30, o + 44], fill=col)
-    if MODO == 'c': g.text((o + W / 2, o + 44), 'ChatGPT', font=inter(26, 600), fill=GRIS, anchor='ms')
+    if MODO != 'partida': g.text((o + W / 2, o + 44), 'ChatGPT', font=inter(26, 600), fill=GRIS, anchor='ms')
     else: g.text((o + W - 24, o + 44), 'ChatGPT', font=inter(24, 600), fill=GRIS, anchor='rs'); g.line([(o, o + 66), (o + W, o + 66)], fill=(230, 226, 218), width=2)
-    f = inter(38, 700) if MODO == 'c' else inter(28, 700)
-    PED, RES = ('Dame 12 frases útiles', 'Acá van, guardalas') if MODO == 'c' else ('Dame 12 preguntas', '¡Acá van!')
-    Y1, Y2, Y3 = (130, 196, 232) if MODO == 'c' else (150, 236, 300)
+    f = inter(28, 700) if MODO == 'partida' else inter(38, 700)
+    PED, RES = {'partida': ('Dame 12 preguntas', '¡Acá van!'), 'baja': ('Dame 12 preguntas clave', 'Acá van, guardalas')}.get(MODO, ('Dame 12 frases útiles', 'Acá van, guardalas'))
+    Y1, Y2, Y3 = (150, 236, 300) if MODO == 'partida' else (130, 196, 232)
     if t > 0.5:  # mi pedido, burbuja roja a la derecha
         s = ease_back((t - 0.5) / 0.25); lin = PED.split('\n'); w = max(f.getlength(x) for x in lin) + 56; hb = 74 + 40 * (len(lin) - 1)
         b = Image.new('RGBA', (int(w), hb), (0, 0, 0, 0)); ImageDraw.Draw(b).rounded_rectangle([0, 0, w - 1, hb - 1], 30, fill=ROJO)
@@ -50,7 +51,7 @@ def chat(im, mask, t):
     if t < 0.3: return
     e = ease_out((t - 0.3) / 0.4); v = ventana(t)
     v.putalpha(v.split()[3].point(lambda p: int(p * e)))
-    im.alpha_composite(v, (110, round(1150 + 80 * (1 - e))) if MODO == 'c' else (-26, round(760 + 80 * (1 - e))))
+    im.alpha_composite(v, {'c': (110, round(1150 + 80 * (1 - e))), 'baja': (110, round(1230 + 80 * (1 - e))), 'partida': (-26, round(760 + 80 * (1 - e)))}[MODO])
 
 # --- 2 · bichito: un globito de chat con ojos asoma por detrás del hombro, saluda y se esconde
 def bicho(t):
@@ -71,7 +72,7 @@ def bichito(im, mask, t):
     ang = 8 * math.sin(max(0, t - 0.7) * 9) if t < 1.6 else 0
     b = bicho(t).rotate(ang, resample=Image.BICUBIC, center=(150, 200))
     if t > 1.85: b.putalpha(b.split()[3].point(lambda p: int(p * (1 - ease_out((t - 1.85) / 0.2)))))
-    BX, BY, BD = (790, 1330, 470) if MODO == 'c' else (30, 1500, 420)
+    BX, BY, BD = {'c': (790, 1330, 470), 'baja': (810, 1330, 470), 'partida': (30, 1500, 420)}[MODO]
     capa.alpha_composite(b, (BX, round(BY - BD * sube)))
     if 0.7 < t < 1.85:  # su globito con el número
         s = ease_back((t - 0.7) / 0.25) * (1 - ease_out((t - 1.6) / 0.25)); gl = pildora(150, 84, 38, ROJO + (255,)); ImageDraw.Draw(gl).text((105, 92), '¡12!', font=inter(48, 900), fill=BLANCO, anchor='ms')
@@ -89,7 +90,7 @@ def orbita(im, mask, t):
     e = ease_out(t / 0.5); atras, adelante = Image.new('RGBA', im.size, (0, 0, 0, 0)), Image.new('RGBA', im.size, (0, 0, 0, 0))
     for i, c in enumerate(CH):
         a = 2 * math.pi * (t / 2.6) + i * 2 * math.pi / 3 + 0.6
-        x, y, z = (540 + 330 * math.cos(a), 1210 + 120 * math.sin(a), math.sin(a)) if MODO == 'c' else (560 + 320 * math.cos(a), 1530 + 70 * math.sin(a), math.sin(a))
+        x, y, z = (540 + 330 * math.cos(a), 1210 + 120 * math.sin(a), math.sin(a)) if MODO != 'partida' else (560 + 320 * math.cos(a), 1530 + 70 * math.sin(a), math.sin(a))
         esc = (0.78 + 0.22 * z) * e
         pegar(adelante if z > 0 else atras, c, x, y, esc, 0.55 + 0.45 * (z + 1) / 2)
     persona = Image.new('RGBA', im.size, (0, 0, 0, 0)); persona.paste(im, (0, 0), mask)
@@ -102,6 +103,6 @@ for k in range(1, n + 1):
     im = Image.open(f'{SP}/f/{k:03d}.png').convert('RGBA'); mask = Image.open(f'{SP}/m/{k:03d}.png').convert('L')
     EFECTO(im, mask, t)
     tt = tarj.copy()
-    if MODO == 'c': tt.putalpha(tt.split()[3].point(lambda p: int(p * ease_out(t / 0.3))))
+    if MODO != 'partida': tt.putalpha(tt.split()[3].point(lambda p: int(p * ease_out(t / 0.3))))
     im.alpha_composite(tt)
     im.convert('RGB').save(f'{SP}/{VER}/{k:03d}.png')
