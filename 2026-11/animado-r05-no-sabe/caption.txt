@@ -1,0 +1,10 @@
+La IA no te avisa cuando no sabe. Te contesta con la misma seguridad, sea cierto o no.
+
+Al final de tu pregunta escribí:
+«Si no tenés el dato, decime que no sabés.»
+
+No es perfecto. Pero vas a ver muchos más «no sé», y un «no sé» te ahorra ir hasta la farmacia para encontrarla cerrada.
+
+Sirve en ChatGPT, Claude y Gemini. Guardalo, así la próxima te avisa.
+
+#chatgpt #inteligenciaartificial #prompts

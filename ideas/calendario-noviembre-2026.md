@@ -9,16 +9,19 @@ Horarios según Metricool (picos de tu audiencia: 10:00 y 18:00; el viernes a la
 - **Lunes 10:00:** reviso con Windsor cómo le fue a la semana anterior y te paso 3 líneas.
 
 ## Semana 1 · 2 al 8
+Cambio del 2/11: no llegaron a grabarse los reels con cara, así que esta semana salen P1 (adelantado) y cuatro reels animados sin cara hechos con `ideas/reels-animados/animado.py`. Las versiones con cara de R01, R02, R03 y R05 quedan para cuando se graben (no repetir el mismo tema la misma semana).
+
 | Día | Hora | Qué | Tema |
 |---|---|---|---|
-| Lun 2 | 18:00 | Reel R01 | ChatGPT siempre te da la razón |
+| Lun 2 | 18:00 | **Reel P1** ✅ programado (adelantado del jue 5) | 12 frases para pegarle a ChatGPT |
 | Mar 3 | 10:00 | **Post B1** (video tranquilo + texto) | Le pedí a Claude que me armara un mes de reels: los 7 pedidos |
-| Mar 3 | 12:30 | Historias R01 | 1: «Decime los 3 puntos más débiles» · 2: «¿ChatGPT te dio la razón en algo que estaba mal? Contame» |
+| Mar 3 | 18:00 | **R01 animado** ✅ programado (sin cara, de respaldo) | ChatGPT siempre te da la razón |
+| Mar 3 | 12:30 | Historias P1 | 1: «Decime los 3 puntos más débiles» · 2: «¿ChatGPT te dio la razón en algo que estaba mal? Contame» |
 | Mié 4 | 10:00 | Carrusel Kumi (ya programado) | Para pymes |
-| Mié 4 | 18:00 | Reel R02 | Tres frases que cambian a ChatGPT |
+| Mié 4 | 18:00 | **R02 animado** ✅ programado | Tres frases que cambian a ChatGPT |
 | Jue 5 | 12:30 | Historias R02 | 1: las 3 frases · 2: «¿Cuál vas a usar? Respondé 1, 2 o 3» |
-| Jue 5 | 18:00 | **Reel P1** ✅ listo | 12 frases para pegarle a ChatGPT (versión del chat) |
-| Vie 6 | 10:00 | Reel R03 | ChatGPT lee planillas en papel |
+| Jue 5 | 18:00 | **R05 animado** ✅ programado | La IA no te avisa cuando no sabe |
+| Vie 6 | 10:00 | **R03 animado** ✅ programado | ChatGPT lee planillas en papel |
 | Vie 6 | 12:30 | Historias P1 | 1: la lista · 2: «¿Qué frase le sumarías a la lista?» |
 | Sáb 7 | 12:30 | Historias R03 | 1: foto → tabla · 2: «¿Pasás cosas del papel a la compu? Del 1 al 10, ¿cuánto te cuesta?» |
 
