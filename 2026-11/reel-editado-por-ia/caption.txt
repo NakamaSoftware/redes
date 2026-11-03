@@ -1,0 +1,11 @@
+Este reel no lo editó nadie. Lo armó la IA con 3 herramientas gratis que corren en tu compu.
+
+1. FFmpeg corta los silencios y las muletillas.
+2. Whisper escribe los subtítulos con lo que decís.
+3. HyperFrames le pone el movimiento.
+
+Sin abrir un editor y sin pagar nada.
+
+Comentá EDITOR y te paso cómo armarlo.
+
+#edicióndevideo #inteligenciaartificial #reels
