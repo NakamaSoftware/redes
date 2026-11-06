@@ -40,16 +40,17 @@ def sombra_caja(base, caja, r, a=70, dy=16, blur=26):
 def palabras(lineas, px, x0, y0, alto, centro=False):
     out = []
     for i, linea in enumerate(lineas):
-        piezas = []
+        piezas = []  # (palabra, cursiva, va pegada a la anterior): la puntuación suelta («,» «?») no lleva espacio antes
         for txt, cur in linea:
             for k, w in enumerate(txt.split(' ')):
                 if not w: continue
-                piezas.append((w, cur))
+                piezas.append((w, cur, k == 0 and bool(piezas) and not txt.startswith(' ') and w[0] in ',.;:?!)»'))
         f = lambda c: SERI(px) if c else SER(px)
         esp = SER(px).getlength(' ')
-        ancho = sum(f(c).getlength(w) for w, c in piezas) + esp * (len(piezas) - 1)
+        ancho = sum(f(c).getlength(w) for w, c, _ in piezas) + esp * sum(1 for _, _, p in piezas[1:] if not p)
         x = (W - ancho) / 2 if centro else x0
-        for w, c in piezas:
+        for j, (w, c, pegada) in enumerate(piezas):
+            if pegada: x -= esp
             fo = f(c); a = fo.getbbox(w); lw, lh = int(fo.getlength(w)) + 20, px + 60
             img = Image.new('RGBA', (lw, lh), (0, 0, 0, 0)); ImageDraw.Draw(img).text((10, px + 10), w, font=fo, fill=ROJO if c else NOCHE, anchor='ls')
             out.append((img, int(x) - 10, int(y0 + i * alto) - px - 10)); x += fo.getlength(w) + esp
@@ -102,7 +103,7 @@ def puntitos(im, x, y, t):
 
 def leyenda(im, txt, clave, y, a):
     if a <= 0: return
-    fo = inter(54, 800); c = Image.new('RGBA', (W, 160), (0, 0, 0, 0)); g = ImageDraw.Draw(c)
+    fo = inter(54, 800); c = Image.new('RGBA', (W, 240), (0, 0, 0, 0)); g = ImageDraw.Draw(c)
     lineas = envolver(txt, fo, 820)
     for i, l in enumerate(lineas):
         x = 110
